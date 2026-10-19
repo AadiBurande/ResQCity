@@ -1,0 +1,10 @@
+# Normal week: no rain, no festival. SYNTHETIC scenario.
+name: normal
+description: Ordinary dry-season week (no rain, no events).
+synthetic: true
+start: "2026-02-02T00:00:00+05:30"   # a Monday
+days: 7
+incident_rate_multiplier: 1.0
+rain: null
+flooding: null
+festival: null

@@ -1,0 +1,145 @@
+# Geography of the study area: wards, road network, speeds, facilities and camera sites.
+# Loaded by geo.config.load_geo_config(). Paths are relative to data/raw or data/processed.
+
+wards:
+  method: geojson                   # geojson | h3
+  url: https://raw.githubusercontent.com/datameet/Municipal_Spatial_Data/master/Pune/pune-electoral-wards_2022.geojson
+  raw_file: wards/pune-electoral-wards_2022.geojson
+  id_field: wardnum
+  name_field: Name2
+  id_prefix: W                      # ward ids become W01..W58
+  h3_resolution: 7                  # only used when method = h3 (~5.2 km2 cells)
+
+network:
+  boundary_buffer_m: 1000           # download roads/facilities this far beyond the ward union
+  bbox: null                        # {west, south, east, north} overrides the ward union (e.g. + PCMC)
+  network_type: drive
+  # OSM snapshot for Overpass (attic query) so re-downloads are reproducible; null = latest.
+  # The raw files used for the current build were fetched 2026-10-19 22:47 UTC (latest data,
+  # before this setting existed); see data/raw/download_meta.json for their SHA-256.
+  osm_snapshot_date: "2026-10-19T00:00:00Z"
+  projected_crs: EPSG:32643         # WGS 84 / UTM zone 43N (metres)
+  osm_cache_dir: osmnx_cache        # under data/raw
+  raw_graphml_file: pune_drive_raw.graphml  # under data/raw (as downloaded)
+  graphml_file: pune_drive.graphml  # under data/processed (canonical OSMnx cache)
+  nodes_file: network_nodes.parquet # under data/processed (fast cache)
+  edges_file: network_edges.parquet
+  wards_file: wards.geojson         # under data/processed (derived from DataMeet, CC BY-SA)
+  facilities_file: facilities.json  # under data/processed
+  download_meta_file: download_meta.json  # under data/raw
+  build_meta_file: build_meta.json  # under data/processed
+  river_sample_step_m: 10           # river lines densified to points this far apart
+  min_edge_time_s: 0.01             # floor so zero-length edges stay in the sparse routing matrix
+
+# OSM highway tag -> road class. Unlisted values fall into `default_class`.
+road_classes:
+  default_class: service
+  priority: [trunk, primary, secondary, tertiary, residential, service]  # best class wins for merged edges
+  mapping:
+    motorway: trunk
+    motorway_link: trunk
+    trunk: trunk
+    trunk_link: trunk
+    primary: primary
+    primary_link: primary
+    secondary: secondary
+    secondary_link: secondary
+    tertiary: tertiary
+    tertiary_link: tertiary
+    residential: residential
+    living_street: residential
+    unclassified: residential
+    service: service
+    road: service
+
+# Typical off-peak travel speed per class (km/h), capped by a tagged maxspeed.
+# Calibration (D-014): speeds and peak multipliers were hand-tuned so that route-weighted average
+# speeds on the sanity routes (configs/sanity_pairs.yaml) at 10:00 and 19:00 are near the TomTom
+# Traffic Index 2025 rush-hour speed for Pune, 15.1 km/h, as reported by Punekar News on
+# 2026-01-22. Only that figure is matched (overall minutes per 10 km is not). The calibration and
+# sanity routes are the same, so this is not validation. Every value stays UNVERIFIED.
+base_speeds_kph:
+  trunk: {value: 28.0, source: UNVERIFIED, note: "calibrated, D-014"}
+  primary: {value: 22.0, source: UNVERIFIED, note: "calibrated, D-014"}
+  secondary: {value: 19.0, source: UNVERIFIED, note: "calibrated, D-014"}
+  tertiary: {value: 16.0, source: UNVERIFIED, note: "calibrated, D-014"}
+  residential: {value: 13.0, source: UNVERIFIED, note: "calibrated, D-014"}
+  service: {value: 10.0, source: UNVERIFIED, note: "calibrated, D-014"}
+
+# Speed multipliers by time of day (local time). Hours not in any period use 1.0.
+# A period may wrap midnight (start > end). Periods must not overlap.
+traffic_periods:
+  - name: am_peak
+    start_hour: 9
+    end_hour: 11
+    multipliers:
+      trunk: {value: 0.70, source: UNVERIFIED}
+      primary: {value: 0.66, source: UNVERIFIED}
+      secondary: {value: 0.70, source: UNVERIFIED}
+      tertiary: {value: 0.80, source: UNVERIFIED}
+      residential: {value: 0.90, source: UNVERIFIED}
+      service: {value: 0.95, source: UNVERIFIED}
+  - name: pm_peak
+    start_hour: 17
+    end_hour: 21
+    multipliers:
+      trunk: {value: 0.64, source: UNVERIFIED}
+      primary: {value: 0.60, source: UNVERIFIED}
+      secondary: {value: 0.64, source: UNVERIFIED}
+      tertiary: {value: 0.75, source: UNVERIFIED}
+      residential: {value: 0.88, source: UNVERIFIED}
+      service: {value: 0.95, source: UNVERIFIED}
+  - name: night
+    start_hour: 23
+    end_hour: 6
+    multipliers:
+      trunk: {value: 1.50, source: UNVERIFIED}
+      primary: {value: 1.50, source: UNVERIFIED}
+      secondary: {value: 1.40, source: UNVERIFIED}
+      tertiary: {value: 1.30, source: UNVERIFIED}
+      residential: {value: 1.20, source: UNVERIFIED}
+      service: {value: 1.10, source: UNVERIFIED}
+
+# Network-wide speed multiplier by current rain intensity (highest matching band applies).
+rain_speed_bands:
+  - {min_mm_h: 2.5, multiplier: {value: 0.90, source: UNVERIFIED}}
+  - {min_mm_h: 7.5, multiplier: {value: 0.80, source: UNVERIFIED}}
+  - {min_mm_h: 15.0, multiplier: {value: 0.70, source: UNVERIFIED}}
+
+# Vehicle speed relative to general traffic (Unit.eta_fn_ref names one of these).
+vehicle_profiles:
+  default: {value: 1.00, source: "definition (general traffic)"}
+  ambulance: {value: 1.15, source: UNVERIFIED, note: "siren; can use gaps and wrong side"}
+  police: {value: 1.15, source: UNVERIFIED}
+  fire: {value: 0.90, source: UNVERIFIED, note: "heavy tender"}
+
+rivers:
+  names: [Mula, Mutha, Mula-Mutha, "Mula Mutha", मुळा, मुठा]
+  raw_file: osm_rivers.geojson      # under data/raw
+
+facilities:
+  raw_file: osm_facilities.geojson  # under data/raw
+  tags:
+    police: {amenity: police}
+    fire: {amenity: fire_station}
+    hospital: {amenity: hospital}
+  max_snap_distance_m: 500          # facilities further from any road node are dropped (logged)
+  extra_ambulance_bases: []         # [{id: AB-X01, name: ..., lat: .., lon: ..}] (synthetic bases)
+  hospital_capabilities:            # SYNTHETIC: OSM has no reliable capability data for Pune
+    seed: 7
+    major_footprint_m2: 5000        # OSM polygon area above which a hospital is treated as "major"
+    p_trauma: {major: 0.7, minor: 0.08}
+    p_burns: {major: 0.35, minor: 0.02}
+    icu_beds: {major: [10, 60], minor: [0, 6]}      # uniform integer range, inclusive
+    beds_available: {major: [20, 120], minor: [2, 25]}
+
+camera_sites:
+  n: 40
+  road_classes: [trunk, primary, secondary]
+  min_degree: 3                     # distinct neighbours (a real intersection)
+  weight_degree: 0.4
+  weight_betweenness: 0.6
+  betweenness_samples: 400          # k for approximate betweenness (networkx)
+  min_spacing_m: 600
+  seed: 11
+  output_file: cameras.yaml         # under configs/

@@ -1,0 +1,42 @@
+# ARCHIVED: speed settings used before the D-014 calibration (2026-10-20). Overlay for
+#   uv run python -m geo.sanity --geo-overlay configs/archive/geo_speeds_precalibration.yaml \
+#       --out results/geo/sanity_travel_times_precalibration.csv
+# Kept only so results/geo/sanity_travel_times_precalibration.csv is reproducible. Do not use.
+base_speeds_kph:
+  trunk: {value: 45.0, source: UNVERIFIED}
+  primary: {value: 35.0, source: UNVERIFIED}
+  secondary: {value: 30.0, source: UNVERIFIED}
+  tertiary: {value: 25.0, source: UNVERIFIED}
+  residential: {value: 20.0, source: UNVERIFIED}
+  service: {value: 15.0, source: UNVERIFIED}
+traffic_periods:
+  - name: am_peak
+    start_hour: 9
+    end_hour: 11
+    multipliers:
+      trunk: {value: 0.60, source: UNVERIFIED}
+      primary: {value: 0.55, source: UNVERIFIED}
+      secondary: {value: 0.60, source: UNVERIFIED}
+      tertiary: {value: 0.70, source: UNVERIFIED}
+      residential: {value: 0.80, source: UNVERIFIED}
+      service: {value: 0.85, source: UNVERIFIED}
+  - name: pm_peak
+    start_hour: 17
+    end_hour: 21
+    multipliers:
+      trunk: {value: 0.55, source: UNVERIFIED}
+      primary: {value: 0.50, source: UNVERIFIED}
+      secondary: {value: 0.55, source: UNVERIFIED}
+      tertiary: {value: 0.65, source: UNVERIFIED}
+      residential: {value: 0.80, source: UNVERIFIED}
+      service: {value: 0.85, source: UNVERIFIED}
+  - name: night
+    start_hour: 23
+    end_hour: 6
+    multipliers:
+      trunk: {value: 1.25, source: UNVERIFIED}
+      primary: {value: 1.25, source: UNVERIFIED}
+      secondary: {value: 1.20, source: UNVERIFIED}
+      tertiary: {value: 1.15, source: UNVERIFIED}
+      residential: {value: 1.10, source: UNVERIFIED}
+      service: {value: 1.05, source: UNVERIFIED}

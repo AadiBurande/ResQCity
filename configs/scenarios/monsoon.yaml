@@ -1,0 +1,26 @@
+# Monsoon week with one cloudburst day. SYNTHETIC, ILLUSTRATIVE rain profile (not observed data).
+name: monsoon
+description: >
+  July week with afternoon/evening rain and a cloudburst on day 4. Roads near the Mula, Mutha and
+  Mula-Mutha rivers flood once rain accumulates.
+synthetic: true
+start: "2026-07-13T00:00:00+05:30"   # a Monday
+days: 7
+incident_rate_multiplier: 1.0
+rain:
+  # Daily pattern of rain intensity (mm/h) for local hours 0..23, scaled per day by day_factors.
+  hourly_mm_h: [0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2,
+                0.4, 0.4, 0.8, 1.2, 1.5, 1.2, 0.9, 0.6, 0.4, 0.3, 0.2, 0.2]
+  day_factors: [0.5, 1.0, 2.5, 8.0, 3.0, 1.0, 0.3]   # cycled if days > len
+flooding:
+  buffer_m: 150             # edges within this distance of a river line are flood-prone
+  window_h: 3               # flood stage driven by rain accumulated over the last window_h hours
+  vulnerability_seed: 101   # which prone edges flood first: fixed property of the city
+  stages:                   # ordered by min_accum_mm; fractions are of flood-prone ROADS
+    source: UNVERIFIED
+    note: illustrative; candidate sources are PMC flood-spot lists and news reports of closures
+    value:
+      - {min_accum_mm: 15, impassable_fraction: 0.00, slowed_fraction: 0.30, slow_multiplier: 0.5}
+      - {min_accum_mm: 30, impassable_fraction: 0.15, slowed_fraction: 0.45, slow_multiplier: 0.4}
+      - {min_accum_mm: 50, impassable_fraction: 0.35, slowed_fraction: 0.45, slow_multiplier: 0.3}
+festival: null

@@ -1,0 +1,26 @@
+# Known Pune places for the travel-time sanity check (geo.sanity). Coordinates are approximate
+# landmarks (snapped to the nearest road node). Times are reported for the user to compare with
+# their own experience or a maps service; they are NOT a validation dataset.
+departure_date: "2026-02-03"     # a Tuesday
+departure_hours: [3, 10, 14, 19] # night, AM peak, off-peak, PM peak (local time)
+profiles: [default, ambulance]
+places:
+  Shivajinagar bus stand: [18.5309, 73.8474]
+  Swargate bus stand: [18.5018, 73.8636]
+  Pune railway station: [18.5289, 73.8744]
+  Deccan Gymkhana: [18.5167, 73.8414]
+  Kothrud depot: [18.5074, 73.8077]
+  Viman Nagar (Phoenix mall): [18.5622, 73.9167]
+  Magarpatta (Hadapsar): [18.5158, 73.9272]
+  Katraj chowk: [18.4575, 73.8580]
+  Aundh: [18.5580, 73.8075]
+  Kharadi (EON IT park): [18.5515, 73.9475]
+  Sassoon hospital: [18.5276, 73.8714]
+pairs:
+  - [Shivajinagar bus stand, Swargate bus stand]
+  - [Pune railway station, Deccan Gymkhana]
+  - [Kothrud depot, Viman Nagar (Phoenix mall)]
+  - [Katraj chowk, Shivajinagar bus stand]
+  - [Aundh, Magarpatta (Hadapsar)]
+  - [Kharadi (EON IT park), Sassoon hospital]
+  - [Deccan Gymkhana, Sassoon hospital]

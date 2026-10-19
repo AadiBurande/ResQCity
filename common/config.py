@@ -8,7 +8,7 @@ they can be flagged in docs and results.
 
 from collections.abc import Iterator, Mapping
 from pathlib import Path
-from typing import Any, Generic, Self, TypeVar
+from typing import Any, Generic, TypeVar
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import yaml
@@ -72,37 +72,28 @@ class PathsSection(ConfigModel):
 
 
 class RandomSection(ConfigModel):
+    """Disjoint seed bases per purpose, so tuned parameters are never evaluated on their own data.
+
+    ``seed_base`` is the evaluation set (confirmatory experiments); threshold/parameter tuning and
+    forecast-model training use their own bases.
+    """
+
     seed_base: int = Field(ge=0)
-
-
-class BBox(ConfigModel):
-    """Geographic bounding box in degrees."""
-
-    west: float = Field(ge=-180.0, le=180.0)
-    south: float = Field(ge=-90.0, le=90.0)
-    east: float = Field(ge=-180.0, le=180.0)
-    north: float = Field(ge=-90.0, le=90.0)
+    tuning_seed_base: int = Field(ge=0)
+    forecast_training_seed_base: int = Field(ge=0)
 
     @model_validator(mode="after")
-    def _ordered(self) -> Self:
-        if not (self.west < self.east and self.south < self.north):
-            raise ValueError("bbox must satisfy west < east and south < north")
+    def _disjoint(self) -> "RandomSection":
+        seeds = [self.seed_base, self.tuning_seed_base, self.forecast_training_seed_base]
+        if len(set(seeds)) != len(seeds):
+            raise ValueError("evaluation, tuning and forecast-training seed bases must differ")
         return self
-
-
-class StudyAreaSection(ConfigModel):
-    place: str
-    bbox: BBox | None = Field(
-        default=None, description="If set, used instead of the place polygon (e.g. + PCMC)."
-    )
-    network_type: str
 
 
 class BaseConfig(ConfigModel):
     project: ProjectSection
     paths: PathsSection
     random: RandomSection
-    study_area: StudyAreaSection
 
 
 # ---------------------------------------------------------------------------------------------

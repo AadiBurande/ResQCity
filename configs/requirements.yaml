@@ -1,0 +1,66 @@
+# Severity score and required services per incident.
+# This is an ILLUSTRATIVE rule table, to be validated with Pune Police / PMC Fire Brigade / 108 EMS
+# protocols. The same functions are used for ground truth (simulator) and for vision/call-triage
+# estimates, so estimation error must be modelled separately (master plan, section 6.7).
+provenance:
+  value: "illustrative rule table v1 (ResQCity authors)"
+  source: UNVERIFIED
+
+severity:
+  base:
+    value: {accident: 0.15, fire_smoke: 0.30, crowd: 0.15, other: 0.05}
+    source: UNVERIFIED
+  weights:
+    value:
+      person_down: 0.35
+      overturned: 0.20
+      fire_visible: 0.25
+      heavy_vehicle: 0.10
+      multi_vehicle: 0.10      # num_vehicles >= multi_vehicle_min
+    source: UNVERIFIED
+  multi_vehicle_min: 3
+  heavy_vehicle_classes: [truck, bus]
+  classes:                     # severity class = first class whose upper bound exceeds the score
+    - {name: minor, below: 0.40}
+    - {name: serious, below: 0.70}
+    - {name: critical, below: 1.01}
+
+# Required services = element-wise MAX over all matching rules. Conditions may only require a cue
+# to be PRESENT (or a minimum), so adding a cue can never reduce what is sent (monotone).
+rules:
+  - name: accident_base
+    when: {types: [accident]}
+    require: {police: 1}
+  - name: accident_injury
+    when: {types: [accident], person_down: true}
+    require: {ambulance: 1, police: 1}
+  - name: accident_serious
+    when: {types: [accident], min_severity: 0.6}
+    require: {ambulance: 1, police: 1}
+  - name: accident_multi_casualty
+    when: {types: [accident], person_down: true, min_vehicles: 3}
+    require: {ambulance: 2, police: 2}
+  - name: heavy_vehicle_overturned
+    when: {types: [accident], heavy_vehicle: true, overturned: true}
+    require: {ambulance: 2, police: 1, fire: 1}    # extrication
+  - name: vehicle_fire
+    when: {types: [accident], fire_visible: true}
+    require: {ambulance: 1, police: 1, fire: 1}
+  - name: fire_base
+    when: {types: [fire_smoke]}
+    require: {police: 1, fire: 1}
+  - name: fire_major
+    when: {types: [fire_smoke], min_severity: 0.6}
+    require: {ambulance: 1, police: 1, fire: 2}
+  - name: fire_casualty
+    when: {types: [fire_smoke], person_down: true}
+    require: {ambulance: 1}
+  - name: crowd_base
+    when: {types: [crowd]}
+    require: {police: 2}
+  - name: crowd_casualty
+    when: {types: [crowd], person_down: true}
+    require: {ambulance: 1}
+  - name: other_base
+    when: {types: [other]}
+    require: {police: 1}

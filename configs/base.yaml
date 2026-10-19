@@ -12,9 +12,10 @@ paths:            # relative to the project root
   configs: configs
 
 random:
-  seed_base: 20261020   # replication r of any experiment uses seeds derived from seed_base + r
+  # Replication r of an experiment uses streams seeded from (seed_base, r, stream name).
+  # Separate bases keep tuning / forecast training / evaluation data disjoint.
+  seed_base: 20261020                     # evaluation (confirmatory experiments)
+  tuning_seed_base: 31102026              # threshold and parameter tuning (RQ3)
+  forecast_training_seed_base: 7041990    # synthetic history for forecasting
 
-study_area:
-  place: "Pune, Maharashtra, India"
-  bbox: null      # e.g. {west: 73.70, south: 18.40, east: 74.00, north: 18.70} to add PCMC
-  network_type: drive
+# Geography (study area, wards, network, speeds) lives in configs/geo.yaml.

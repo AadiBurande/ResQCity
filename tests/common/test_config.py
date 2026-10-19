@@ -28,7 +28,6 @@ def test_base_config_loads():
     cfg = load_base_config()
     assert isinstance(cfg, BaseConfig)
     assert cfg.project.timezone == "Asia/Kolkata"
-    assert cfg.study_area.bbox is None
     assert cfg.paths.resolve("configs") == CONFIG_DIR
 
 
@@ -43,13 +42,6 @@ def test_bad_timezone_rejected(tmp_path: Path):
     data = load_yaml(CONFIG_DIR / "base.yaml")
     data["project"]["timezone"] = "Asia/Poona"
     with pytest.raises(ValidationError, match="timezone"):
-        load_model(BaseConfig, _write(tmp_path / "bad.yaml", data))
-
-
-def test_bbox_must_be_ordered(tmp_path: Path):
-    data = load_yaml(CONFIG_DIR / "base.yaml")
-    data["study_area"]["bbox"] = {"west": 74.0, "south": 18.4, "east": 73.7, "north": 18.7}
-    with pytest.raises(ValidationError, match="bbox"):
         load_model(BaseConfig, _write(tmp_path / "bad.yaml", data))
 
 

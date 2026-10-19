@@ -10,6 +10,7 @@ succeed. A silent no-op ``reproduce`` would be a research-integrity hazard.
 """
 
 import argparse
+import os
 import shutil
 import subprocess
 import sys
@@ -21,9 +22,10 @@ NOT_IMPLEMENTED_EXIT = 3
 
 
 def _run(*commands: Sequence[str]) -> int:
+    env = {**os.environ, "PYTHONUTF8": "1"}  # Marathi/Hindi names on Windows consoles
     for cmd in commands:
         print("$", " ".join(cmd), flush=True)
-        code = subprocess.call(list(cmd), cwd=PROJECT_ROOT)
+        code = subprocess.call(list(cmd), cwd=PROJECT_ROOT, env=env)
         if code != 0:
             return code
     return 0
@@ -60,6 +62,11 @@ def types(_: argparse.Namespace) -> int:
     return _run(_py("tools.gen_ts_types"))
 
 
+def data(_: argparse.Namespace) -> int:
+    """Download raw inputs (network access), then build processed data offline."""
+    return _run(_py("geo.download"), _py("geo.build"), _py("geo.sanity"))
+
+
 def _stub(phase: int, what: str) -> Callable[[argparse.Namespace], int]:
     def run(args: argparse.Namespace) -> int:
         print(f"{what}: not implemented yet (phase {phase}).", file=sys.stderr)
@@ -74,7 +81,7 @@ TASKS: dict[str, Callable[[argparse.Namespace], int]] = {
     "format": fmt,
     "test": test,
     "types": types,
-    "data": _stub(2, "download road network and facilities"),
+    "data": data,
     "streams": _stub(3, "start simulated RTSP cameras"),
     "api": _stub(8, "start backend API"),
     "ui": _stub(9, "start dashboard"),
