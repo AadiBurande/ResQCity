@@ -6,7 +6,7 @@ description: Write or update the methodology, results, discussion or limitations
 # Writing up ResQCity results
 
 1. Read `results/summary.md`, `results/stats/*.csv` and the experiment configs first.
-2. Every number in the text must be inserted by `python -m paper.build` from results files.
+2. Every number in the text must be inserted by `python -m resqcity.paper.build` from results files.
    Write placeholders like `{{stats.B3_vs_B0.last_arrival.mean_diff}}`, never typed numbers.
 3. Structure (IMRaD): Introduction, Related work, Methodology (research design, system,
    models, simulation, experiment design, statistical analysis), Results (one subsection per RQ),

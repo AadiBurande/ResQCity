@@ -1,8 +1,8 @@
 """Build processed geographic data from the raw downloads (offline, deterministic).
 
-    uv run python -m geo.build [--skip-cameras]
+    uv run python -m resqcity.geo.build [--skip-cameras]
 
-Reads data/raw (see geo.download) and writes:
+Reads data/raw (see resqcity.geo.download) and writes:
 - data/processed/pune_drive.graphml          canonical OSMnx graph (largest SCC, speeds, times)
 - data/processed/network_{nodes,edges}.parquet  fast-loading RoadNetwork cache
 - data/processed/wards.geojson               wards used by the project
@@ -23,13 +23,13 @@ import osmnx as ox
 import shapely
 from scipy.spatial import cKDTree
 
-from common.config import CONFIG_DIR, load_base_config
-from geo.cameras import select_camera_sites, write_cameras_yaml
-from geo.config import GeoConfig, load_geo_config
-from geo.download import sha256
-from geo.facilities import build_facilities, save_facilities
-from geo.network import RoadNetwork, graph_tables, prepare_graph
-from geo.wards import assign_nodes, load_wards, ward_table
+from resqcity.common.config import CONFIG_DIR, load_base_config
+from resqcity.geo.cameras import select_camera_sites, write_cameras_yaml
+from resqcity.geo.config import GeoConfig, load_geo_config
+from resqcity.geo.download import sha256
+from resqcity.geo.facilities import build_facilities, save_facilities
+from resqcity.geo.network import RoadNetwork, graph_tables, prepare_graph
+from resqcity.geo.wards import assign_nodes, load_wards, ward_table
 
 log = logging.getLogger(__name__)
 

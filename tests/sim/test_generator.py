@@ -3,9 +3,9 @@
 import numpy as np
 import pytest
 
-from common.requirements import load_requirements_config
-from geo.scenario import ScenarioConfig, ScenarioState, load_scenario
-from sim.generator import (
+from resqcity.common.requirements import load_requirements_config
+from resqcity.geo.scenario import ScenarioConfig, ScenarioState, load_scenario
+from resqcity.sim.generator import (
     IncidentGenerator,
     IncidentsConfig,
     hotspot_weights,

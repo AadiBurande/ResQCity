@@ -5,8 +5,8 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from common.config import find_unverified
-from common.requirements import (
+from resqcity.common.config import find_unverified
+from resqcity.common.requirements import (
     RequirementsConfig,
     RuleCondition,
     load_requirements_config,
@@ -15,7 +15,7 @@ from common.requirements import (
     severity_class,
     severity_score,
 )
-from common.schemas import EventType, ServiceCounts, SeverityFeatures
+from resqcity.common.schemas import EventType, ServiceCounts, SeverityFeatures
 
 CFG = load_requirements_config()
 

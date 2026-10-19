@@ -4,8 +4,8 @@ import itertools
 
 import numpy as np
 
-from geo.cameras import load_cameras, select_camera_sites, write_cameras_yaml
-from geo.config import CameraSitesConfig
+from resqcity.geo.cameras import load_cameras, select_camera_sites, write_cameras_yaml
+from resqcity.geo.config import CameraSitesConfig
 
 
 def _cfg(**kw) -> CameraSitesConfig:

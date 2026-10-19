@@ -14,7 +14,7 @@ from importlib import metadata
 from pathlib import Path
 from typing import Any
 
-from common.config import PROJECT_ROOT
+from resqcity.common.config import PROJECT_ROOT
 
 TRACKED_PACKAGES = ("numpy", "pandas", "scipy", "networkx", "osmnx", "pydantic")
 

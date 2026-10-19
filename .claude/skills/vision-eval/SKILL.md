@@ -14,7 +14,7 @@ description: Prepare accident/fire video datasets, train or fine-tune detection 
 - Split by VIDEO (never by frame) into train/val/test, stratified by source; save split files.
 
 ## Training
-- Must run on CPU for inference; training may use GPU. Keep `vision/notebooks/train.ipynb`
+- Must run on CPU for inference; training may use GPU. Keep `notebooks/vision/train.ipynb`
   runnable on Google Colab (installs, dataset mount, training, export).
 - Calibrate the final probability on the validation split (temperature scaling or isotonic).
 - Save model weights with a content hash; record hyperparameters in `results/vision/<run>/config.yaml`.

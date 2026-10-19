@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from geo.network import (
+from resqcity.geo.network import (
     KPH_TO_MPS,
     RoadNetwork,
     graph_tables,

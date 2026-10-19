@@ -14,7 +14,7 @@ repos:
         types: [python]
       - id: ts-types
         name: dashboard TypeScript types up to date
-        entry: uv run python -m tools.gen_ts_types --check
+        entry: uv run python -m resqcity.tools.gen_ts_types --check
         language: system
         pass_filenames: false
-        files: ^(common/schemas\.py|tools/gen_ts_types\.py|dashboard/src/types/schemas\.ts)$
+        files: ^(src/resqcity/common/schemas\.py|src/resqcity/tools/gen_ts_types\.py|dashboard/src/types/schemas\.ts)$

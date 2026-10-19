@@ -14,7 +14,16 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+def _find_project_root(start: Path) -> Path:
+    """Nearest ancestor holding pyproject.toml (the repo root, where configs/ and data/ live)."""
+    for parent in start.parents:
+        if (parent / "pyproject.toml").exists():
+            return parent
+    raise RuntimeError(f"no pyproject.toml above {start}; run from a ResQCity checkout")
+
+
+PROJECT_ROOT = _find_project_root(Path(__file__).resolve())
 CONFIG_DIR = PROJECT_ROOT / "configs"
 UNVERIFIED = "UNVERIFIED"
 

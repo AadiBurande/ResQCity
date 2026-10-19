@@ -6,7 +6,7 @@ description: Design, run and analyse simulation experiments for the research que
 # Running a ResQCity experiment
 
 ## Design (write before running)
-Create `experiments/configs/<exp_name>.yaml` containing:
+Create `configs/experiments/<exp_name>.yaml` containing:
 - `research_question`, `hypothesis` (H0 and H1 in words), `primary_metric`, `secondary_metrics`.
 - `scenarios`, `policies`, factor levels, `replications` (>= 30), `seed_base`.
 - `horizon` (simulated days) and `warmup` (discarded at start).
@@ -15,7 +15,7 @@ Ask the `research-auditor` subagent to review the design file before running.
 
 ## Run
 - Use common random numbers: replication r uses the same seeds for every policy.
-- Run with `python -m experiments.run --config experiments/configs/<exp_name>.yaml`; it must be
+- Run with `python -m resqcity.experiments.run --config configs/experiments/<exp_name>.yaml`; it must be
   resumable and write one parquet per (scenario, policy, replication) to `results/raw/<exp_name>/`.
 - Record git commit hash, config hash, package versions and machine spec in `results/raw/<exp_name>/meta.json`.
 
@@ -26,10 +26,10 @@ Ask the `research-auditor` subagent to review the design file before running.
 - Report effect size (mean difference with 95% CI; Cohen's d_z or rank-biserial r) and, for
   percentile metrics (p90), a bootstrap 95% CI.
 - Write `results/stats/<exp_name>.csv` and regenerate `results/summary.md` via
-  `python -m experiments.summarize` (never edit summary.md by hand).
+  `python -m resqcity.experiments.summarize` (never edit summary.md by hand).
 
 ## Figures
-- One script per figure in `experiments/figures/`, reading only from `results/`.
+- One script per figure in `src/resqcity/experiments/figures/`, reading only from `results/`.
 - Colour-blind-safe palette, labelled axes with units, CI bands or error bars, saved as PNG and PDF.
 
 ## Report honestly

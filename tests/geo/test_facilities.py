@@ -3,8 +3,8 @@
 import geopandas as gpd
 from shapely.geometry import Point, box
 
-from common.schemas import Agency, FacilitySource
-from geo.facilities import build_facilities, load_facilities, save_facilities
+from resqcity.common.schemas import Agency, FacilitySource
+from resqcity.geo.facilities import build_facilities, load_facilities, save_facilities
 from tests.conftest import LAT0, LON0, STEP
 
 

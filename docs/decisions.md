@@ -19,7 +19,7 @@ Consequences: ...
 ## D-001 Cross-platform task runner behind the Makefile  (2026-10-20, phase 1)
 Context: the development machine is Windows without GNU make; CLAUDE.md specifies `make` targets.
 Decision: the `Makefile` stays the documented interface. Every target delegates to
-`tools/tasks.py`, which also runs as `uv run python -m tools.tasks <target>`.
+`tools/tasks.py`, which also runs as `uv run python -m resqcity.tools.tasks <target>`.
 Targets of later phases exit with status 3 ("not implemented yet (phase N)") instead of 0.
 Alternatives: PowerShell `make.ps1` (not portable to CI/Linux); only stubs that print and succeed
 (a silent no-op `make reproduce` would be a research-integrity hazard).
@@ -201,7 +201,7 @@ Fixed in phase 2:
   test checks that changing `p_person_down` leaves onsets, nodes and types unchanged. Disjoint seed
   bases exist for evaluation, tuning and forecast training (`configs/base.yaml`).
 - Leakage guard: `tests/test_architecture.py` fails if any package outside `sim/` imports
-  `sim.groundtruth` or `sim.generator`, and it enforces the master-plan module boundaries.
+  `resqcity.sim.groundtruth` or `resqcity.sim.generator`, and it enforces the master-plan module boundaries.
 - Hotspot weights count each road once (two-way roads were double-counted).
 - OSM re-downloads are pinned to `osm_snapshot_date` (Overpass attic query).
 - Added a dispersion test (variance ≈ mean).
@@ -214,3 +214,19 @@ Deferred (recorded, owner phase):
 - Only 14 fire stations are in OSM; check against the PMC fire-brigade list (user action).
 - 40 stations lie outside the city and carry the nearest ward's id. Filter on `in_city` before any
   ward-level fleet scaling (phase 6/7).
+
+## D-017 Repository layout: single `src/resqcity` package  (2026-10-20, between phases 2 and 3)
+Context: the root held 12 top-level Python package folders (8 of them empty placeholders) next to
+configs, data, docs and the kit files; generic top-level import names (`common`, `tools`) could
+also clash with other installed packages. The user chose the src-layout option.
+Decision: all Python code lives in `src/resqcity/` and is imported as `resqcity.<module>`
+(`python -m resqcity.geo.build`, `python -m resqcity.tools.tasks test`, ...). Module folders are
+created in the phase that implements them (no empty placeholders). `BUILD_PROMPT.md` and
+`SETUP.md` moved to `docs/kit/`. Experiment configs will live in `configs/experiments/` and the
+Colab training notebook in `notebooks/vision/` (the kit prompts still show the old paths;
+CLAUDE.md, the master plan and the project skills are updated). `PROJECT_ROOT` is found by walking
+up to `pyproject.toml`, so it no longer depends on package depth. `tests/test_architecture.py`
+scans `src/resqcity/` and asserts it actually found the modules, so boundary checks cannot pass
+vacuously.
+Consequences: earlier entries and phase plans keep their original paths as historical record.
+Committed result sidecars before this change name the old module paths in `command`.

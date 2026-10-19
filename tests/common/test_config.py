@@ -6,7 +6,7 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from common.config import (
+from resqcity.common.config import (
     CONFIG_DIR,
     BaseConfig,
     ConfigModel,

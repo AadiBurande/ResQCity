@@ -5,7 +5,7 @@ import zlib
 import numpy as np
 import pytest
 
-from common.rng import stream, stream_key
+from resqcity.common.rng import stream, stream_key
 
 
 def test_same_inputs_same_stream():

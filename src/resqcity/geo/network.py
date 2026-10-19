@@ -26,11 +26,11 @@ from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import dijkstra
 from scipy.spatial import cKDTree
 
-from geo.config import GeoConfig, RoadClassesConfig
-from geo.traffic import TrafficModel
+from resqcity.geo.config import GeoConfig, RoadClassesConfig
+from resqcity.geo.traffic import TrafficModel
 
 if TYPE_CHECKING:
-    from geo.scenario import ScenarioState
+    from resqcity.geo.scenario import ScenarioState
 
 KPH_TO_MPS = 1000.0 / 3600.0
 WGS84 = "EPSG:4326"

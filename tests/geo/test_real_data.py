@@ -4,11 +4,11 @@ import time
 
 import pytest
 
-from common.config import CONFIG_DIR, load_base_config
-from geo.cameras import load_cameras
-from geo.config import load_geo_config
-from geo.facilities import load_facilities
-from geo.network import RoadNetwork
+from resqcity.common.config import CONFIG_DIR, load_base_config
+from resqcity.geo.cameras import load_cameras
+from resqcity.geo.config import load_geo_config
+from resqcity.geo.facilities import load_facilities
+from resqcity.geo.network import RoadNetwork
 
 BASE, GEO = load_base_config(), load_geo_config()
 PROCESSED = BASE.paths.resolve("data_processed")
@@ -59,7 +59,7 @@ def test_facilities_snap_to_network(network):
 
 
 def test_every_festival_street_matches_the_real_network(network):
-    from geo.scenario import ScenarioState, load_scenario
+    from resqcity.geo.scenario import ScenarioState, load_scenario
 
     state = ScenarioState(load_scenario("ganeshotsav"), network, BASE.project.timezone)
     unmatched = [name for name, n in state.route_match_counts.items() if n == 0]
@@ -67,7 +67,7 @@ def test_every_festival_street_matches_the_real_network(network):
 
 
 def test_ambulance_bases_are_labelled_synthetic():
-    from common.schemas import Agency, FacilitySource
+    from resqcity.common.schemas import Agency, FacilitySource
 
     fac = load_facilities(PROCESSED / GEO.network.facilities_file)
     assert all(s.source == FacilitySource.SYNTHETIC for s in fac.by_agency(Agency.AMBULANCE))

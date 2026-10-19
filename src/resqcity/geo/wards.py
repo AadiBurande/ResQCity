@@ -9,7 +9,7 @@ import pandas as pd
 from shapely.geometry import Polygon, box
 from shapely.geometry.base import BaseGeometry
 
-from geo.config import GeoConfig, WardsConfig
+from resqcity.geo.config import GeoConfig, WardsConfig
 
 WGS84 = "EPSG:4326"
 

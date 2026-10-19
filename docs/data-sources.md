@@ -10,13 +10,13 @@ Synthetic data is listed too, so readers can see which inputs are real.
 | OSM drivable road network | OpenStreetMap via Overpass (OSMnx 2.1.1) | ODbL 1.0 | 2026-10-20 | road graph, travel times | real | yes, with attribution (kept out of git: size) |
 | OSM rivers (Mula, Mutha, Mula-Mutha) | OpenStreetMap `waterway=river` | ODbL 1.0 | 2026-10-20 | flood-prone edges | real | yes, with attribution |
 | OSM police / fire / hospital locations | OpenStreetMap `amenity=police/fire_station/hospital` | ODbL 1.0 | 2026-10-20 | stations, hospitals, ambulance bases | real locations; **synthetic** capabilities | yes, with attribution |
-| Camera sites (40 junctions) | `geo/cameras.py` over the OSM network | derived (ODbL) | generated | simulated CCTV locations | **algorithm-chosen**, not real CCTV sites | yes |
+| Camera sites (40 junctions) | `resqcity.geo.cameras` over the OSM network | derived (ODbL) | generated | simulated CCTV locations | **algorithm-chosen**, not real CCTV sites | yes |
 | Pune rush-hour speed (calibration target) | Punekar News, 2026-01-22, reporting TomTom Traffic Index 2025 (33 min 20 s per 10 km; 15.1 km/h rush hour) | press article | 2026-10-20 | speed calibration (D-014) | real aggregate, secondary source | n/a |
-| Synthetic incidents | `sim/generator.py` + `configs/incidents.yaml` | n/a | generated | ground truth for the simulator | **synthetic** | n/a |
+| Synthetic incidents | `resqcity.sim.generator` + `configs/incidents.yaml` | n/a | generated | ground truth for the simulator | **synthetic** | n/a |
 | Scenario weather / festival timings | `configs/scenarios/*.yaml` | n/a | authored | monsoon and Ganeshotsav scenarios | **synthetic, illustrative** | n/a |
 
 Exact download time, OSMnx version and SHA-256 of every raw file: `data/raw/download_meta.json`
-(written by `python -m geo.download`).
+(written by `python -m resqcity.geo.download`).
 
 ## Notes per dataset
 
@@ -24,7 +24,7 @@ Exact download time, OSMnx version and SHA-256 of every raw file: `data/raw/down
 - Citation: DataMeet Pune chapter, "Pune electoral wards 2022", Municipal_Spatial_Data repository;
   traced by SeerMaps Technologies (commissioned by Nikhil VJ) from the PMC final prabhag
   rachna 2022 PDFs.
-- Download: `uv run python -m geo.download` (URL in `configs/geo.yaml`).
+- Download: `uv run python -m resqcity.geo.download` (URL in `configs/geo.yaml`).
 - Pre-processing: ids `W01..W58` from `wardnum`; geometries `make_valid`; the union is the study
   boundary (506.9 km²).
 - Known issues: hand-traced from PDF screenshots, so boundaries are approximate.

@@ -10,8 +10,8 @@ from typing import Self
 
 from pydantic import Field, model_validator
 
-from common.config import CONFIG_DIR, ConfigModel, SourcedValue, load_model
-from common.schemas import Agency, EventType, ServiceCounts, SeverityFeatures
+from resqcity.common.config import CONFIG_DIR, ConfigModel, SourcedValue, load_model
+from resqcity.common.schemas import Agency, EventType, ServiceCounts, SeverityFeatures
 
 
 class SeverityWeights(ConfigModel):

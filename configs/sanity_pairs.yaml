@@ -1,4 +1,4 @@
-# Known Pune places for the travel-time sanity check (geo.sanity). Coordinates are approximate
+# Known Pune places for the travel-time sanity check (resqcity.geo.sanity). Coordinates are approximate
 # landmarks (snapped to the nearest road node). Times are reported for the user to compare with
 # their own experience or a maps service; they are NOT a validation dataset.
 departure_date: "2026-02-03"     # a Tuesday

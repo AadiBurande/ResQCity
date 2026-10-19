@@ -15,9 +15,9 @@ jobs:
       - name: Install
         run: uv sync --locked
       - name: Lint (ruff + TS types up to date)
-        run: uv run python -m tools.tasks lint
+        run: uv run python -m resqcity.tools.tasks lint
       - name: Test
-        run: uv run python -m tools.tasks test
+        run: uv run python -m resqcity.tools.tasks test
 
   typescript-types:
     runs-on: ubuntu-latest

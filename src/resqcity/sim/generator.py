@@ -9,7 +9,7 @@ Rate at in-city node n during hour h (local time):
 per-ward-hour NHPP of the design at node resolution. For each hour: N ~ Poisson(sum_n lambda_n),
 nodes are drawn proportionally to lambda_n, onset times uniformly within the hour.
 
-    uv run python -m sim.generator --scenario monsoon --replication 0
+    uv run python -m resqcity.sim.generator --scenario monsoon --replication 0
 """
 
 import argparse
@@ -21,20 +21,26 @@ import numpy as np
 import pandas as pd
 from pydantic import Field, model_validator
 
-from common.config import CONFIG_DIR, ConfigModel, SourcedValue, load_base_config, load_model
-from common.provenance import write_meta
-from common.requirements import (
+from resqcity.common.config import (
+    CONFIG_DIR,
+    ConfigModel,
+    SourcedValue,
+    load_base_config,
+    load_model,
+)
+from resqcity.common.provenance import write_meta
+from resqcity.common.requirements import (
     RequirementsConfig,
     load_requirements_config,
     required_services,
     severity_class,
     severity_score,
 )
-from common.rng import stream
-from common.schemas import EventType, GeoPoint, SeverityFeatures
-from geo.network import RoadNetwork
-from geo.scenario import ScenarioState
-from sim.groundtruth import GroundTruthIncident
+from resqcity.common.rng import stream
+from resqcity.common.schemas import EventType, GeoPoint, SeverityFeatures
+from resqcity.geo.network import RoadNetwork
+from resqcity.geo.scenario import ScenarioState
+from resqcity.sim.groundtruth import GroundTruthIncident
 
 HOUR = timedelta(hours=1)
 # Sub-streams (common random numbers): arrivals per hour; marks (type, features) per incident.
@@ -319,8 +325,8 @@ def to_frame(incidents: list[GroundTruthIncident]) -> pd.DataFrame:
 
 
 def main(argv: list[str] | None = None) -> int:
-    from geo.config import load_geo_config
-    from geo.scenario import SCENARIO_DIR, load_scenario
+    from resqcity.geo.config import load_geo_config
+    from resqcity.geo.scenario import SCENARIO_DIR, load_scenario
 
     parser = argparse.ArgumentParser(description="Generate synthetic ground-truth incidents")
     parser.add_argument("--scenario", default="normal")

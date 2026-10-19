@@ -1,6 +1,6 @@
 """Download raw geographic inputs. This is the ONLY module in geo/ that touches the network.
 
-    uv run python -m geo.download [--force]
+    uv run python -m resqcity.geo.download [--force]
 
 Outputs (data/raw, gitignored):
 - wards/pune-electoral-wards_2022.geojson  PMC 2022 electoral wards (DataMeet, CC BY-SA 2.5 IN)
@@ -28,10 +28,10 @@ import requests
 from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
 
-from common.config import load_base_config
-from geo.config import GeoConfig, load_geo_config
-from geo.facilities import FACILITY_COLUMNS
-from geo.wards import buffered, load_wards, study_boundary
+from resqcity.common.config import load_base_config
+from resqcity.geo.config import GeoConfig, load_geo_config
+from resqcity.geo.facilities import FACILITY_COLUMNS
+from resqcity.geo.wards import buffered, load_wards, study_boundary
 
 log = logging.getLogger(__name__)
 USER_AGENT = "ResQCity research prototype (university project)"

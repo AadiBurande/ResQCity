@@ -16,9 +16,9 @@ import numpy as np
 import pandas as pd
 from pydantic import TypeAdapter
 
-from common.schemas import Agency, FacilitySource, GeoPoint, Hospital, Station
-from geo.config import FacilitiesConfig
-from geo.network import RoadNetwork
+from resqcity.common.schemas import Agency, FacilitySource, GeoPoint, Hospital, Station
+from resqcity.geo.config import FacilitiesConfig
+from resqcity.geo.network import RoadNetwork
 
 log = logging.getLogger(__name__)
 WGS84 = "EPSG:4326"

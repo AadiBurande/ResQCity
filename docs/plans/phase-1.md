@@ -29,6 +29,6 @@ JSON, and the dashboard TypeScript types are generated from the pydantic models.
 11. `docs/decisions.md`, `docs/data-sources.md` templates; record D-001…D-00n.
 
 ## Acceptance
-- `make setup && make lint && make test` (or `uv run python -m tools.tasks setup|lint|test`) pass.
+- `make setup && make lint && make test` (or `uv run python -m resqcity.tools.tasks setup|lint|test`) pass.
 - `tools/gen_ts_types.py --check` passes, and `tsc --noEmit --strict` accepts the generated file.
 - Commit: "phase 1: scaffolding and schemas".

@@ -7,7 +7,7 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 from pydantic import BaseModel, ValidationError
 
-from common.schemas import (
+from resqcity.common.schemas import (
     SCHEMA_MODELS,
     Agency,
     Assignment,

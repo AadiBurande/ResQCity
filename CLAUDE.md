@@ -9,7 +9,12 @@ Research question: Does CCTV-triggered, confidence-aware joint dispatch reduce t
 versus today's call-based, agency-by-agency dispatch, without increasing inequity across wards?
 
 ## Architecture (one line per module)
-- `common/`        Shared pydantic schemas + config loading
+All Python code is one package in `src/resqcity/` (import as `resqcity.<module>`, run as
+`python -m resqcity.<module>.<script>`). Python modules below live in `src/resqcity/`; `dashboard/`,
+`configs/`, `data/`, `results/`, `notebooks/`, `tests/` and `docs/` are at the repo root.
+A module folder is created in the phase that implements it.
+- `common/`        Shared pydantic schemas + config loading, RNG streams, provenance sidecars
+- `geo/`           Pune road network (OSMnx), wards, facilities, camera sites, scenarios, travel times
 - `vision/`        CCTV pipeline: YOLO + ByteTrack -> accident / fire-smoke / severity -> `Event` with confidence
 - `streams/`       Simulated live cameras: MediaMTX + ffmpeg looping clips as RTSP, pinned to real junctions
 - `fusion/`        Bayesian fusion of CCTV events + simulated 112 calls -> incident with posterior + severity
@@ -20,18 +25,20 @@ versus today's call-based, agency-by-agency dispatch, without increasing inequit
 - `backend/`       FastAPI + WebSocket event bus, operator approve/override, audit log
 - `dashboard/`     React + Vite + TypeScript + Leaflet live map, camera tiles, explanations, KPIs
 - `experiments/`   Configs, runners, statistics, figures for the research results
-- `docs/`          Methodology, model formulations (LaTeX), data sources, decisions, limitations, ethics
+- `tools/`         Task runner behind the Makefile, TypeScript type generation
+- `docs/`          Methodology, model formulations (LaTeX), data sources, decisions, limitations, ethics;
+                   `docs/kit/` holds the original build prompts and setup guide
 
 ## Tech conventions
 - Python 3.11, dependency management with `uv`; lint/format with `ruff`; type hints everywhere; `pytest`.
 - Node 20 + pnpm for `dashboard/`.
 - Config via YAML in `configs/`, loaded into pydantic models. No magic numbers in code.
-- Shared schemas live in `common/schemas.py`: Camera, Event, Call, Incident, Unit, Station, Hospital,
+- Shared schemas live in `src/resqcity/common/schemas.py`: Camera, Event, Call, Incident, Unit, Station, Hospital,
   DispatchDecision, Explanation. Dashboard TypeScript types are generated from these.
 - OR solvers: OR-Tools (CP-SAT / MIP) first, PuLP + CBC as fallback. Every model has a tiny-instance
   unit test checked against brute force.
 - Road graph: OSMnx, cached to `data/processed/pune_drive.graphml`. Tests never hit the network.
-- GPU-heavy training (vision) must also run on Google Colab via a notebook in `vision/notebooks/`.
+- GPU-heavy training (vision) must also run on Google Colab via a notebook in `notebooks/vision/`.
 
 ## Research integrity rules (non-negotiable)
 1. Never invent or hand-type a result. Every number in docs/figures comes from a file in `results/`

@@ -10,10 +10,10 @@ import pytest
 from pyproj import Transformer
 from shapely.geometry import LineString, box
 
-from geo.build import edge_river_distance
-from geo.config import GeoConfig, load_geo_config
-from geo.network import RoadNetwork, graph_tables, prepare_graph
-from geo.wards import assign_nodes
+from resqcity.geo.build import edge_river_distance
+from resqcity.geo.config import GeoConfig, load_geo_config
+from resqcity.geo.network import RoadNetwork, graph_tables, prepare_graph
+from resqcity.geo.wards import assign_nodes
 
 IST = ZoneInfo("Asia/Kolkata")
 LAT0, LON0, STEP = 18.500, 73.850, 0.002  # ~222 m (lat) x ~211 m (lon) grid spacing

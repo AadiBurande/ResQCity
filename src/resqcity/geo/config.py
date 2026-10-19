@@ -5,7 +5,7 @@ from typing import Generic, Literal, Self, TypeVar
 
 from pydantic import Field, model_validator
 
-from common.config import CONFIG_DIR, ConfigModel, SourcedValue, load_model
+from resqcity.common.config import CONFIG_DIR, ConfigModel, SourcedValue, load_model
 
 T = TypeVar("T")
 

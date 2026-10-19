@@ -1,7 +1,7 @@
-# ResQCity Makefile. Every target delegates to tools/tasks.py, so on machines without GNU make
-# you can run the same thing with:  uv run python -m tools.tasks <target>
+# ResQCity Makefile. Every target delegates to src/resqcity/tools/tasks.py, so on machines without GNU make
+# you can run the same thing with:  uv run python -m resqcity.tools.tasks <target>
 
-TASKS    := uv run python -m tools.tasks
+TASKS    := uv run python -m resqcity.tools.tasks
 SCENARIO ?= normal
 POLICY   ?= B0
 

@@ -6,7 +6,7 @@ detection and call processes (phases 4 and 7).
 
 from pydantic import AwareDatetime, Field
 
-from common.schemas import (
+from resqcity.common.schemas import (
     EventType,
     GeoPoint,
     Id,

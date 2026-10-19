@@ -18,9 +18,9 @@ import numpy as np
 from pydantic import AwareDatetime, Field, model_validator
 from scipy.spatial import cKDTree
 
-from common.config import CONFIG_DIR, ConfigModel, SourcedValue, load_model
-from common.schemas import EventType
-from geo.network import RoadNetwork
+from resqcity.common.config import CONFIG_DIR, ConfigModel, SourcedValue, load_model
+from resqcity.common.schemas import EventType
+from resqcity.geo.network import RoadNetwork
 
 log = logging.getLogger(__name__)
 SCENARIO_DIR = CONFIG_DIR / "scenarios"

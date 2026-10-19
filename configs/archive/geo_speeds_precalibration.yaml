@@ -1,5 +1,5 @@
 # ARCHIVED: speed settings used before the D-014 calibration (2026-10-20). Overlay for
-#   uv run python -m geo.sanity --geo-overlay configs/archive/geo_speeds_precalibration.yaml \
+#   uv run python -m resqcity.geo.sanity --geo-overlay configs/archive/geo_speeds_precalibration.yaml \
 #       --out results/geo/sanity_travel_times_precalibration.csv
 # Kept only so results/geo/sanity_travel_times_precalibration.csv is reproducible. Do not use.
 base_speeds_kph:

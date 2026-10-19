@@ -2,8 +2,8 @@
 
 import json
 
-from common.config import CONFIG_DIR
-from common.provenance import meta_path, sha256_file, write_meta
+from resqcity.common.config import CONFIG_DIR
+from resqcity.common.provenance import meta_path, sha256_file, write_meta
 
 
 def test_write_meta_records_configs_seeds_and_synthetic_flag(tmp_path):

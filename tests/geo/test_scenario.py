@@ -8,7 +8,7 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from geo.scenario import ScenarioConfig, ScenarioState, available_scenarios, load_scenario
+from resqcity.geo.scenario import ScenarioConfig, ScenarioState, available_scenarios, load_scenario
 from tests.conftest import LAT0, LON0, STEP, at, node_id
 
 

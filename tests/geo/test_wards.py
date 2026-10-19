@@ -4,8 +4,8 @@ import geopandas as gpd
 import numpy as np
 from shapely.geometry import Point, box
 
-from geo.config import WardsConfig
-from geo.wards import assign_nodes, h3_wards, load_wards_geojson, study_boundary
+from resqcity.geo.config import WardsConfig
+from resqcity.geo.wards import assign_nodes, h3_wards, load_wards_geojson, study_boundary
 
 CFG = WardsConfig(
     method="geojson",

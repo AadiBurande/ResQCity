@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pytest
 
-from common.schemas import SCHEMA_MODELS
-from tools import gen_ts_types
-from tools.gen_ts_types import DEFAULT_OUT, render, ts_type
+from resqcity.common.schemas import SCHEMA_MODELS
+from resqcity.tools import gen_ts_types
+from resqcity.tools.gen_ts_types import DEFAULT_OUT, render, ts_type
 
 
 def test_every_model_becomes_an_interface():

@@ -27,31 +27,35 @@ compared with today's call-based, agency-by-agency dispatch, without increasing 
 ## 2. Repository layout
 
 ```
-resqcity/
-├── common/            schemas.py (pydantic v2), config.py (YAML → typed), ids.py, timeutil.py, provenance.py
-├── configs/           base.yaml, cameras.yaml, requirements.yaml, survival.yaml, calls.yaml,
-│                      fleet.yaml, routing.yaml, policies.yaml, scenarios/{normal,monsoon,ganeshotsav}.yaml
+ResQCity/                         (repo root; layout revised in D-017)
+├── src/resqcity/                 the single Python package: import resqcity.<module>
+│   ├── common/        schemas.py (pydantic v2), config.py (YAML → typed), rng.py, provenance.py, requirements.py
+│   ├── geo/           road graph (OSMnx), facilities, wards, camera-site selection, scenarios, travel times
+│   ├── streams/       loop_cameras.py, scenario_player.py (docker-compose.yml for MediaMTX at streams/)
+│   ├── vision/        ingest, detect_track (YOLO+ByteTrack), accident_heuristics, clip_classifier,
+│   │                  calibration, fire_smoke, severity, privacy (blur), run.py, eval/
+│   ├── fusion/        call_sim (synthetic 112 calls), triage (rules | optional LLM), associate, posterior
+│   ├── forecasting/   panel builder, baseline (historical average), LightGBM-Poisson, predict(ward, t)
+│   ├── optimization/  routing, joint_dispatch (C1), confidence_policy (C2), preposition (C3),
+│   │                  camera_placement (MCLP), erlang, heuristics, explain, bench_*.py
+│   ├── sim/           generator, ground truth, SimPy engine, policies registry (B0…FULL), logging
+│   ├── backend/       FastAPI app, bus (Redis | in-process), services, audit log, ws
+│   ├── experiments/   run.py (resumable), stats.py, summarize.py, figures/*.py
+│   ├── paper/         build.py (fills {{placeholders}} in paper/*.md from results/)
+│   └── tools/         gen_ts_types.py, tasks.py (cross-platform task runner)
+├── configs/           base, geo, incidents, requirements, cameras (generated), scenarios/, experiments/,
+│                      archive/ (superseded settings kept for reproducibility)
 ├── data/              raw/ (gitignored), processed/ (gitignored, regenerable), videos/<camera_id>/
-├── geo/               road graph (OSMnx), facilities, wards, camera-site selection, travel_time()
-│                      [added: the network code is shared by sim, optimization and backend]
-├── streams/           docker-compose.yml (MediaMTX), loop_cameras.py, scenario_player.py
-├── vision/            ingest, detect_track (YOLO+ByteTrack), accident_heuristics, clip_classifier,
-│                      calibration, fire_smoke, severity, privacy (blur), run.py, eval/, notebooks/train.ipynb
-├── fusion/            call_sim (synthetic 112 calls), triage (rules | optional LLM), associate, posterior
-├── forecasting/       panel builder, baseline (historical average), LightGBM-Poisson, predict(ward, t)
-├── optimization/      routing, joint_dispatch (C1), confidence_policy (C2), preposition (C3),
-│                      camera_placement (MCLP), erlang, heuristics, explain, bench_*.py
-├── sim/               SimPy engine, processes, policies registry (B0…FULL), logging, validation
-├── backend/           FastAPI app, bus (Redis | in-process), services, audit log, ws
+├── results/           raw/ (gitignored parquet), geo/, stats/, vision/, forecasting/, bench/, figures/, summary.md
+├── notebooks/         02_network.ipynb, vision/train.ipynb (Colab), ...
 ├── dashboard/         React + Vite + TS + Leaflet; src/types/schemas.ts is GENERATED
-├── experiments/       configs/*.yaml, run.py (resumable), stats.py, summarize.py, figures/*.py
-├── paper/             IMRaD markdown templates + build.py (fills {{placeholders}} from results/)
-├── results/           raw/ (gitignored parquet), stats/, vision/, forecasting/, bench/, figures/, summary.md
-├── tools/             gen_ts_types.py, tasks.py (cross-platform task runner)
-├── tests/             mirrors packages: tests/common, tests/optimization, ...
-└── docs/              plans/, models/*.md (LaTeX), methodology.md, decisions.md, data-sources.md,
-                       limitations.md, ethics.md
+├── tests/             mirrors the package: tests/common, tests/geo, tests/sim, ...
+├── docs/              plans/, models/*.md (LaTeX), decisions.md, data-sources.md, limitations.md,
+│                      methodology.md, ethics.md, kit/ (original build prompts + setup guide)
+└── CLAUDE.md, README.md, Makefile, pyproject.toml, uv.lock
 ```
+
+Module folders are created in the phase that implements them (no empty placeholders).
 
 Module boundaries (who may import whom):
 
@@ -93,7 +97,7 @@ call_sim (synthetic 112) → triage → Call ──────────►�
 ```
 scenario yaml + seed ─► incident generator (ground truth, synthetic NHPP per ward-hour)
    ─► SimPy: detection process (sim_inputs.yaml) + call process (calls.yaml)
-   ─► fusion (same code) ─► policy (same code: B0…FULL) ─► unit travel (geo.travel_time)
+   ─► fusion (same code) ─► policy (same code: B0…FULL) ─► unit travel (resqcity.geo.travel_time)
    ─► on-scene, transport, hospital handover, return / relocation
    ─► results/raw/<exp>/<scenario>/<policy>/rep_<r>.parquet  + meta.json
    ─► experiments.stats ─► results/stats/*.csv ─► experiments.summarize ─► results/summary.md
@@ -222,4 +226,4 @@ requirements, true type) lives in `sim/`. Ground truth must never be visible to 
 - **Q7 Tooling.** OK if I install GNU make (`winget install ezwinports.make`), ffmpeg
   (`winget install Gyan.FFmpeg`) and pnpm (`corepack enable pnpm`)? Also, is there a GitHub
   remote for CI? Until then, every Make target also works as
-  `uv run python -m tools.tasks <target>`.
+  `uv run python -m resqcity.tools.tasks <target>`.

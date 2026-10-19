@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from geo.config import GeoConfig
+from resqcity.geo.config import GeoConfig
 
 HOURS_PER_DAY = 24
 

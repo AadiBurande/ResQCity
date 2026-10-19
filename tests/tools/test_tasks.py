@@ -2,7 +2,7 @@
 
 import pytest
 
-from tools.tasks import NOT_IMPLEMENTED_EXIT, TASKS, main
+from resqcity.tools.tasks import NOT_IMPLEMENTED_EXIT, TASKS, main
 
 MAKEFILE_TARGETS = {
     "setup",

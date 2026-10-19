@@ -3,7 +3,7 @@
 GNU make is not available on every developer machine (notably Windows), so every Make target
 delegates here and can also be run directly:
 
-    uv run python -m tools.tasks <target> [--scenario NAME] [--policy NAME]
+    uv run python -m resqcity.tools.tasks <target> [--scenario NAME] [--policy NAME]
 
 Targets that belong to a later phase exit with status 3 and say so, rather than pretending to
 succeed. A silent no-op ``reproduce`` would be a research-integrity hazard.
@@ -16,7 +16,7 @@ import subprocess
 import sys
 from collections.abc import Callable, Sequence
 
-from common.config import PROJECT_ROOT
+from resqcity.common.config import PROJECT_ROOT
 
 NOT_IMPLEMENTED_EXIT = 3
 
@@ -36,7 +36,7 @@ def _py(*args: str) -> list[str]:
 
 
 def setup(_: argparse.Namespace) -> int:
-    code = _run(_py("tools.gen_ts_types"))
+    code = _run(_py("resqcity.tools.gen_ts_types"))
     if code == 0 and (PROJECT_ROOT / ".git").exists() and shutil.which("git"):
         code = _run(_py("pre_commit", "install"))
     return code
@@ -46,7 +46,7 @@ def lint(_: argparse.Namespace) -> int:
     return _run(
         _py("ruff", "check", "."),
         _py("ruff", "format", "--check", "."),
-        _py("tools.gen_ts_types", "--check"),
+        _py("resqcity.tools.gen_ts_types", "--check"),
     )
 
 
@@ -59,12 +59,12 @@ def test(_: argparse.Namespace) -> int:
 
 
 def types(_: argparse.Namespace) -> int:
-    return _run(_py("tools.gen_ts_types"))
+    return _run(_py("resqcity.tools.gen_ts_types"))
 
 
 def data(_: argparse.Namespace) -> int:
     """Download raw inputs (network access), then build processed data offline."""
-    return _run(_py("geo.download"), _py("geo.build"), _py("geo.sanity"))
+    return _run(_py("resqcity.geo.download"), _py("resqcity.geo.build"), _py("resqcity.geo.sanity"))
 
 
 def _stub(phase: int, what: str) -> Callable[[argparse.Namespace], int]:

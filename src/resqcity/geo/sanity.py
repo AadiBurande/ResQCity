@@ -1,6 +1,6 @@
 """Travel times between known Pune places, for a human sanity check (not a validation dataset).
 
-uv run python -m geo.sanity      ->  results/geo/sanity_travel_times.csv
+uv run python -m resqcity.geo.sanity      ->  results/geo/sanity_travel_times.csv
 """
 
 import argparse
@@ -11,10 +11,10 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 from pydantic import Field
 
-from common.config import CONFIG_DIR, ConfigModel, load_base_config, load_model
-from common.provenance import write_meta
-from geo.config import GeoConfig
-from geo.network import RoadNetwork
+from resqcity.common.config import CONFIG_DIR, ConfigModel, load_base_config, load_model
+from resqcity.common.provenance import write_meta
+from resqcity.geo.config import GeoConfig
+from resqcity.geo.network import RoadNetwork
 
 
 class SanityConfig(ConfigModel):

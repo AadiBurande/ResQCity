@@ -33,7 +33,7 @@ Create or update `docs/models/<model_name>.md` with:
   the optimum; lower ETAs never increase L[i]).
 
 ## 4. Benchmark
-- Script `optimization/bench_<model>.py` reports solve time vs instance size; save to
+- Script `src/resqcity/optimization/bench_<model>.py` reports solve time vs instance size; save to
   `results/bench/<model>.csv`. Live dispatch must answer within 1 s or use the fallback.
 
 ## 5. Review
