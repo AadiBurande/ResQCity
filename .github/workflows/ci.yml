@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: uv sync --locked
+      - name: Lint (ruff + TS types up to date)
+        run: uv run python -m tools.tasks lint
+      - name: Test
+        run: uv run python -m tools.tasks test
+
+  typescript-types:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Type-check generated schemas
+        run: npx --yes -p typescript@5.6.3 tsc --noEmit --strict dashboard/src/types/schemas.ts

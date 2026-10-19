@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.hypothesis/
+*.egg-info/
+build/
+dist/
+
+# Node
+node_modules/
+dashboard/dist/
+.pnpm-store/
+
+# Data (regenerable or licence-restricted; download scripts are committed instead)
+data/raw/
+data/processed/
+data/videos/
+
+# Large/raw results (summaries, stats and figures ARE committed)
+results/raw/
+*.parquet
+
+# Model weights (stored with content hash outside git)
+*.pt
+*.onnx
+*.ckpt
+
+# Secrets / local
+.env
+.claude/settings.local.json
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,20 @@
+# ResQCity base configuration. Loaded by common.config.load_base_config().
+# Every other config file (scenarios, fleet, requirements, survival, ...) is added in its phase.
+
+project:
+  name: ResQCity
+  timezone: Asia/Kolkata
+
+paths:            # relative to the project root
+  data_raw: data/raw
+  data_processed: data/processed
+  results: results
+  configs: configs
+
+random:
+  seed_base: 20261020   # replication r of any experiment uses seeds derived from seed_base + r
+
+study_area:
+  place: "Pune, Maharashtra, India"
+  bbox: null      # e.g. {west: 73.70, south: 18.40, east: 74.00, north: 18.70} to add PCMC
+  network_type: drive
