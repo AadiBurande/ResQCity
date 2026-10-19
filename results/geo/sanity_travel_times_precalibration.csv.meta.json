@@ -1,0 +1,30 @@
+{
+  "file": "results/geo/sanity_travel_times_precalibration.csv",
+  "generated_at_utc": "2026-10-19T23:10:31+00:00",
+  "command": "sanity.py --geo-overlay configs/archive/geo_speeds_precalibration.yaml --out results/geo/sanity_travel_times_precalibration.csv",
+  "synthetic": false,
+  "git": {
+    "commit": "6b9dd74f11a88805c219233f3176fc89c02a1ef5",
+    "dirty": false
+  },
+  "configs_sha256": {
+    "configs/geo.yaml": "777973a613ab9013b04fd68277f53590aa372381ae21dc5fdcb3a952dcf43b34",
+    "configs/archive/geo_speeds_precalibration.yaml": "745f4600db9fc6bb5ace45b7cd726bc66535c808fb5007bf64454f928c14480e",
+    "configs/sanity_pairs.yaml": "53b3a5a0be79fbcd039de15e3164d00f7578f4cac9f93d7dbfb992d6b02ff067"
+  },
+  "seeds": {},
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  },
+  "note": "model travel times for a human sanity check; not observations"
+}
