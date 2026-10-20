@@ -16,6 +16,7 @@ from typing import Any
 
 from resqcity.common.config import PROJECT_ROOT
 
+GENERATED_DIRS = ("results", "notebooks")
 TRACKED_PACKAGES = ("numpy", "pandas", "scipy", "networkx", "osmnx", "pydantic")
 
 
@@ -24,7 +25,11 @@ def sha256_file(path: Path) -> str:
 
 
 def git_state() -> dict[str, Any]:
-    """Current commit and whether tracked files have uncommitted changes (None if no git)."""
+    """Current commit and whether CODE/CONFIG differ from it (None if no git).
+
+    Generated outputs (``results/``, ``notebooks/``) are excluded from the dirty check: a chain of
+    result-producing scripts rewrites tracked result files, which must not mark later steps dirty.
+    """
     try:
         commit = subprocess.run(
             ["git", "rev-parse", "HEAD"],
@@ -34,7 +39,15 @@ def git_state() -> dict[str, Any]:
             check=True,
         ).stdout.strip()
         dirty = subprocess.run(
-            ["git", "status", "--porcelain", "--untracked-files=no"],
+            [
+                "git",
+                "status",
+                "--porcelain",
+                "--untracked-files=no",
+                "--",
+                ".",
+                *(f":(exclude){d}" for d in GENERATED_DIRS),
+            ],
             cwd=PROJECT_ROOT,
             capture_output=True,
             text=True,
