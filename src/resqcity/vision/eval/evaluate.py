@@ -13,7 +13,8 @@ classifier alone, heuristics alone and the combination: timing-checked onset det
 intervals, false alarms on ROAD footage (pre-onset) and NON-ROAD footage (UCF normal) separately,
 with Poisson and video-clustered bootstrap intervals, per-video AUROC with bootstrap intervals,
 calibration overall / within onset videos / above the operating threshold; (5)
-``results/vision/sim_inputs.yaml`` (timing-checked recall, delays, ROAD false-alarm rate).
+``results/vision/<run>/sim_inputs_v3.yaml`` (timing-checked recall, delays, ROAD false-alarm
+rate). The simulator reads ``results/vision/sim_inputs.yaml``, exported by ``crossfit`` (v4).
 """
 
 import argparse
@@ -211,7 +212,7 @@ def main(argv: list[str] | None = None) -> int:
     (out / "report.json").write_text(
         json.dumps(report, indent=2, default=float), encoding="utf-8", newline="\n"
     )
-    sim_inputs = base.paths.resolve("results") / "vision" / "sim_inputs.yaml"
+    sim_inputs = out / "sim_inputs_v3.yaml"  # the shared sim_inputs.yaml comes from crossfit
     export_sim_inputs(out, sim_inputs, args.run_id, chosen["combined"], models)
     for f in (
         "test_video_metrics.csv",

@@ -180,8 +180,10 @@ def main(argv: list[str] | None = None) -> int:
     }
     out = base.paths.resolve("results") / "geo" / "speed_calibration.json"
     out.write_text(json.dumps(report, indent=2), encoding="utf-8", newline="\n")
-    df.to_csv(out.with_name("speed_calibration_routes.csv"), index=False, lineterminator="\n")
-    write_meta(out, configs=[CONFIG_DIR / "geo.yaml", BASELINE, ROUTES], synthetic=False)
+    routes = out.with_name("speed_calibration_routes.csv")
+    df.to_csv(routes, index=False, lineterminator="\n")
+    for f in (out, routes):
+        write_meta(f, configs=[CONFIG_DIR / "geo.yaml", BASELINE, ROUTES], synthetic=False)
     print(json.dumps({k: v for k, v in report.items() if k != "calibrated_multipliers"}, indent=2))
     return 0
 
