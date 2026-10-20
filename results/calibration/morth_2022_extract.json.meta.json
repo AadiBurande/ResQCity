@@ -1,10 +1,10 @@
 {
   "file": "results/calibration/morth_2022_extract.json",
-  "generated_at_utc": "2026-10-20T10:02:27+00:00",
+  "generated_at_utc": "2026-10-20T15:51:48+00:00",
   "command": "morth_extract.py",
   "synthetic": false,
   "git": {
-    "commit": "616d1638fdfd2f08607828381bd26894a7cf223c",
+    "commit": "25f0354ca8a2d604c5e1dbafd0e56976c292be6e",
     "dirty": false
   },
   "configs_sha256": {},

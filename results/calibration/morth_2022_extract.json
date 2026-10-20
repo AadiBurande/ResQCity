@@ -10,6 +10,17 @@
     "page": 99,
     "table": "Table 6.2"
   },
+  "all_million_plus_cities": {
+    "accidents_2021": 67301,
+    "accidents_2022": 76752,
+    "killed_2021": 15350,
+    "killed_2022": 17089,
+    "injured_2021": 58758,
+    "injured_2022": 69052,
+    "cities": 50,
+    "page": 99,
+    "table": "Table 6.2 (Total)"
+  },
   "pune_weather_2022": {
     "clear_sunny": 776,
     "rainy": 82,

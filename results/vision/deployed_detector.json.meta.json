@@ -1,14 +1,14 @@
 {
   "file": "results/vision/deployed_detector.json",
-  "generated_at_utc": "2026-10-20T10:04:28+00:00",
+  "generated_at_utc": "2026-10-20T15:52:16+00:00",
   "command": "crossfit.py",
   "synthetic": false,
   "git": {
-    "commit": "616d1638fdfd2f08607828381bd26894a7cf223c",
+    "commit": "25f0354ca8a2d604c5e1dbafd0e56976c292be6e",
     "dirty": false
   },
   "configs_sha256": {
-    "configs/vision.yaml": "b60af4dc2cae6867a3752daeb57f8ec888c4238f4fd18e2b197ad842b5660036",
+    "configs/vision.yaml": "a032ba7342c07d21425fabab974febbb90b7826f38ac819e84595abb19f03e0d",
     "configs/vision_sweeps/clip_s03_t1.yaml": "32a6228ebb95737c468f825eb68cb2cbb81e7cff8975f3d008d30c30fb40c58d",
     "configs/vision_sweeps/clip_s0_t0.yaml": "c3d59cebf19938c424da23be3b262161497b0a2d20b46ee7caaef0ce940fd065",
     "configs/vision_sweeps/clip_s1_t1.yaml": "6909462d03fb889db97309e2b26946160d2fea822772c17eaef962910d098d9d",

@@ -30,3 +30,15 @@ road_fa_poisson_ci95:
 road_fa_cluster_ci95:
 - 19.394273828978918
 - 143.28556333377358
+estimates_describe: the cross-fitted procedure (fold A and B may choose different
+  detectors); the deployed live detector's own fold-A estimates are under deployed_detector_fold_A
+deployed_detector_fold_A:
+  candidate: image_s03_t1
+  onset_detected: 3
+  onset_videos: 12
+  road_false_alarms: 4
+  road_hours: 0.03175925925925926
+  road_false_alarms_per_hour: 125.94752186588921
+  road_fa_poisson_ci95:
+  - 34.316460743919265
+  - 322.47567840921255

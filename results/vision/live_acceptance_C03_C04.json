@@ -1,7 +1,8 @@
 {
-  "run_start_utc": "2026-10-20T10:08:54.617542+00:00",
-  "run_end_utc": "2026-10-20T10:11:35.345292+00:00",
-  "detection_rule": "event in [onset, offset + 10 s]",
+  "run_start_utc": "2026-10-20T15:56:32.364042+00:00",
+  "run_end_utc": "2026-10-20T16:00:52.350679+00:00",
+  "detection_rule": "accident event in [onset, min(offset + 10 s, clip end)]",
+  "cut_effect_s": 8.0,
   "detector": {
     "clip_run": "clip_s03_t1",
     "evaluation": "crossfit_v4 fold A (fitted on val)",
@@ -18,29 +19,42 @@
   "cameras": [
     {
       "camera": "C03",
-      "events": 3,
+      "accident_events": 2,
+      "other_events": {
+        "fire_smoke": 1
+      },
+      "scene_cuts": 17,
       "accident_clip": "RoadAccidents011_x264.mp4",
-      "true_onset_utc": "2026-10-20T10:10:13.586124+00:00",
-      "detection_window_end_utc": "2026-10-20T10:10:24.919457+00:00",
+      "true_onset_utc": "2026-10-20T15:57:51.506880+00:00",
+      "clip_end_utc": "2026-10-20T15:58:54.405954+00:00",
+      "detection_window_end_utc": "2026-10-20T15:58:02.840213+00:00",
       "detected": true,
-      "delay_s": 1.335685,
-      "false_alarms": 2
+      "delay_s": 4.948944,
+      "events_after_clip_end_within_offline_window": 0,
+      "false_alarms": 1,
+      "false_alarms_near_scene_cut": 1
     },
     {
       "camera": "C04",
-      "events": 3,
+      "accident_events": 3,
+      "other_events": {},
+      "scene_cuts": 37,
       "accident_clip": "RoadAccidents012_x264.mp4",
-      "true_onset_utc": "2026-10-20T10:10:28.262094+00:00",
-      "detection_window_end_utc": "2026-10-20T10:10:42.928761+00:00",
+      "true_onset_utc": "2026-10-20T15:58:06.194102+00:00",
+      "clip_end_utc": "2026-10-20T15:58:13.390710+00:00",
+      "detection_window_end_utc": "2026-10-20T15:58:13.390710+00:00",
       "detected": false,
       "delay_s": null,
-      "false_alarms": 3
+      "events_after_clip_end_within_offline_window": 0,
+      "false_alarms": 3,
+      "false_alarms_near_scene_cut": 1
     }
   ],
   "detected": 1,
   "accident_clips": 2,
-  "false_alarms": 5,
-  "camera_hours": 0.08929319444444443,
+  "false_alarms": 4,
+  "false_alarms_near_scene_cut": 2,
+  "camera_hours": 0.14443702055555555,
   "events_published": 6,
-  "note": "Live check of the end-to-end path (RTSP -> vision -> bus) on road footage. A few clips cannot estimate detector accuracy; see results/vision/crossfit_v4/ for that."
+  "note": "Live check of the end-to-end path (RTSP -> vision -> bus) on road footage. A few clips cannot estimate detector accuracy; see results/vision/crossfit_v4/ for that. Scene cuts and reconnects are artefacts of the simulated cameras."
 }

@@ -1,57 +1,57 @@
 from,to,holdout,profile,depart_local,route_km,minutes,avg_kph,snap_from_m,snap_to_m
 Shivajinagar bus stand,Swargate bus stand,False,default,Tue 03:00,4.28,7.5,34.0,10,3
-Shivajinagar bus stand,Swargate bus stand,False,default,Tue 10:00,4.28,15.9,16.1,10,3
+Shivajinagar bus stand,Swargate bus stand,False,default,Tue 10:00,4.28,15.0,17.2,10,3
 Shivajinagar bus stand,Swargate bus stand,False,default,Tue 14:00,4.28,16.1,15.9,10,3
-Shivajinagar bus stand,Swargate bus stand,False,default,Tue 19:00,4.28,18.5,13.9,10,3
+Shivajinagar bus stand,Swargate bus stand,False,default,Tue 19:00,4.28,16.2,15.8,10,3
 Shivajinagar bus stand,Swargate bus stand,False,ambulance,Tue 03:00,4.28,6.6,39.1,10,3
-Shivajinagar bus stand,Swargate bus stand,False,ambulance,Tue 10:00,4.28,13.8,18.5,10,3
+Shivajinagar bus stand,Swargate bus stand,False,ambulance,Tue 10:00,4.28,13.0,19.7,10,3
 Shivajinagar bus stand,Swargate bus stand,False,ambulance,Tue 14:00,4.28,14.0,18.3,10,3
-Shivajinagar bus stand,Swargate bus stand,False,ambulance,Tue 19:00,4.28,16.1,15.9,10,3
+Shivajinagar bus stand,Swargate bus stand,False,ambulance,Tue 19:00,4.28,14.1,18.2,10,3
 Pune railway station,Deccan Gymkhana,False,default,Tue 03:00,4.7,8.5,33.3,102,50
-Pune railway station,Deccan Gymkhana,False,default,Tue 10:00,4.7,19.5,14.5,102,50
+Pune railway station,Deccan Gymkhana,False,default,Tue 10:00,4.7,18.3,15.4,102,50
 Pune railway station,Deccan Gymkhana,False,default,Tue 14:00,4.7,18.6,15.2,102,50
-Pune railway station,Deccan Gymkhana,False,default,Tue 19:00,4.7,22.9,12.3,102,50
+Pune railway station,Deccan Gymkhana,False,default,Tue 19:00,4.7,20.0,14.1,102,50
 Pune railway station,Deccan Gymkhana,False,ambulance,Tue 03:00,4.7,7.4,38.2,102,50
-Pune railway station,Deccan Gymkhana,False,ambulance,Tue 10:00,4.7,16.9,16.7,102,50
+Pune railway station,Deccan Gymkhana,False,ambulance,Tue 10:00,4.7,15.9,17.7,102,50
 Pune railway station,Deccan Gymkhana,False,ambulance,Tue 14:00,4.7,16.1,17.5,102,50
-Pune railway station,Deccan Gymkhana,False,ambulance,Tue 19:00,4.7,19.9,14.2,102,50
+Pune railway station,Deccan Gymkhana,False,ambulance,Tue 19:00,4.7,17.4,16.2,102,50
 Kothrud depot,Viman Nagar (Phoenix mall),False,default,Tue 03:00,15.83,25.4,37.3,3,148
-Kothrud depot,Viman Nagar (Phoenix mall),False,default,Tue 10:00,15.27,59.2,15.5,3,148
+Kothrud depot,Viman Nagar (Phoenix mall),False,default,Tue 10:00,15.27,55.6,16.5,3,148
 Kothrud depot,Viman Nagar (Phoenix mall),False,default,Tue 14:00,15.83,56.7,16.7,3,148
-Kothrud depot,Viman Nagar (Phoenix mall),False,default,Tue 19:00,15.27,69.4,13.2,3,148
+Kothrud depot,Viman Nagar (Phoenix mall),False,default,Tue 19:00,15.27,60.8,15.1,3,148
 Kothrud depot,Viman Nagar (Phoenix mall),False,ambulance,Tue 03:00,15.83,22.1,42.9,3,148
-Kothrud depot,Viman Nagar (Phoenix mall),False,ambulance,Tue 10:00,15.27,51.5,17.8,3,148
+Kothrud depot,Viman Nagar (Phoenix mall),False,ambulance,Tue 10:00,15.27,48.4,18.9,3,148
 Kothrud depot,Viman Nagar (Phoenix mall),False,ambulance,Tue 14:00,15.83,49.3,19.3,3,148
-Kothrud depot,Viman Nagar (Phoenix mall),False,ambulance,Tue 19:00,15.27,60.3,15.2,3,148
+Kothrud depot,Viman Nagar (Phoenix mall),False,ambulance,Tue 19:00,15.27,52.9,17.3,3,148
 Katraj chowk,Shivajinagar bus stand,False,default,Tue 03:00,9.62,14.2,40.6,13,10
-Katraj chowk,Shivajinagar bus stand,False,default,Tue 10:00,9.62,32.4,17.8,13,10
+Katraj chowk,Shivajinagar bus stand,False,default,Tue 10:00,9.62,30.5,18.9,13,10
 Katraj chowk,Shivajinagar bus stand,False,default,Tue 14:00,9.62,31.7,18.2,13,10
-Katraj chowk,Shivajinagar bus stand,False,default,Tue 19:00,9.62,38.1,15.2,13,10
+Katraj chowk,Shivajinagar bus stand,False,default,Tue 19:00,9.62,33.4,17.3,13,10
 Katraj chowk,Shivajinagar bus stand,False,ambulance,Tue 03:00,9.62,12.4,46.7,13,10
-Katraj chowk,Shivajinagar bus stand,False,ambulance,Tue 10:00,9.62,28.2,20.5,13,10
+Katraj chowk,Shivajinagar bus stand,False,ambulance,Tue 10:00,9.62,26.5,21.8,13,10
 Katraj chowk,Shivajinagar bus stand,False,ambulance,Tue 14:00,9.62,27.5,21.0,13,10
-Katraj chowk,Shivajinagar bus stand,False,ambulance,Tue 19:00,9.62,33.1,17.4,13,10
+Katraj chowk,Shivajinagar bus stand,False,ambulance,Tue 19:00,9.62,29.0,19.9,13,10
 Aundh,Magarpatta (Hadapsar),False,default,Tue 03:00,18.91,32.9,34.4,78,127
-Aundh,Magarpatta (Hadapsar),False,default,Tue 10:00,17.56,73.0,14.4,78,127
+Aundh,Magarpatta (Hadapsar),False,default,Tue 10:00,17.56,68.6,15.4,78,127
 Aundh,Magarpatta (Hadapsar),False,default,Tue 14:00,17.56,71.8,14.7,78,127
-Aundh,Magarpatta (Hadapsar),False,default,Tue 19:00,17.56,85.4,12.3,78,127
+Aundh,Magarpatta (Hadapsar),False,default,Tue 19:00,17.56,74.8,14.1,78,127
 Aundh,Magarpatta (Hadapsar),False,ambulance,Tue 03:00,18.91,28.7,39.6,78,127
-Aundh,Magarpatta (Hadapsar),False,ambulance,Tue 10:00,17.56,63.5,16.6,78,127
+Aundh,Magarpatta (Hadapsar),False,ambulance,Tue 10:00,17.56,59.7,17.7,78,127
 Aundh,Magarpatta (Hadapsar),False,ambulance,Tue 14:00,17.56,62.4,16.9,78,127
-Aundh,Magarpatta (Hadapsar),False,ambulance,Tue 19:00,17.56,74.2,14.2,78,127
+Aundh,Magarpatta (Hadapsar),False,ambulance,Tue 19:00,17.56,65.1,16.2,78,127
 Kharadi (EON IT park),Sassoon hospital,False,default,Tue 03:00,11.77,19.6,36.0,137,187
-Kharadi (EON IT park),Sassoon hospital,False,default,Tue 10:00,11.66,43.0,16.3,137,187
+Kharadi (EON IT park),Sassoon hospital,False,default,Tue 10:00,11.66,40.5,17.3,137,187
 Kharadi (EON IT park),Sassoon hospital,False,default,Tue 14:00,11.77,42.6,16.6,137,187
-Kharadi (EON IT park),Sassoon hospital,False,default,Tue 19:00,11.66,50.3,13.9,137,187
+Kharadi (EON IT park),Sassoon hospital,False,default,Tue 19:00,11.66,44.1,15.9,137,187
 Kharadi (EON IT park),Sassoon hospital,False,ambulance,Tue 03:00,11.77,17.0,41.4,137,187
-Kharadi (EON IT park),Sassoon hospital,False,ambulance,Tue 10:00,11.66,37.4,18.7,137,187
+Kharadi (EON IT park),Sassoon hospital,False,ambulance,Tue 10:00,11.66,35.2,19.9,137,187
 Kharadi (EON IT park),Sassoon hospital,False,ambulance,Tue 14:00,11.77,37.0,19.1,137,187
-Kharadi (EON IT park),Sassoon hospital,False,ambulance,Tue 19:00,11.66,43.7,16.0,137,187
+Kharadi (EON IT park),Sassoon hospital,False,ambulance,Tue 19:00,11.66,38.3,18.2,137,187
 Deccan Gymkhana,Sassoon hospital,False,default,Tue 03:00,5.55,10.0,33.4,50,187
-Deccan Gymkhana,Sassoon hospital,False,default,Tue 10:00,4.97,22.7,13.1,50,187
+Deccan Gymkhana,Sassoon hospital,False,default,Tue 10:00,4.97,21.3,14.0,50,187
 Deccan Gymkhana,Sassoon hospital,False,default,Tue 14:00,5.55,21.9,15.2,50,187
-Deccan Gymkhana,Sassoon hospital,False,default,Tue 19:00,4.97,26.4,11.3,50,187
+Deccan Gymkhana,Sassoon hospital,False,default,Tue 19:00,4.97,23.1,12.9,50,187
 Deccan Gymkhana,Sassoon hospital,False,ambulance,Tue 03:00,5.55,8.7,38.4,50,187
-Deccan Gymkhana,Sassoon hospital,False,ambulance,Tue 10:00,4.97,19.7,15.1,50,187
+Deccan Gymkhana,Sassoon hospital,False,ambulance,Tue 10:00,4.97,18.5,16.1,50,187
 Deccan Gymkhana,Sassoon hospital,False,ambulance,Tue 14:00,5.55,19.0,17.5,50,187
-Deccan Gymkhana,Sassoon hospital,False,ambulance,Tue 19:00,4.97,23.0,13.0,50,187
+Deccan Gymkhana,Sassoon hospital,False,ambulance,Tue 19:00,4.97,20.1,14.8,50,187

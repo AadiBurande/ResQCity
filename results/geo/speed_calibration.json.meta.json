@@ -1,14 +1,14 @@
 {
   "file": "results/geo/speed_calibration.json",
-  "generated_at_utc": "2026-10-20T10:02:30+00:00",
+  "generated_at_utc": "2026-10-20T15:51:56+00:00",
   "command": "calibrate_speeds.py",
   "synthetic": false,
   "git": {
-    "commit": "616d1638fdfd2f08607828381bd26894a7cf223c",
+    "commit": "25f0354ca8a2d604c5e1dbafd0e56976c292be6e",
     "dirty": false
   },
   "configs_sha256": {
-    "configs/geo.yaml": "6d1a1a382cc4fe3eb789bf017df00259252af950d878a94d6f190d53574f6710",
+    "configs/geo.yaml": "fdaa7746f51b10c09f9fa93412785c2fd170447152d5d79d32db07121b5d5e81",
     "configs/archive/geo_speeds_d014.yaml": "db6e8aa3283f75b9d0d8f6c3882ae7bddadc7ff74df1b8de08ac7871386908e0",
     "configs/maps_check_routes.yaml": "0e1f24ee7966f1096bb41b09423794eba904f9ccc7bf2b45307497bde70d678c"
   },

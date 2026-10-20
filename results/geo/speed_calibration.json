@@ -21,6 +21,26 @@
     },
     "verdict": "over-corrects: the 4 fit routes are the most congested (central city)"
   },
+  "baseline_direction_by_hour": {
+    "10": {
+      "routes": 10,
+      "baseline_faster_than_google_mid": 7,
+      "baseline_below_google_low": 1,
+      "sign_test_p": 0.34375
+    },
+    "14": {
+      "routes": 10,
+      "baseline_faster_than_google_mid": 10,
+      "baseline_below_google_low": 5,
+      "sign_test_p": 0.001953125
+    },
+    "19": {
+      "routes": 10,
+      "baseline_faster_than_google_mid": 7,
+      "baseline_below_google_low": 2,
+      "sign_test_p": 0.34375
+    }
+  },
   "step2_leave_one_route_out_all10": {
     "baseline": {
       "n": 30,
@@ -33,36 +53,140 @@
       "share_within_google_range": 0.8,
       "median_abs_pct_error_vs_mid": 17.16272980346624,
       "mean_log_ratio": 1.8503717077085942e-18
+    },
+    "by_hour": {
+      "10": {
+        "baseline": {
+          "n": 10,
+          "share_within_google_range": 0.9,
+          "median_abs_pct_error_vs_mid": 14.59839357429719,
+          "mean_log_ratio": -0.061978130240624416
+        },
+        "calibrated": {
+          "n": 10,
+          "share_within_google_range": 0.8,
+          "median_abs_pct_error_vs_mid": 13.50879812083604,
+          "mean_log_ratio": -1.3877787807814457e-17
+        }
+      },
+      "14": {
+        "baseline": {
+          "n": 10,
+          "share_within_google_range": 0.5,
+          "median_abs_pct_error_vs_mid": 28.887468030690535,
+          "mean_log_ratio": -0.39831837059726966
+        },
+        "calibrated": {
+          "n": 10,
+          "share_within_google_range": 0.7,
+          "median_abs_pct_error_vs_mid": 17.821214676901125,
+          "mean_log_ratio": -1.5959455978986624e-17
+        }
+      },
+      "19": {
+        "baseline": {
+          "n": 10,
+          "share_within_google_range": 0.8,
+          "median_abs_pct_error_vs_mid": 8.61627906976744,
+          "mean_log_ratio": -0.1319165062230751
+        },
+        "calibrated": {
+          "n": 10,
+          "share_within_google_range": 0.9,
+          "median_abs_pct_error_vs_mid": 17.181805429734947,
+          "mean_log_ratio": 3.053113317719181e-17
+        }
+      }
+    },
+    "by_route_group": {
+      "fit4": {
+        "baseline": {
+          "n": 12,
+          "share_within_google_range": 0.75,
+          "median_abs_pct_error_vs_mid": 24.788888888888888,
+          "mean_log_ratio": -0.2629930480199099
+        },
+        "calibrated": {
+          "n": 12,
+          "share_within_google_range": 0.75,
+          "median_abs_pct_error_vs_mid": 17.181805429734947,
+          "mean_log_ratio": -0.07287634703657798
+        }
+      },
+      "holdout6": {
+        "baseline": {
+          "n": 18,
+          "share_within_google_range": 0.7222222222222222,
+          "median_abs_pct_error_vs_mid": 11.535330511234127,
+          "mean_log_ratio": -0.15367852746504293
+        },
+        "calibrated": {
+          "n": 18,
+          "share_within_google_range": 0.8333333333333334,
+          "median_abs_pct_error_vs_mid": 16.303742059054148,
+          "mean_log_ratio": 0.04858423135771867
+        }
+      }
+    },
+    "note": "mean_log_ratio of LORO predictions is zero by construction (per-hour geometric-mean fit); it is not evidence of reduced bias"
+  },
+  "step2_bootstrap_gain": {
+    "all": {
+      "gain_pct_points": 2.170603529867087,
+      "ci95_lo": -9.010846064771417,
+      "ci95_hi": 9.932909887172976
+    },
+    "10": {
+      "gain_pct_points": 1.0895954534611523,
+      "ci95_lo": -6.766240810857912,
+      "ci95_hi": 5.025576023014656
+    },
+    "14": {
+      "gain_pct_points": 11.066253353789406,
+      "ci95_lo": -9.169925889854266,
+      "ci95_hi": 25.76945119606342
+    },
+    "19": {
+      "gain_pct_points": -8.56552635996751,
+      "ci95_lo": -16.32399562122363,
+      "ci95_hi": 7.686777092567141
     }
   },
-  "adopted": true,
-  "final_factors_by_hour": {
+  "step3_rule": "change a period only if LORO improves both the median error and the share inside Google's range at its hour (added after an independent audit, D-026)",
+  "adopted_periods": [
+    "midday"
+  ],
+  "kept_at_baseline": [
+    "am_peak",
+    "pm_peak"
+  ],
+  "all_route_factors_by_hour": {
     "10": 1.0639390763820074,
     "14": 1.489318109532823,
     "19": 1.1410130478011216
   },
   "final_all_routes": {
     "n": 30,
-    "share_within_google_range": 0.9666666666666667,
-    "median_abs_pct_error_vs_mid": 15.500000000000004,
-    "mean_log_ratio": 0.0001237896178324524
+    "share_within_google_range": 0.9,
+    "median_abs_pct_error_vs_mid": 13.22173913043479,
+    "mean_log_ratio": -0.06462186400683939
   },
   "calibrated_multipliers": {
     "am_peak": {
-      "trunk": 0.6579,
-      "primary": 0.6203,
-      "secondary": 0.6579,
-      "tertiary": 0.7519,
-      "residential": 0.8459,
-      "service": 0.8929
+      "trunk": 0.7,
+      "primary": 0.66,
+      "secondary": 0.7,
+      "tertiary": 0.8,
+      "residential": 0.9,
+      "service": 0.95
     },
     "pm_peak": {
-      "trunk": 0.5609,
-      "primary": 0.5258,
-      "secondary": 0.5609,
-      "tertiary": 0.6573,
-      "residential": 0.7712,
-      "service": 0.8326
+      "trunk": 0.64,
+      "primary": 0.6,
+      "secondary": 0.64,
+      "tertiary": 0.75,
+      "residential": 0.88,
+      "service": 0.95
     },
     "night": {
       "trunk": 1.5,
@@ -81,5 +205,5 @@
       "service": 0.6714
     }
   },
-  "uncalibrated_hours": "06-09, 21-23 (base speed) and night 23-06 (D-014 multipliers)"
+  "uncalibrated_hours": "06-09, 21-23 (base speed; probably too fast, L2), night 23-06 and every period kept at baseline (D-014 multipliers)"
 }

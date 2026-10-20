@@ -398,7 +398,8 @@ ERRATA notes (`eval_v1/`, `eval_v2/`).
   Live sources have 10 s open/read timeouts.
 - Demo "normal" clips are now road footage (pre-onset parts of other onset videos), so a scene
   change cannot pass for an accident. Live JSON records the operating point and model hashes.
-  Live v3 run (`results/vision/live_acceptance_C0*.json`): 2 of 4 accident clips detected (C02
+  Live v3 run (`results/vision/live_acceptance_C0*.json` as committed in 2774191; later runs
+  overwrite these files): 2 of 4 accident clips detected (C02
   +3.8 s, C03 +1.9 s). There were 8 false events (7 accident, 1 fire_smoke) in 0.18 camera-hours
   of road footage. The earlier "0 false alarms" came from non-road normal clips. This is
   consistent with the offline road false-alarm rate.
@@ -419,24 +420,38 @@ ERRATA notes (`eval_v1/`, `eval_v2/`).
 User inputs: a Google Maps sheet was filled in (10 routes × 3 departure times); CADP frames are not
 available; MoRTH "Road Accidents in India 2022" was provided (PDF); the user wants clear images and
 videos (chose "blur faces + plates only" and "no blurring at all") and a stronger accident model.
-1. **Speeds calibrated to Google Maps** (`resqcity.geo.calibrate_speeds`,
+1. **Midday speeds calibrated to Google Maps; peak speeds kept** (`resqcity.geo.calibrate_speeds`,
    `results/geo/speed_calibration.json`). The user's sheet is kept as
    `results/geo/maps_check_google_2026-10-20.csv`; the template refuses to overwrite filled data.
-   Step 1 (pre-specified: fit on 4 routes, hold out 6) over-corrected. Hold-out median error went
-   from 11.5% to 19.9%, because the 4 fit routes are the most congested central routes. Step 2
-   (added after seeing step 1; disclosed here): leave-one-route-out over all 10 routes with
-   per-hour factors gives median error 17.2% vs 19.3% for the baseline, and 80% vs 73% inside
-   Google's range, so the all-route factors were adopted (×1.06 at 10:00, ×1.49 at 14:00, ×1.14
-   at 19:00). A new MIDDAY period (11–17) is the main change: Pune is about 1.5× slower at 14:00
-   than the D-014 base speeds. Shoulder hours (06–09, 21–23) and night are not calibrated.
+   - Step 1 (pre-specified: fit on 4 routes, hold out 6) over-corrected: hold-out median error
+     went from 11.5% to 19.9%, because the 4 fit routes are the most congested central routes.
+   - Step 2 (added after seeing step 1): leave-one-route-out (LORO) over all 10 routes. Pooled
+     median error 17.2% vs 19.3% for the baseline, and the all-route factors were first adopted.
+   - Step 3 (added after the independent audit, item 7): the pooled gain came from 14:00 only.
+     Per hour, LORO median error / share inside Google's range: 10:00 14.6% → 13.5% / 90% → 80%;
+     14:00 28.9% → 17.8% / 50% → 70%; 19:00 8.6% → 17.2% / 80% → 90%. A period now changes
+     only if LORO improves both measures at its hour, so **only a new MIDDAY period (11–17) is
+     adopted** (multiplier 0.6714 ≈ 1/1.49). am_peak and pm_peak keep their D-014 values
+     (UNVERIFIED).
+   - The evidence for midday does not depend on fitting: at 14:00 the baseline is faster than
+     Google's midpoint on 10 of 10 routes (sign test p = 0.002), vs 7 of 10 at 10:00 and 19:00
+     (p = 0.34). With 10 routes the route-level bootstrap intervals of the LORO gain include
+     zero at every hour (14:00: +11.1 points, 95% −9.2 to +25.8), so the error reduction itself
+     is not established. Steps 2 and 3 were added post hoc.
+   - Shoulder hours (06–09, 21–23) run at base speed, which is probably too fast given midday;
+     night is not calibrated (L2).
 2. **Base incident rate from the primary source** (`resqcity.sim.morth_extract` →
    `results/calibration/morth_2022_extract.json`, `resqcity.sim.base_rate`):
    - Pune 2022: 871 accidents, 325 killed (MoRTH Table 6.2), replacing the 334/0.365 proxy;
      5.59 incidents/day (fires 1,107/yr + accidents 871/yr, plus 3% crowd/other).
-   - Registered crashes in Pune are severe (37 killed per 100 vs 22 for all million-plus cities),
-     so non-fatal crashes are probably under-registered; the rate is likely a lower bound.
+   - Registered crashes in Pune are severe (37.3 killed per 100 accidents vs 22.3 for all 50
+     million-plus cities; both computed in `results/calibration/base_rate.json` from Table 6.2,
+     whose total row is checked against the city rows), so non-fatal crashes are probably
+     under-registered; the rate is likely a lower bound.
    - The **hour profile** now comes from MoRTH Annexure 42 (Maharashtra, 3-hour intervals)
-     instead of an assumption. Pune weather split (Annexure 45): 82 of 871 accidents (9.4%) in
+     instead of an assumption. It describes road accidents; fires (54% of incidents) use their
+     own profile entry (`type_hour_profiles.fire_smoke`), currently the same values and marked
+     UNVERIFIED. Pune weather split (Annexure 45): 82 of 871 accidents (9.4%) in
      rain, recorded but not used (no rain-exposure hours).
    - The Pune vehicle-type table (Annexure 46) is not machine-readable; the vehicle mix stays
      UNVERIFIED.
@@ -447,9 +462,13 @@ videos (chose "blur faces + plates only" and "no blurring at all") and a stronge
    - `faces_plates` is the new default: faces plus a narrower plate region (60–100% height,
      10–90% width of each vehicle box); vehicles, people and the crash stay clear.
    - `full` additionally blurs people (the previous behaviour).
-   - `off` means unblurred, and is allowed only for local files and the simulated 127.0.0.1
-     streams of public-dataset footage. It is refused for any other live source (e.g. a phone
-     IP camera) and the preview is labelled "UNBLURRED".
+   - `off` means unblurred, and is allowed only for public-dataset footage: local files under
+     `data/raw/vision` or `data/videos`, or the simulated cameras (`rtsp://127.0.0.1:8554/C01`
+     … `C04`, kept in sync with `configs/streams.yaml` by a test). Every other source (a phone or
+     IP camera, any other file, a loopback relay under another name) is refused when a
+     `CameraPipeline` is built, and the preview is labelled "UNBLURRED". Footage deliberately
+     copied into those folders, or published under a simulated camera's name, cannot be
+     detected by code.
 5. **Stronger accident model attempted; it did not help** (evaluation v4, `results/vision/crossfit_v4/`).
    - Candidates: the per-frame MobileNetV3 head and a Kinetics-400 R(2+1)D-18 video backbone
      (16-frame clips), each with 3 MIL settings.
@@ -458,14 +477,40 @@ videos (chose "blur faces + plates only" and "no blurring at all") and a stronge
      predictions are pooled.
    - The video backbone scored lower in both folds (fit-split within-video AUROC 0.56–0.64 vs
      0.67–0.74 on val; 0.41–0.47 vs 0.60–0.70 on test), so it was never selected.
-   - Pooled result (combined, all 23 onset videos): onset detection 6/23 = 0.26 (Wilson 0.13–0.47),
+   - Pooled result (combined, all 23 onset videos): onset detection 6/23 = 0.26 (Wilson 0.13–0.46),
      median delay 6.3 s, road false alarms 5 in 0.075 h = 67/h (Poisson 22–156), non-road 3.5/h,
-     per-video AUROC 0.73 (0.60–0.85).
+     per-video AUROC 0.73 (0.60–0.85; 20 onset videos with both classes of windows).
+   - The folds may choose different detectors (A: image s03_t1, B: image s1_t1), so the pooled
+     numbers describe the cross-fitted PROCEDURE. The **deployed detector** (fold A) on its own
+     evaluation split: 3/12 onsets (Wilson 0.09–0.53) and 4 road false alarms in 0.032 h = 126/h
+     (Poisson 34–322) (`results/vision/crossfit_v4/per_fold_metrics.csv`).
    - Still over-confident above the threshold (0.67 predicted vs 0.46 observed).
-   - `sim_inputs.yaml` now exports these pooled v4 estimates; the live detector is fold A's choice
-     (`results/vision/deployed_detector.json`).
+   - `sim_inputs.yaml` exports the pooled v4 estimates and, separately, the deployed detector's
+     fold-A estimates; the live detector is fold A's choice (`results/vision/deployed_detector.json`).
    - **Constraint for phase 4:** fusion must use the measured event-level detection and
      false-alarm rates (likelihood ratios) from `sim_inputs.yaml`, not the window confidence as a
      probability.
 6. CADP is unavailable, so no never-seen footage exists. v4 cross-fitting is the best available
    estimate and remains a development estimate (L15).
+7. **Response to the independent audit of items 1–6** (research-auditor, 2026-10-20). All
+   changes below were made after seeing the data and are post hoc:
+   - Speeds: per-hour LORO, sign test and bootstrap added; only midday adopted (item 1). The
+     earlier claim that calibration "removed the bias" is withdrawn: a LORO mean log-ratio of
+     zero holds by construction for a per-hour geometric-mean fit.
+   - Detector: per-fold metrics reported; the deployed detector's own estimate (fold A) is weaker
+     than the pooled one (item 5). `crossfit` now checks that every run was fitted on its fold's
+     split (fold-A runs predate the `fit_split` field and were fitted on val, then hard-coded).
+   - Live acceptance re-scored. The earlier v4 live result (3 of 4 detected, in commit 26c8ad3)
+     was inflated: one "detection" (C01) came about 4.5 s after the 11.6 s accident clip had
+     ended, i.e. it was triggered by the cut back to normal footage, and a fire/smoke event was
+     counted as an accident false alarm. Now only `accident` events are scored, the detection
+     window also ends when the accident clip ends, and false alarms within 8 s of a scene cut
+     (clip switch or loop, each forcing an RTSP reconnect) are flagged. Re-run
+     (`results/vision/live_acceptance_C01_C02.json`, `..._C03_C04.json`): 2 of 4 clips detected
+     (C02 +2.1 s, C03 +4.9 s); 7 accident false alarms in 0.23 camera-hours, 5 of them within 8 s
+     after a scene cut; 1 fire/smoke event. Offline, fold A detects 1 of these 4 test clips
+     (RoadAccidents010); live timing and window alignment differ, so the live run checks the
+     end-to-end path, not accuracy.
+   - Fire hour profile flagged UNVERIFIED (item 2); privacy guard tightened and moved into
+     `CameraPipeline` (item 4); Wilson upper bound corrected to 0.46; the million-plus severity
+     figure is now extracted, not hand-computed.
