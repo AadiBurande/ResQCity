@@ -32,22 +32,30 @@ STARTUP_S = 20.0  # vision processes load models before the first cue
 
 
 def detector_provenance() -> dict[str, object]:
-    """Selected clip run, its val operating point and model hashes (as used by vision.run)."""
-    import pandas as pd
+    """Clip run, stacker, operating point and model hashes, resolved exactly as ``vision.run``
+    resolves the deployed detector (``results/vision/deployed_detector.json`` first)."""
+    from resqcity.vision.eval.evaluate import sha16
+    from resqcity.vision.run import deployed_detector
 
     results = PROJECT_ROOT / "results" / "vision"
-    selection = results / "clip_selection.csv"
-    if not selection.exists():
+    chosen = deployed_detector(results, PROJECT_ROOT / "data" / "models" / "clip")
+    if chosen is None:
         return {"mode": "no trained model"}
-    table = pd.read_csv(selection)
-    run = str(table.loc[table["selected"], "run_id"].iloc[0])
-    report_path = results / run / "report.json"
-    report = json.loads(report_path.read_text(encoding="utf-8")) if report_path.exists() else {}
+    run, stacker, op = chosen
+    deployed = results / "deployed_detector.json"
     return {
-        "clip_run": run,
-        "evaluation_version": report.get("evaluation_version"),
-        "operating_point": report.get("operating_points_chosen_on_val", {}).get("combined"),
-        "models": report.get("models"),
+        "clip_run": run.name,
+        "evaluation": (
+            json.loads(deployed.read_text(encoding="utf-8")).get("evaluation")
+            if deployed.exists()
+            else None
+        ),
+        "stacker": stacker.relative_to(PROJECT_ROOT).as_posix() if stacker else None,
+        "operating_point": op,
+        "models": {
+            "clip_weights_sha256_16": sha16(run / "clip_head.pt"),
+            "stacker_sha256_16": sha16(stacker) if stacker else None,
+        },
     }
 
 
@@ -105,7 +113,7 @@ def score(run_start: datetime, run_end: datetime, cameras: list[str]) -> dict[st
         "camera_hours": hours,
         "events_published": len(events),
         "note": "Live check of the end-to-end path (RTSP -> vision -> bus) on road footage. "
-        "A few clips cannot estimate detector accuracy; see test_video_metrics.csv for that.",
+        "A few clips cannot estimate detector accuracy; see results/vision/crossfit_v4/ for that.",
     }
 
 
