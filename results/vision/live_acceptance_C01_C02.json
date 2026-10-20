@@ -1,10 +1,11 @@
 {
-  "run_start_utc": "2026-10-20T07:02:26.061143+00:00",
-  "run_end_utc": "2026-10-20T07:05:06.696511+00:00",
+  "run_start_utc": "2026-10-20T10:06:09.226011+00:00",
+  "run_end_utc": "2026-10-20T10:08:50.443672+00:00",
   "detection_rule": "event in [onset, offset + 10 s]",
   "detector": {
     "clip_run": "clip_s03_t1",
-    "evaluation_version": 3,
+    "evaluation": "crossfit_v4 fold A (fitted on val)",
+    "stacker": "results/vision/crossfit_v4/stacker_foldA.json",
     "operating_point": {
       "threshold": 0.45,
       "consecutive_windows": 4
@@ -17,29 +18,29 @@
   "cameras": [
     {
       "camera": "C01",
-      "events": 3,
+      "events": 2,
       "accident_clip": "RoadAccidents002_x264.mp4",
-      "true_onset_utc": "2026-10-20T07:03:14.379389+00:00",
-      "detection_window_end_utc": "2026-10-20T07:03:26.379389+00:00",
-      "detected": false,
-      "delay_s": null,
-      "false_alarms": 3
+      "true_onset_utc": "2026-10-20T10:06:57.911267+00:00",
+      "detection_window_end_utc": "2026-10-20T10:07:09.911267+00:00",
+      "detected": true,
+      "delay_s": 8.034282,
+      "false_alarms": 1
     },
     {
       "camera": "C02",
       "events": 1,
       "accident_clip": "RoadAccidents010_x264.mp4",
-      "true_onset_utc": "2026-10-20T07:03:29.052359+00:00",
-      "detection_window_end_utc": "2026-10-20T07:03:40.385692+00:00",
+      "true_onset_utc": "2026-10-20T10:07:12.576562+00:00",
+      "detection_window_end_utc": "2026-10-20T10:07:23.909895+00:00",
       "detected": true,
-      "delay_s": 3.233731,
+      "delay_s": 2.869987,
       "false_alarms": 0
     }
   ],
-  "detected": 1,
+  "detected": 2,
   "accident_clips": 2,
-  "false_alarms": 3,
-  "camera_hours": 0.0892418711111111,
-  "events_published": 4,
-  "note": "Live check of the end-to-end path (RTSP -> vision -> bus) on road footage. A few clips cannot estimate detector accuracy; see test_video_metrics.csv for that."
+  "false_alarms": 1,
+  "camera_hours": 0.08956536722222222,
+  "events_published": 3,
+  "note": "Live check of the end-to-end path (RTSP -> vision -> bus) on road footage. A few clips cannot estimate detector accuracy; see results/vision/crossfit_v4/ for that."
 }

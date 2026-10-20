@@ -1,15 +1,15 @@
 {
   "file": "results/geo/sanity_travel_times.csv",
-  "generated_at_utc": "2026-10-19T23:10:33+00:00",
+  "generated_at_utc": "2026-10-20T10:02:32+00:00",
   "command": "sanity.py",
   "synthetic": false,
   "git": {
-    "commit": "6b9dd74f11a88805c219233f3176fc89c02a1ef5",
+    "commit": "616d1638fdfd2f08607828381bd26894a7cf223c",
     "dirty": false
   },
   "configs_sha256": {
-    "configs/geo.yaml": "777973a613ab9013b04fd68277f53590aa372381ae21dc5fdcb3a952dcf43b34",
-    "configs/sanity_pairs.yaml": "53b3a5a0be79fbcd039de15e3164d00f7578f4cac9f93d7dbfb992d6b02ff067"
+    "configs/geo.yaml": "6d1a1a382cc4fe3eb789bf017df00259252af950d878a94d6f190d53574f6710",
+    "configs/sanity_pairs.yaml": "496f0159d22cf95e450b3872d2456f0b4dace0661f4c25b4224a13064fb43902"
   },
   "seeds": {},
   "versions": {

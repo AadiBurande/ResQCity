@@ -1,11 +1,11 @@
 {
   "file": "results/vision/crossfit_v4/report.json",
-  "generated_at_utc": "2026-10-20T09:56:57+00:00",
+  "generated_at_utc": "2026-10-20T10:04:28+00:00",
   "command": "crossfit.py",
   "synthetic": false,
   "git": {
-    "commit": "27741917fb32dff76f8d0ab0329ee55070cd4d12",
-    "dirty": true
+    "commit": "616d1638fdfd2f08607828381bd26894a7cf223c",
+    "dirty": false
   },
   "configs_sha256": {
     "configs/vision.yaml": "b60af4dc2cae6867a3752daeb57f8ec888c4238f4fd18e2b197ad842b5660036",

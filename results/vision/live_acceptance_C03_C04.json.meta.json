@@ -1,15 +1,15 @@
 {
   "file": "results/vision/live_acceptance_C03_C04.json",
-  "generated_at_utc": "2026-10-20T07:07:48+00:00",
+  "generated_at_utc": "2026-10-20T10:11:35+00:00",
   "command": "acceptance.py --duration 160 --cameras C03 C04 --out results/vision/live_acceptance_C03_C04.json",
   "synthetic": false,
   "git": {
-    "commit": "02b89c56b4a335740e5a2d67ca5c32ee312fbca9",
+    "commit": "0cf70227a33b65690c58e51354932ec3c84dfc23",
     "dirty": false
   },
   "configs_sha256": {
     "configs/streams_acceptance.yaml": "679470f582e74bb22eb0f18a6e723debb159a62e8bef9d729b8696d3447a1bab",
-    "configs/vision.yaml": "0861c6e32bb3f5598b7ac6b1f708a808b35b6f62792c49521c0ed8402c3944f1"
+    "configs/vision.yaml": "b60af4dc2cae6867a3752daeb57f8ec888c4238f4fd18e2b197ad842b5660036"
   },
   "seeds": {},
   "versions": {
