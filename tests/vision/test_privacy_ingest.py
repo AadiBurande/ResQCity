@@ -32,23 +32,44 @@ def test_blur_removes_detail_only_inside_region():
 
 def test_plate_band_is_lower_part_of_vehicle():
     assert plate_band(Box(0, 100, 50, 200), (0.55, 1.0)) == Box(0, 155, 50, 200)
+    assert plate_band(Box(0, 100, 50, 200), (0.6, 1.0), (0.1, 0.9)) == Box(5, 160, 45, 200)
 
 
-def test_anonymizer_covers_faces_plates_and_persons(vcfg):
-    anon = Anonymizer(
-        vcfg.privacy, vcfg.detector.vehicle_classes, vcfg.detector.person_class, faces=FixedFace()
+TRACKS = [
+    TrackObs(1, "car", 0.9, Box(150, 100, 300, 200)),
+    TrackObs(2, "person", 0.9, Box(80, 120, 120, 230)),
+]
+
+
+def _anon(vcfg, mode):
+    cfg = vcfg.privacy.model_copy(update={"mode": mode})
+    return Anonymizer(
+        cfg, vcfg.detector.vehicle_classes, vcfg.detector.person_class, faces=FixedFace()
     )
+
+
+def test_faces_plates_mode_keeps_people_and_vehicle_body_clear(vcfg):
     img = noisy()
-    tracks = [
-        TrackObs(1, "car", 0.9, Box(150, 100, 300, 200)),
-        TrackObs(2, "person", 0.9, Box(80, 120, 120, 230)),
-    ]
-    out = anon.apply(img, tracks)
-    assert detail(out[10:60, 10:60]) < 0.05 * detail(img[10:60, 10:60])  # face
-    assert detail(out[160:200, 150:300]) < 0.05 * detail(img[160:200, 150:300])  # plate band
-    assert detail(out[120:230, 80:120]) < 0.05 * detail(img[120:230, 80:120])  # person
-    assert np.array_equal(out[100:150, 200:300], img[100:150, 200:300])  # upper vehicle body kept
+    out = _anon(vcfg, "faces_plates").apply(img, TRACKS)
+    assert detail(out[10:60, 10:60]) < 0.05 * detail(img[10:60, 10:60])  # face blurred
+    assert detail(out[165:200, 170:280]) < 0.05 * detail(img[165:200, 170:280])  # plate region
+    assert np.array_equal(out[100:150, 200:300], img[100:150, 200:300])  # vehicle body clear
+    assert np.array_equal(out[120:230, 85:115], img[120:230, 85:115])  # person clear
     assert not np.shares_memory(out, img)  # original untouched
+
+
+def test_full_mode_also_blurs_people(vcfg):
+    img = noisy()
+    out = _anon(vcfg, "full").apply(img, TRACKS)
+    assert detail(out[120:230, 80:120]) < 0.05 * detail(img[120:230, 80:120])
+
+
+def test_off_mode_returns_an_unmodified_copy(vcfg):
+    img = noisy()
+    anon = _anon(vcfg, "off")
+    out = anon.apply(img, TRACKS)
+    assert np.array_equal(out, img) and not np.shares_memory(out, img)
+    assert anon.regions(img, TRACKS) == {"faces": [], "plates": [], "persons": []}
 
 
 @pytest.mark.parametrize(
@@ -76,3 +97,18 @@ def test_file_frames_sampling_and_timestamps(tmp_path, vcfg):
 def test_missing_file_raises(tmp_path, vcfg):
     with pytest.raises(OSError):
         list(file_frames(tmp_path / "nope.mp4", vcfg.ingest))
+
+
+@pytest.mark.parametrize(
+    ("source", "allowed"),
+    [
+        ("data/videos/C01/accident/x.mp4", True),
+        ("rtsp://127.0.0.1:8554/C01", True),
+        ("http://192.168.1.20:8080/video", False),  # phone IP camera: real people
+        ("rtsp://10.0.0.5/stream", False),
+    ],
+)
+def test_unblurred_only_for_local_or_simulated_sources(source, allowed):
+    from resqcity.vision.run import unblurred_allowed
+
+    assert unblurred_allowed(source) is allowed

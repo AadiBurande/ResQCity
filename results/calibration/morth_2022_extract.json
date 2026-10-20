@@ -1,0 +1,37 @@
+{
+  "source": "MoRTH, Road Accidents in India 2022 (Transport Research Wing, 2023)",
+  "pune_million_plus_city": {
+    "accidents_2021": 741,
+    "accidents_2022": 871,
+    "killed_2021": 255,
+    "killed_2022": 325,
+    "injured_2021": 556,
+    "injured_2022": 608,
+    "page": 99,
+    "table": "Table 6.2"
+  },
+  "pune_weather_2022": {
+    "clear_sunny": 776,
+    "rainy": 82,
+    "other_conditions": 13,
+    "page": 206,
+    "table": "Annexure 45"
+  },
+  "maharashtra_time_of_day_2022": {
+    "accidents_by_interval": {
+      "06-09": 3147,
+      "09-12": 4772,
+      "12-15": 4987,
+      "15-18": 5696,
+      "18-21": 6666,
+      "21-24": 4173,
+      "00-03": 2082,
+      "03-06": 1610
+    },
+    "unknown_time": 250,
+    "total": 33383,
+    "page": 204,
+    "table": "Annexure 42"
+  },
+  "pdf_sha256": "d1908170c4e25153539d82244f0fe269805a577b71e42259a53a57422dd8d8ed"
+}

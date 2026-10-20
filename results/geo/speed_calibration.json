@@ -1,0 +1,85 @@
+{
+  "data": "geo/maps_check_google_2026-10-20.csv",
+  "collected": "2026-10-20, Google Maps 'typically' ranges, Tuesday departures (user)",
+  "step1_prespecified_fit4_holdout6": {
+    "factors_by_hour": {
+      "10": 1.084652649529613,
+      "14": 1.6137007568225548,
+      "19": 1.2575799494241606
+    },
+    "holdout_before": {
+      "n": 18,
+      "share_within_google_range": 0.7222222222222222,
+      "median_abs_pct_error_vs_mid": 11.535330511234127,
+      "mean_log_ratio": -0.15367852746504293
+    },
+    "holdout_after": {
+      "n": 18,
+      "share_within_google_range": 0.7777777777777778,
+      "median_abs_pct_error_vs_mid": 19.86344238975818,
+      "mean_log_ratio": 0.10924328115856145
+    },
+    "verdict": "over-corrects: the 4 fit routes are the most congested (central city)"
+  },
+  "step2_leave_one_route_out_all10": {
+    "baseline": {
+      "n": 30,
+      "share_within_google_range": 0.7333333333333333,
+      "median_abs_pct_error_vs_mid": 19.33333333333333,
+      "mean_log_ratio": -0.19740433568698976
+    },
+    "calibrated": {
+      "n": 30,
+      "share_within_google_range": 0.8,
+      "median_abs_pct_error_vs_mid": 17.16272980346624,
+      "mean_log_ratio": 1.8503717077085942e-18
+    }
+  },
+  "adopted": true,
+  "final_factors_by_hour": {
+    "10": 1.0639390763820074,
+    "14": 1.489318109532823,
+    "19": 1.1410130478011216
+  },
+  "final_all_routes": {
+    "n": 30,
+    "share_within_google_range": 0.9666666666666667,
+    "median_abs_pct_error_vs_mid": 15.500000000000004,
+    "mean_log_ratio": 0.0001237896178324524
+  },
+  "calibrated_multipliers": {
+    "am_peak": {
+      "trunk": 0.6579,
+      "primary": 0.6203,
+      "secondary": 0.6579,
+      "tertiary": 0.7519,
+      "residential": 0.8459,
+      "service": 0.8929
+    },
+    "pm_peak": {
+      "trunk": 0.5609,
+      "primary": 0.5258,
+      "secondary": 0.5609,
+      "tertiary": 0.6573,
+      "residential": 0.7712,
+      "service": 0.8326
+    },
+    "night": {
+      "trunk": 1.5,
+      "primary": 1.5,
+      "secondary": 1.4,
+      "tertiary": 1.3,
+      "residential": 1.2,
+      "service": 1.1
+    },
+    "midday": {
+      "trunk": 0.6714,
+      "primary": 0.6714,
+      "secondary": 0.6714,
+      "tertiary": 0.6714,
+      "residential": 0.6714,
+      "service": 0.6714
+    }
+  },
+  "uncalibrated_hours": "06-09, 21-23 (base speed) and night 23-06 (D-014 multipliers)"
+}

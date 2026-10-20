@@ -63,8 +63,16 @@ def types(_: argparse.Namespace) -> int:
 
 
 def data(_: argparse.Namespace) -> int:
-    """Download raw inputs (network access), then build processed data offline."""
-    return _run(_py("resqcity.geo.download"), _py("resqcity.geo.build"), _py("resqcity.geo.sanity"))
+    """Download raw inputs (network access), build processed data offline, then calibrate:
+    MoRTH extract (needs the MoRTH 2022 PDF in data/raw/morth/), base rate, Google-Maps speeds."""
+    return _run(
+        _py("resqcity.geo.download"),
+        _py("resqcity.geo.build"),
+        _py("resqcity.sim.morth_extract"),
+        _py("resqcity.sim.base_rate"),
+        _py("resqcity.geo.calibrate_speeds"),
+        _py("resqcity.geo.sanity"),
+    )
 
 
 def streams(_: argparse.Namespace) -> int:
@@ -72,17 +80,45 @@ def streams(_: argparse.Namespace) -> int:
     return _run(_py("resqcity.streams.loop_cameras", "--start-server"))
 
 
-def vision(_: argparse.Namespace) -> int:
-    """Vision pipeline: data, annotations, train/evaluate accident + fire models, demo clips.
+CLIP_SETTINGS = ("s0_t0", "s03_t1", "s1_t1")
 
-    GPU recommended (hours); every step resumes from its cache.
-    """
-    run_id = "clip_main"
+
+def vision(_: argparse.Namespace) -> int:
+    """Vision pipeline: data, annotations, cross-fitted accident detector (evaluation v4),
+    fire/smoke detector, demo clips. GPU recommended (hours); every step resumes from its cache."""
+    train = []
+    for s in CLIP_SETTINGS:
+        for fit, img_run, vid_run in (
+            ("val", f"clip_{s}", f"video_{s}_fitval"),
+            ("test", f"clip_{s}_fittest", f"video_{s}_fittest"),
+        ):
+            train.append(
+                _py(
+                    "resqcity.vision.train_clip",
+                    "--run-id",
+                    img_run,
+                    "--overlay",
+                    f"configs/vision_sweeps/clip_{s}.yaml",
+                    "--fit-split",
+                    fit,
+                )
+            )
+            train.append(
+                _py(
+                    "resqcity.vision.train_clip",
+                    "--run-id",
+                    vid_run,
+                    "--overlay",
+                    f"configs/vision_sweeps/video_{s}.yaml",
+                    "--fit-split",
+                    fit,
+                )
+            )
     return _run(
         _py("resqcity.vision.datasets.download"),
         _py("resqcity.vision.datasets.annotations"),
-        _py("resqcity.vision.train_clip", "--run-id", run_id),
-        _py("resqcity.vision.eval.evaluate", "--run-id", run_id),
+        *train,
+        _py("resqcity.vision.eval.crossfit"),
         _py("resqcity.vision.datasets.prepare_dfire"),
         _py("resqcity.vision.train_fire", "--run-id", "fire_main"),
         _py("resqcity.streams.prepare_videos"),

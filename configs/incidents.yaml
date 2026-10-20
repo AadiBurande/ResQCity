@@ -4,26 +4,29 @@
 synthetic: true
 
 base_rate_per_day:
-  value: 5.71
+  value: 5.59
   source: >
-    Derived by resqcity.sim.base_rate from configs/base_rate.yaml (D-018, corrected in D-025):
+    Derived by resqcity.sim.base_rate (results/calibration/base_rate.json; D-026):
     (fires + road accidents) / 365 / (1 - 0.03 assumed crowd/other share).
     Fires: mean "Fire" calls 2015-2019 = 1107.4/yr, PMC Fire Call Statistics 2011-2020
     (data.opencity.in, Pune Municipal Corporation, public domain).
-    Road accidents: 334 road deaths in Pune city in 2023 (Pune city police, via Punekar News,
-    2024-01-13) / national severity index 36.5 deaths per 100 accidents (MoRTH, Road Accidents in
-    India 2022, via Outlook Business) = 915/yr. Accidents + fires = 5.54/day.
+    Road accidents: 871 in 2022, MoRTH "Road Accidents in India 2022", Table 6.2 (Pune).
+    Accidents + fires = 5.42/day.
   note: >
-    Secondary sources for deaths and the severity index; years and areas differ (see
-    configs/base_rate.yaml caveats). The national severity index probably UNDER-estimates city
-    accidents, and police-registered figures miss unreported crashes. Phase-10 sensitivity
-    covers 0.5x-4x. Superseded values: 24.0/day (assumption), 5.54/day (crowd/other carved out).
+    Police-registered accidents; Pune's registered crashes are unusually severe (37 killed per 100
+    vs 22 for all million-plus cities), which suggests non-fatal crashes are under-registered, so
+    this is likely a LOWER bound. Phase-10 sensitivity covers 0.5x-4x. Superseded values:
+    24.0/day (assumption), 5.54 and 5.71/day (death-count / severity-index proxy).
 
 # Relative intensity by local hour 0..23 (normalised to mean 1 at load time).
 hour_profile:
-  value: [0.45, 0.35, 0.30, 0.30, 0.35, 0.50, 0.75, 0.95, 1.15, 1.30, 1.25, 1.15,
-          1.10, 1.10, 1.10, 1.15, 1.25, 1.40, 1.55, 1.50, 1.35, 1.10, 0.85, 0.65]
-  source: UNVERIFIED
+  value: [0.5027, 0.5027, 0.5027, 0.3887, 0.3887, 0.3887, 0.7598, 0.7598, 0.7598, 1.1522, 1.1522,
+          1.1522, 1.2041, 1.2041, 1.2041, 1.3753, 1.3753, 1.3753, 1.6095, 1.6095, 1.6095, 1.0076,
+          1.0076, 1.0076]
+  source: >
+    MoRTH "Road Accidents in India 2022", Annexure 42 (Maharashtra, road accidents by 3-hour
+    interval), spread evenly within each interval (resqcity.sim.base_rate).
+  note: "State-level road accidents (incl. highways); applied to fires as well (UNVERIFIED for fires)."
 # Relative intensity Monday..Sunday (normalised to mean 1 at load time).
 weekday_profile:
   value: [1.00, 0.97, 0.97, 0.98, 1.03, 1.05, 1.00]
@@ -45,7 +48,7 @@ rain_effect:
   max_multiplier: {value: 2.0, source: UNVERIFIED}
 
 type_mix:
-  value: {accident: 0.439, fire_smoke: 0.531, crowd: 0.01, other: 0.02}
+  value: {accident: 0.427, fire_smoke: 0.543, crowd: 0.01, other: 0.02}
   source: UNVERIFIED
   note: "accident/fire split from results/calibration/base_rate.json; crowd/other (0.03) assumed, added on top"
 

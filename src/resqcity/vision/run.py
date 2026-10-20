@@ -39,8 +39,19 @@ def load_cameras(path: Path) -> list[Camera]:
     return TypeAdapter(list[Camera]).validate_python(data.get("cameras", []))
 
 
-def selected_clip_run(results: Path, models: Path) -> Path | None:
-    """The run chosen by ``resqcity.vision.select_clip`` (val criterion), else the newest."""
+def deployed_detector(results: Path, models: Path) -> tuple[Path, Path | None, dict | None] | None:
+    """(clip run dir, stacker path, operating point) of the deployed detector.
+
+    Preference: ``results/vision/deployed_detector.json`` (evaluation v4, cross-fitted, D-026), then
+    the older single-split selection (``clip_selection.csv`` + that run's ``report.json``)."""
+    import json
+
+    deployed = results / "deployed_detector.json"
+    if deployed.exists():
+        d = json.loads(deployed.read_text(encoding="utf-8"))
+        run = models / d["clip_run"]
+        if run.exists():
+            return run, PROJECT_ROOT / d["stacker"], d["operating_point"]
     selection = results / "clip_selection.csv"
     if selection.exists():
         import pandas as pd
@@ -48,22 +59,28 @@ def selected_clip_run(results: Path, models: Path) -> Path | None:
         table = pd.read_csv(selection)
         chosen = table.loc[table["selected"], "run_id"]
         if len(chosen) and (models / chosen.iloc[0]).exists():
-            return models / chosen.iloc[0]
-    return newest(models)
+            run = models / chosen.iloc[0]
+            report = results / run.name / "report.json"
+            op = (
+                json.loads(report.read_text(encoding="utf-8"))
+                .get("operating_points_chosen_on_val", {})
+                .get("combined")
+                if report.exists()
+                else None
+            )
+            return run, results / run.name / "stacker.json", op
+    run = newest(models)
+    return (run, None, None) if run is not None else None
 
 
-def operating_point(results: Path, run: str) -> dict[str, float] | None:
-    """Threshold and persistence chosen on VAL by ``resqcity.vision.eval.evaluate``."""
-    import json
+def unblurred_allowed(source: str) -> bool:
+    """Unblurred viewing is limited to local files and the simulated loopback streams (D-026):
+    never a real camera such as a phone IP camera."""
+    from urllib.parse import urlparse
 
-    report = results / run / "report.json"
-    if not report.exists():
-        return None
-    return (
-        json.loads(report.read_text(encoding="utf-8"))
-        .get("operating_points_chosen_on_val", {})
-        .get("combined")
-    )
+    if not is_live(source):
+        return True
+    return urlparse(source).hostname in {"127.0.0.1", "localhost", "::1"}
 
 
 def newest(path: Path) -> Path | None:
@@ -79,6 +96,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--fire-run", type=Path, default=None, help="data/models/fire/<run>")
     parser.add_argument("--no-models", action="store_true", help="heuristics only")
     parser.add_argument("--device", default=None, help="override detector.device (cpu, cuda:0)")
+    parser.add_argument(
+        "--privacy",
+        choices=["faces_plates", "full", "off"],
+        default=None,
+        help="override privacy.mode; 'off' only for local files / simulated 127.0.0.1 streams",
+    )
     parser.add_argument("--events", type=Path, default=EVENTS_FILE)
     parser.add_argument("--preview-port", type=int, default=None)
     parser.add_argument(
@@ -100,28 +123,38 @@ def main(argv: list[str] | None = None) -> int:
             update={"detector": cfg.detector.model_copy(update={"device": args.device})}
         )
     device = resolve_device(cfg.detector.device)
+    if args.privacy:
+        cfg = cfg.model_copy(
+            update={"privacy": cfg.privacy.model_copy(update={"mode": args.privacy})}
+        )
+    if cfg.privacy.mode == "off" and not unblurred_allowed(source):
+        parser.error(
+            "--privacy off is only allowed for local files and simulated 127.0.0.1 streams"
+        )
+    if cfg.privacy.mode == "off":
+        log.warning("privacy OFF: unblurred preview of public-dataset footage (local demo only)")
 
     classifier = stacker = fire = None
     threshold = None
     results = base.paths.resolve("results") / "vision"
     if not args.no_models:
-        clip_run = args.clip_run or selected_clip_run(
-            results, PROJECT_ROOT / "data" / "models" / "clip"
+        models = PROJECT_ROOT / "data" / "models" / "clip"
+        chosen = (
+            (args.clip_run, None, None) if args.clip_run else deployed_detector(results, models)
         )
-        if clip_run is not None:
+        if chosen is not None:
             from resqcity.vision.clip_classifier import ClipClassifier
 
+            clip_run, stacker_path, op = chosen
             classifier = ClipClassifier(clip_run, cfg.clip_classifier, device)
-            stacker_path = results / clip_run.name / "stacker.json"
-            stacker = Stacker.load(stacker_path) if stacker_path.exists() else None
-            op = operating_point(results, clip_run.name)
+            stacker = Stacker.load(stacker_path) if stacker_path and stacker_path.exists() else None
             if op is not None:
                 threshold = float(op["threshold"])
                 alarm = cfg.alarm.model_copy(
                     update={"consecutive_windows": int(op["consecutive_windows"])}
                 )
                 cfg = cfg.model_copy(update={"alarm": alarm})
-                log.info("operating point from val: %s", op)
+                log.info("detector %s, operating point %s", clip_run.name, op)
         fire_run = args.fire_run or newest(PROJECT_ROOT / "data" / "models" / "fire")
         if fire_run is not None and (fire_run / "best.pt").exists():
             from resqcity.vision.fire_smoke import FireSmokeDetector

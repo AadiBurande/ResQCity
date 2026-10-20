@@ -74,7 +74,6 @@ class CameraPipeline:
         self.on_preview = on_preview
         cc = cfg.clip_classifier
         maxlen = int(np.ceil(cc.window_s * cfg.ingest.sample_fps)) + 1
-        self.feats: deque[tuple[float, np.ndarray]] = deque(maxlen=maxlen)
         self.heur: deque[tuple[float, HeuristicResult]] = deque(maxlen=maxlen)
         self.last_window_t = -np.inf
         self.events: list[Event] = []
@@ -86,9 +85,8 @@ class CameraPipeline:
         heur_max = {k: max((h.components[k] for h in recent), default=0.0) for k in COMPONENTS}
         heur_score = max((h.score for h in recent), default=0.0)
         comps = {"heur_score": heur_score, **{f"c_{k}": v for k, v in heur_max.items()}}
-        if self.classifier is not None and len(self.feats) >= 2:
-            feats = np.stack([f for _, f in self.feats])
-            p = self.classifier.proba_from_features(feats)  # type: ignore[attr-defined]
+        if self.classifier is not None and self.classifier.ready():  # type: ignore[attr-defined]
+            p = self.classifier.proba_now()  # type: ignore[attr-defined]
             comps["clf_logit"] = float(np.log(max(p, 1e-6) / max(1 - p, 1e-6)))
             comps["classifier_p"] = p
         if self.stacker is not None and "clf_logit" in comps:
@@ -104,8 +102,7 @@ class CameraPipeline:
         heur = self.scorer.update(det)
         self.heur.append((frame.t, heur))
         if self.classifier is not None:
-            feat = self.classifier.encoder.encode([frame.image])[0]  # type: ignore[attr-defined]
-            self.feats.append((frame.t, feat))
+            self.classifier.observe(frame.t, frame.image)  # type: ignore[attr-defined]
         emitted: list[Event] = []
         if frame.t - self.last_window_t >= self.cfg.clip_classifier.stride_s:
             self.last_window_t = frame.t
@@ -222,4 +219,10 @@ class CameraPipeline:
             2,
             cv2.LINE_AA,
         )
+        if self.anonymizer.cfg.mode == "off":
+            label = "UNBLURRED - local demo, public dataset footage"
+            y = image.shape[0] - 10
+            cv2.putText(
+                image, label, (8, y), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 1, cv2.LINE_AA
+            )
         return image

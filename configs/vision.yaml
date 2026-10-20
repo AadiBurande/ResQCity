@@ -22,9 +22,13 @@ privacy:
   face_model_url: https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx
   face_model_file: face_detection_yunet_2023mar.onnx   # under data/models/
   face_score_threshold: 0.6
-  plate_band: [0.55, 1.0]      # vertical fraction of each vehicle box treated as plate region
-  blur_persons: true           # blur whole person boxes (covers faces the face model misses)
-  person_blur_kernel_frac: 0.6 # strong blur; verified by results/vision/privacy_check.json
+  # mode (D-026): faces_plates = default (faces + plate region only; vehicles, people and the scene
+  # stay clear) | full = also blur whole people | off = no blurring, ONLY for local files and the
+  # simulated 127.0.0.1 streams of public-dataset footage (refused for any other live source).
+  mode: faces_plates
+  plate_band: [0.6, 1.0]       # vertical fraction of each vehicle box treated as plate region
+  plate_band_x: [0.1, 0.9]     # horizontal fraction of each vehicle box treated as plate region
+  person_blur_kernel_frac: 0.6 # strong blur for whole people (mode: full)
   min_region_px: 24            # tiny regions are grown to at least this size before blurring
   blur_kernel_frac: 0.25       # Gaussian kernel = this fraction of the region size (odd, >= 9)
 
@@ -43,8 +47,9 @@ heuristics:                    # stage 1 (explainable). Speeds are in box-height
   weights: {deceleration: 0.25, collision: 0.45, orientation: 0.15, person_down: 0.15}
 
 clip_classifier:               # stage 2 (learned)
-  backbone: mobilenet_v3_small # torchvision, ImageNet weights, frozen
-  input_size: 224
+  backbone: mobilenet_v3_small # torchvision, frozen: mobilenet_v3_small (ImageNet) | r2plus1d_18 (Kinetics-400)
+  input_size: 224              # image side (image backbone) or crop side (video backbone: 112)
+  clip_frames: 16              # frames per window clip (video backbones only)
   window_s: 3.0
   stride_s: 1.0
   hidden: 128

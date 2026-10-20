@@ -1,0 +1,6 @@
+# Video-backbone MIL regularisation sweep (D-026); selection on the fit split only.
+clip_classifier:
+  backbone: r2plus1d_18
+  input_size: 112
+  mil_sparsity: 0.3
+  mil_smoothness: 1.0

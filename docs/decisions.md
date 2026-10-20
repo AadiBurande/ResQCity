@@ -414,3 +414,58 @@ ERRATA notes (`eval_v1/`, `eval_v2/`).
 - Latency: measured on road footage (320×240), including the fire model: 77.8 ms per frame,
   12.8 fps on CPU (`results/vision/latency_cpu.json`). That is real-time at 5 fps, about two
   cameras per laptop CPU (the D-024 figure of 44 ms excluded the fire model).
+
+## D-026 Phase-2/3 follow-ups after the user's inputs  (2026-10-20, before phase 4)
+User inputs: a Google Maps sheet was filled in (10 routes × 3 departure times); CADP frames are not
+available; MoRTH "Road Accidents in India 2022" was provided (PDF); the user wants clear images and
+videos (chose "blur faces + plates only" and "no blurring at all") and a stronger accident model.
+1. **Speeds calibrated to Google Maps** (`resqcity.geo.calibrate_speeds`,
+   `results/geo/speed_calibration.json`). The user's sheet is kept as
+   `results/geo/maps_check_google_2026-10-20.csv`; the template refuses to overwrite filled data.
+   Step 1 (pre-specified: fit on 4 routes, hold out 6) over-corrected. Hold-out median error went
+   from 11.5% to 19.9%, because the 4 fit routes are the most congested central routes. Step 2
+   (added after seeing step 1; disclosed here): leave-one-route-out over all 10 routes with
+   per-hour factors gives median error 17.2% vs 19.3% for the baseline, and 80% vs 73% inside
+   Google's range, so the all-route factors were adopted (×1.06 at 10:00, ×1.49 at 14:00, ×1.14
+   at 19:00). A new MIDDAY period (11–17) is the main change: Pune is about 1.5× slower at 14:00
+   than the D-014 base speeds. Shoulder hours (06–09, 21–23) and night are not calibrated.
+2. **Base incident rate from the primary source** (`resqcity.sim.morth_extract` →
+   `results/calibration/morth_2022_extract.json`, `resqcity.sim.base_rate`):
+   - Pune 2022: 871 accidents, 325 killed (MoRTH Table 6.2), replacing the 334/0.365 proxy;
+     5.59 incidents/day (fires 1,107/yr + accidents 871/yr, plus 3% crowd/other).
+   - Registered crashes in Pune are severe (37 killed per 100 vs 22 for all million-plus cities),
+     so non-fatal crashes are probably under-registered; the rate is likely a lower bound.
+   - The **hour profile** now comes from MoRTH Annexure 42 (Maharashtra, 3-hour intervals)
+     instead of an assumption. Pune weather split (Annexure 45): 82 of 871 accidents (9.4%) in
+     rain, recorded but not used (no rain-exposure hours).
+   - The Pune vehicle-type table (Annexure 46) is not machine-readable; the vehicle mix stays
+     UNVERIFIED.
+3. **Ganeshotsav dates verified:** Anant Chaturdashi is Fri 25 Sep 2026 (day 6). The scenario is
+   now 8 days, and the immersion closure continues on day 7, 00:00–14:00 (approximate; Pune's
+   procession usually runs 24–30 h).
+4. **Privacy modes (user request; CLAUDE.md rule 6 updated with the user's approval):**
+   - `faces_plates` is the new default: faces plus a narrower plate region (60–100% height,
+     10–90% width of each vehicle box); vehicles, people and the crash stay clear.
+   - `full` additionally blurs people (the previous behaviour).
+   - `off` means unblurred, and is allowed only for local files and the simulated 127.0.0.1
+     streams of public-dataset footage. It is refused for any other live source (e.g. a phone
+     IP camera) and the preview is labelled "UNBLURRED".
+5. **Stronger accident model attempted; it did not help** (evaluation v4, `results/vision/crossfit_v4/`).
+   - Candidates: the per-frame MobileNetV3 head and a Kinetics-400 R(2+1)D-18 video backbone
+     (16-frame clips), each with 3 MIL settings.
+   - Two-fold cross-fitting: each fold chooses early stopping, temperature, candidate, stacker
+     and operating point on its fit split only (`train_clip --fit-split`), and evaluation
+     predictions are pooled.
+   - The video backbone scored lower in both folds (fit-split within-video AUROC 0.56–0.64 vs
+     0.67–0.74 on val; 0.41–0.47 vs 0.60–0.70 on test), so it was never selected.
+   - Pooled result (combined, all 23 onset videos): onset detection 6/23 = 0.26 (Wilson 0.13–0.47),
+     median delay 6.3 s, road false alarms 5 in 0.075 h = 67/h (Poisson 22–156), non-road 3.5/h,
+     per-video AUROC 0.73 (0.60–0.85).
+   - Still over-confident above the threshold (0.67 predicted vs 0.46 observed).
+   - `sim_inputs.yaml` now exports these pooled v4 estimates; the live detector is fold A's choice
+     (`results/vision/deployed_detector.json`).
+   - **Constraint for phase 4:** fusion must use the measured event-level detection and
+     false-alarm rates (likelihood ratios) from `sim_inputs.yaml`, not the window confidence as a
+     probability.
+6. CADP is unavailable, so no never-seen footage exists. v4 cross-fitting is the best available
+   estimate and remains a development estimate (L15).

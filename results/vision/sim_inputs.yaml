@@ -1,286 +1,32 @@
-source: 'measured: results/vision/clip_s03_t1 (UCF-Crime development-test split)'
-evaluation_version: 3
+source: 'measured: results/vision/crossfit_v4 (UCF-Crime val+test, 2-fold cross-fitting)'
+evaluation_version: 4
 detection_rule: alarm in [onset, offset + 10 s]
-caveat: 'Measured on public CCTV footage (UCF-Crime, 320x240), not Pune cameras. Only
-  12 onset-annotated videos and ~2 minutes of road footage before onsets: intervals
-  are very wide. The test split was used during development (D-025), so these are
-  development estimates, not held-out results. Use as an empirical prior and vary
-  in sensitivity analysis.'
+caveat: 'Public CCTV footage (UCF-Crime, 320x240), not Pune cameras. 23 onset-annotated
+  videos, ~4 minutes of road footage before onsets: intervals are very wide. The test
+  split was looked at during development (D-021..D-025); cross-fitting removes fit-on-eval
+  bias but these remain development estimates. Vary in sensitivity analysis.'
 synthetic: false
-models:
-  clip_weights_sha256_16: 40cd328b8bcea568
-  stacker_sha256_16: 1c83265c32c615f1
-operating_point:
-  threshold: 0.45
-  consecutive_windows: 4
-per_threshold:
-- threshold: 0.3
-  consecutive_windows: 4
-  onset_detected: 4
-  onset_videos: 12
-  onset_detection_rate: 0.3333333333333333
-  onset_detection_rate_ci95:
-  - 0.1381200901248598
-  - 0.6093779130595061
-  n_delays: 4
-  delay_median_s: 6.0
-  road_false_alarms: 5
-  road_hours: 0.0317592592592592
-  road_false_alarms_per_hour: 157.43440233236151
-  road_fa_poisson_ci95:
-  - 51.11852190460333
-  - 367.3993774247372
-  road_fa_cluster_ci95:
-  - 52.941176470588246
-  - 288.01374045801526
-- threshold: 0.35
-  consecutive_windows: 4
-  onset_detected: 4
-  onset_videos: 12
-  onset_detection_rate: 0.3333333333333333
-  onset_detection_rate_ci95:
-  - 0.1381200901248598
-  - 0.6093779130595061
-  n_delays: 4
-  delay_median_s: 6.0
-  road_false_alarms: 5
-  road_hours: 0.0317592592592592
-  road_false_alarms_per_hour: 157.43440233236151
-  road_fa_poisson_ci95:
-  - 51.11852190460333
-  - 367.3993774247372
-  road_fa_cluster_ci95:
-  - 52.941176470588246
-  - 288.01374045801526
-- threshold: 0.4
-  consecutive_windows: 4
-  onset_detected: 3
-  onset_videos: 12
-  onset_detection_rate: 0.25
-  onset_detection_rate_ci95:
-  - 0.0889416676948856
-  - 0.5323053370816633
-  n_delays: 3
-  delay_median_s: 6.0
-  road_false_alarms: 5
-  road_hours: 0.0317592592592592
-  road_false_alarms_per_hour: 157.43440233236151
-  road_fa_poisson_ci95:
-  - 51.11852190460333
-  - 367.3993774247372
-  road_fa_cluster_ci95:
-  - 52.941176470588246
-  - 288.01374045801526
-- threshold: 0.45
-  consecutive_windows: 4
-  onset_detected: 3
-  onset_videos: 12
-  onset_detection_rate: 0.25
-  onset_detection_rate_ci95:
-  - 0.0889416676948856
-  - 0.5323053370816633
-  n_delays: 3
-  delay_median_s: 6.0
-  road_false_alarms: 4
-  road_hours: 0.0317592592592592
-  road_false_alarms_per_hour: 125.9475218658892
-  road_fa_poisson_ci95:
-  - 34.316460743919265
-  - 322.4756784092125
-  road_fa_cluster_ci95:
-  - 29.916897506925213
-  - 233.34837545126348
-- threshold: 0.5
-  consecutive_windows: 4
-  onset_detected: 3
-  onset_videos: 12
-  onset_detection_rate: 0.25
-  onset_detection_rate_ci95:
-  - 0.0889416676948856
-  - 0.5323053370816633
-  n_delays: 3
-  delay_median_s: 6.0
-  road_false_alarms: 4
-  road_hours: 0.0317592592592592
-  road_false_alarms_per_hour: 125.9475218658892
-  road_fa_poisson_ci95:
-  - 34.316460743919265
-  - 322.4756784092125
-  road_fa_cluster_ci95:
-  - 29.916897506925213
-  - 233.34837545126348
-- threshold: 0.55
-  consecutive_windows: 4
-  onset_detected: 3
-  onset_videos: 12
-  onset_detection_rate: 0.25
-  onset_detection_rate_ci95:
-  - 0.0889416676948856
-  - 0.5323053370816633
-  n_delays: 3
-  delay_median_s: 6.0
-  road_false_alarms: 4
-  road_hours: 0.0317592592592592
-  road_false_alarms_per_hour: 125.9475218658892
-  road_fa_poisson_ci95:
-  - 34.316460743919265
-  - 322.4756784092125
-  road_fa_cluster_ci95:
-  - 29.916897506925213
-  - 233.34837545126348
-- threshold: 0.6
-  consecutive_windows: 4
-  onset_detected: 1
-  onset_videos: 12
-  onset_detection_rate: 0.0833333333333333
-  onset_detection_rate_ci95:
-  - 0.0148650942396693
-  - 0.3538799137212455
-  n_delays: 1
-  delay_median_s: 5.333333333333333
-  road_false_alarms: 4
-  road_hours: 0.0317592592592592
-  road_false_alarms_per_hour: 125.9475218658892
-  road_fa_poisson_ci95:
-  - 34.316460743919265
-  - 322.4756784092125
-  road_fa_cluster_ci95:
-  - 29.916897506925213
-  - 233.34837545126348
-- threshold: 0.65
-  consecutive_windows: 4
-  onset_detected: 1
-  onset_videos: 12
-  onset_detection_rate: 0.0833333333333333
-  onset_detection_rate_ci95:
-  - 0.0148650942396693
-  - 0.3538799137212455
-  n_delays: 1
-  delay_median_s: 5.333333333333333
-  road_false_alarms: 4
-  road_hours: 0.0317592592592592
-  road_false_alarms_per_hour: 125.9475218658892
-  road_fa_poisson_ci95:
-  - 34.316460743919265
-  - 322.4756784092125
-  road_fa_cluster_ci95:
-  - 29.916897506925213
-  - 233.34837545126348
-- threshold: 0.7
-  consecutive_windows: 4
-  onset_detected: 2
-  onset_videos: 12
-  onset_detection_rate: 0.1666666666666666
-  onset_detection_rate_ci95:
-  - 0.0469651417569208
-  - 0.4480308646118111
-  n_delays: 2
-  delay_median_s: 3.8333333333333335
-  road_false_alarms: 3
-  road_hours: 0.0317592592592592
-  road_false_alarms_per_hour: 94.46064139941691
-  road_fa_poisson_ci95:
-  - 19.480055181552466
-  - 276.0540791638982
-  road_fa_cluster_ci95:
-  - 0.0
-  - 194.59459459459455
-- threshold: 0.75
-  consecutive_windows: 4
-  onset_detected: 2
-  onset_videos: 12
-  onset_detection_rate: 0.1666666666666666
-  onset_detection_rate_ci95:
-  - 0.0469651417569208
-  - 0.4480308646118111
-  n_delays: 2
-  delay_median_s: 5.833333333333334
-  road_false_alarms: 2
-  road_hours: 0.0317592592592592
-  road_false_alarms_per_hour: 62.97376093294461
-  road_fa_poisson_ci95:
-  - 7.6264146013843215
-  - 227.4828770012209
-  road_fa_cluster_ci95:
-  - 0.0
-  - 150.02094972067027
-- threshold: 0.8
-  consecutive_windows: 4
-  onset_detected: 1
-  onset_videos: 12
-  onset_detection_rate: 0.0833333333333333
-  onset_detection_rate_ci95:
-  - 0.0148650942396693
-  - 0.3538799137212455
-  n_delays: 1
-  delay_median_s: 5.333333333333333
-  road_false_alarms: 2
-  road_hours: 0.0317592592592592
-  road_false_alarms_per_hour: 62.97376093294461
-  road_fa_poisson_ci95:
-  - 7.6264146013843215
-  - 227.4828770012209
-  road_fa_cluster_ci95:
-  - 0.0
-  - 150.02094972067027
-- threshold: 0.85
-  consecutive_windows: 4
-  onset_detected: 0
-  onset_videos: 12
-  onset_detection_rate: 0.0
-  onset_detection_rate_ci95:
-  - 0.0
-  - 0.2424940095530979
-  n_delays: 0
-  delay_median_s: null
-  road_false_alarms: 2
-  road_hours: 0.0317592592592592
-  road_false_alarms_per_hour: 62.97376093294461
-  road_fa_poisson_ci95:
-  - 7.6264146013843215
-  - 227.4828770012209
-  road_fa_cluster_ci95:
-  - 0.0
-  - 150.02094972067027
-- threshold: 0.9
-  consecutive_windows: 4
-  onset_detected: 1
-  onset_videos: 12
-  onset_detection_rate: 0.0833333333333333
-  onset_detection_rate_ci95:
-  - 0.0148650942396693
-  - 0.3538799137212455
-  n_delays: 1
-  delay_median_s: 3.666666666666667
-  road_false_alarms: 0
-  road_hours: 0.0317592592592592
-  road_false_alarms_per_hour: 0.0
-  road_fa_poisson_ci95:
-  - 0.0
-  - 116.15130642691108
-  road_fa_cluster_ci95:
-  - 0.0
-  - 0.0
-- threshold: 0.95
-  consecutive_windows: 4
-  onset_detected: 0
-  onset_videos: 12
-  onset_detection_rate: 0.0
-  onset_detection_rate_ci95:
-  - 0.0
-  - 0.2424940095530979
-  n_delays: 0
-  delay_median_s: null
-  road_false_alarms: 0
-  road_hours: 0.0317592592592592
-  road_false_alarms_per_hour: 0.0
-  road_fa_poisson_ci95:
-  - 0.0
-  - 116.15130642691108
-  road_fa_cluster_ci95:
-  - 0.0
-  - 0.0
-delays_at_operating_point_s:
-- 4.33
-- 6.0
-- 8.0
+operating_points:
+  A:
+    threshold: 0.45
+    consecutive_windows: 4
+  B:
+    threshold: 0.4
+    consecutive_windows: 4
+onset_detected: 6
+onset_videos: 23
+onset_detection_rate: 0.2608695652173913
+onset_detection_rate_ci95:
+- 0.12548615971944993
+- 0.46470005002993314
+n_delays: 6
+delay_median_s: 6.333333333333334
+road_false_alarms: 5
+road_hours: 0.07462962962962963
+road_false_alarms_per_hour: 66.99751861042184
+road_fa_poisson_ci95:
+- 21.75391192714509
+- 156.34985912740055
+road_fa_cluster_ci95:
+- 19.394273828978918
+- 143.28556333377358

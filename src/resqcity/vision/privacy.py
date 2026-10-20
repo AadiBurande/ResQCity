@@ -1,10 +1,12 @@
 """Privacy by design: blur faces and number plates BEFORE a frame is stored, streamed or shown.
 
-- Faces: OpenCV YuNet face detector (ONNX model, downloaded once to ``data/models``).
-- Number plates: no reliable open plate detector is used; instead the lower band of every vehicle
-  box (where plates are) is blurred (configurable band). This over-blurs rather than under-blurs.
-- Persons: optionally blurred as a whole box (strong kernel), which covers faces the face model
-  misses (small, side-on or blurred faces are common in CCTV).
+Modes (``privacy.mode``, D-026):
+- ``faces_plates`` (default): faces (OpenCV YuNet, ONNX model downloaded once to ``data/models``)
+  and the plate region of every vehicle (no reliable open plate detector exists, so the lower-centre
+  part of the vehicle box is blurred). Vehicles, people's bodies and the scene stay clear.
+- ``full``: additionally blurs every person box (covers faces the face model misses).
+- ``off``: no blurring; allowed only for local files and the simulated 127.0.0.1 streams of
+  public-dataset footage (enforced in ``resqcity.vision.run``).
 Only event metadata leaves ``vision/`` (research-integrity rule 6).
 """
 
@@ -55,9 +57,12 @@ def grow(box: Box, min_px: float) -> Box:
     return Box(cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2)
 
 
-def plate_band(box: Box, band: tuple[float, float]) -> Box:
+def plate_band(
+    box: Box, band: tuple[float, float], band_x: tuple[float, float] = (0.0, 1.0)
+) -> Box:
     lo, hi = band
-    return Box(box.x1, box.y1 + lo * box.h, box.x2, box.y1 + hi * box.h)
+    xlo, xhi = band_x
+    return Box(box.x1 + xlo * box.w, box.y1 + lo * box.h, box.x1 + xhi * box.w, box.y1 + hi * box.h)
 
 
 class FaceDetector:
@@ -111,22 +116,26 @@ class Anonymizer:
         self.faces = faces if faces is not None else FaceDetector(cfg)
 
     def regions(self, image: np.ndarray, tracks: Iterable[TrackObs]) -> dict[str, list[Box]]:
+        if self.cfg.mode == "off":
+            return {"faces": [], "plates": [], "persons": []}
         tracks = list(tracks)
         m = self.cfg.min_region_px
         return {
             "faces": [grow(b, m) for b in self.faces.detect(image)],
             "plates": [
-                grow(plate_band(t.box, self.cfg.plate_band), m)
+                grow(plate_band(t.box, self.cfg.plate_band, self.cfg.plate_band_x), m)
                 for t in tracks
                 if t.cls in self.vehicle_classes
             ],
             "persons": [grow(t.box, m) for t in tracks if t.cls == self.person_class]
-            if self.cfg.blur_persons
+            if self.cfg.mode == "full"
             else [],
         }
 
     def apply(self, image: np.ndarray, tracks: Iterable[TrackObs]) -> np.ndarray:
         out = image.copy()
+        if self.cfg.mode == "off":
+            return out
         regions = self.regions(out, tracks)
         for box in regions["persons"]:
             blur_region(out, box, self.cfg.person_blur_kernel_frac)

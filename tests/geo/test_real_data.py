@@ -71,3 +71,14 @@ def test_ambulance_bases_are_labelled_synthetic():
 
     fac = load_facilities(PROCESSED / GEO.network.facilities_file)
     assert all(s.source == FacilitySource.SYNTHETIC for s in fac.by_agency(Agency.AMBULANCE))
+
+
+def test_geo_config_carries_the_speed_calibration():
+    import json
+
+    out = BASE.paths.resolve("results") / "geo" / "speed_calibration.json"
+    if not out.exists():
+        pytest.skip("speed calibration not run")
+    cal = json.loads(out.read_text(encoding="utf-8"))["calibrated_multipliers"]
+    periods = {p.name: {c: v.value for c, v in p.multipliers.items()} for p in GEO.traffic_periods}
+    assert periods == cal

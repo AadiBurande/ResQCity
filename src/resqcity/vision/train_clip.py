@@ -1,6 +1,8 @@
-"""Train the stage-2 window classifier (GPU if available) and calibrate it on the val split.
+"""Train the stage-2 window classifier (GPU if available); early stopping and calibration on the
+FIT split (``val`` by default; ``test`` for the second cross-fitting fold, D-026).
 
-    uv run python -m resqcity.vision.train_clip [--run-id NAME]
+    uv run python -m resqcity.vision.train_clip [--run-id NAME] [--overlay sweep.yaml]
+                                                 [--fit-split val|test]
 
 Outputs:
 - ``data/models/clip/<run_id>/clip_head.pt`` + ``clip_classifier.json`` (temperature, weight hash);
@@ -24,16 +26,25 @@ from resqcity.common.config import CONFIG_DIR, PROJECT_ROOT, load_base_config, l
 from resqcity.common.provenance import write_meta
 from resqcity.vision.clip_classifier import (
     MIL_TOP_K,
+    ClipEncoder,
     FrameEncoder,
+    Window,
     build_head,
     fit_temperature,
+    is_video_backbone,
     make_windows,
     sigmoid,
     window_features,
     window_label,
 )
 from resqcity.vision.config import VisionConfig
-from resqcity.vision.offline import extract_features, feature_path, load_features
+from resqcity.vision.offline import (
+    extract_features,
+    extract_window_features,
+    feature_path,
+    load_features,
+    load_window_features,
+)
 
 log = logging.getLogger(__name__)
 SEED = 20261020
@@ -43,14 +54,24 @@ PATIENCE = 8
 def build_windows(
     ann: pd.DataFrame, cfg: VisionConfig, cache: Path
 ) -> tuple[pd.DataFrame, np.ndarray]:
-    """One row per window (all videos) + the matching (N, 3D) feature matrix."""
+    """One row per window (all videos) + the matching feature matrix."""
     cc = cfg.clip_classifier
+    video = is_video_backbone(cc.backbone)
     rows, feats = [], []
     for _, v in ann.iterrows():
-        times, f = load_features(feature_path(cache, cc.backbone, v["video_id"]))
+        path = feature_path(cache, cc.backbone, v["video_id"])
+        if video:
+            starts, ends, wf = load_window_features(path)
+            windows = [
+                Window(float(s), float(e), i, i + 1)
+                for i, (s, e) in enumerate(zip(starts, ends, strict=True))
+            ]
+        else:
+            times, f = load_features(path)
+            windows = make_windows(times, cc.window_s, cc.stride_s)
         onset = v["accident_onset_s"] if v["has_onset"] else None
         offset = v["accident_offset_s"] if v["has_onset"] else None
-        for w in make_windows(times, cc.window_s, cc.stride_s):
+        for w in windows:
             if v["label"] == "normal":
                 label = 0.0
             elif v["has_onset"]:
@@ -68,8 +89,8 @@ def build_windows(
                     "label": np.nan if label is None else label,
                 }
             )
-            feats.append(window_features(f[w.first : w.last]))
-    return pd.DataFrame(rows), np.stack(feats)
+            feats.append(wf[w.first] if video else window_features(f[w.first : w.last]))
+    return pd.DataFrame(rows), np.stack(feats).astype(np.float32)
 
 
 def auroc(y: np.ndarray, s: np.ndarray) -> float:
@@ -79,7 +100,7 @@ def auroc(y: np.ndarray, s: np.ndarray) -> float:
 
 
 def train(
-    windows: pd.DataFrame, x: np.ndarray, cfg: VisionConfig, device: str
+    windows: pd.DataFrame, x: np.ndarray, cfg: VisionConfig, device: str, fit_split: str = "val"
 ) -> tuple[object, pd.DataFrame]:
     import torch
 
@@ -100,7 +121,7 @@ def train(
             tr & windows["label"].isna() & windows["video_label"].eq("accident"), "video_id"
         ].unique()
     ]
-    val = (windows["split"].eq("val") & windows["label"].notna()).to_numpy()
+    val = (windows["split"].eq(fit_split) & windows["label"].notna()).to_numpy()
     # Model selection: discrimination WITHIN onset-annotated accident videos (pre-onset vs
     # accident windows of the same scene). Overall AUROC is dominated by scene type (D-021).
     val_within = val & windows["video_label"].eq("accident").to_numpy()
@@ -178,6 +199,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--overlay", type=Path, default=None, help="YAML merged over configs/vision.yaml (sweeps)"
     )
+    parser.add_argument("--fit-split", choices=["val", "test"], default="val")
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     vision_paths = [CONFIG_DIR / "vision.yaml", *([args.overlay] if args.overlay else [])]
@@ -188,17 +210,21 @@ def main(argv: list[str] | None = None) -> int:
     ann = pd.read_parquet(cache / "annotations.parquet")
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-    encoder = FrameEncoder(cfg.clip_classifier, device)
+    video = is_video_backbone(cfg.clip_classifier.backbone)
+    encoder = (ClipEncoder if video else FrameEncoder)(cfg.clip_classifier, device)
     for i, (_, row) in enumerate(ann.iterrows(), start=1):
-        extract_features(raw, row, cfg, encoder, cache)
+        if video:
+            extract_window_features(raw, row, cfg, encoder, cache)  # type: ignore[arg-type]
+        else:
+            extract_features(raw, row, cfg, encoder, cache)  # type: ignore[arg-type]
         if i % 20 == 0:
             log.info("features: %d/%d videos", i, len(ann))
 
     windows, x = build_windows(ann, cfg, cache)
-    head, train_log = train(windows, x, cfg, device)
+    head, train_log = train(windows, x, cfg, device, args.fit_split)
     with torch.inference_mode():
         logits = head(torch.from_numpy(x).to(device)).squeeze(1).cpu().numpy()
-    val = (windows["split"].eq("val") & windows["label"].notna()).to_numpy()
+    val = (windows["split"].eq(args.fit_split) & windows["label"].notna()).to_numpy()
     temperature = fit_temperature(logits[val], windows.loc[val, "label"].to_numpy())
     windows["clf_logit"] = logits
     windows["clf_p"] = sigmoid(logits / temperature)
@@ -213,6 +239,8 @@ def main(argv: list[str] | None = None) -> int:
         "temperature": temperature,
         "weights_sha256_16": weight_hash,
         "device": device,
+        "fit_split": args.fit_split,
+        "clip_classifier": cfg.clip_classifier.model_dump(),
     }
     (model_dir / "clip_classifier.json").write_text(
         json.dumps(meta, indent=2), encoding="utf-8", newline="\n"
@@ -222,7 +250,7 @@ def main(argv: list[str] | None = None) -> int:
     out.mkdir(parents=True, exist_ok=True)
     (out / "config.yaml").write_text(
         yaml.safe_dump(
-            {"clip_classifier": cfg.clip_classifier.model_dump(), "seed": SEED, **meta},
+            {"seed": SEED, **meta},
             sort_keys=False,
         ),
         encoding="utf-8",

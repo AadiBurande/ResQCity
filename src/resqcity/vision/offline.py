@@ -15,7 +15,7 @@ import cv2
 import numpy as np
 import pandas as pd
 
-from resqcity.vision.clip_classifier import FrameEncoder
+from resqcity.vision.clip_classifier import ClipEncoder, FrameEncoder, make_windows, resize_short
 from resqcity.vision.config import VisionConfig
 from resqcity.vision.datasets.annotations import video_frame_paths
 from resqcity.vision.heuristics import COMPONENTS, HeuristicScorer
@@ -68,6 +68,38 @@ def extract_features(
     arr = np.concatenate(feats).astype(np.float16) if feats else np.zeros((0, 1), np.float16)
     np.savez_compressed(out, times=np.asarray(times, np.float64), feats=arr)
     return out
+
+
+def extract_window_features(
+    raw_root: Path, row: pd.Series, cfg: VisionConfig, encoder: ClipEncoder, cache: Path
+) -> Path:
+    """Video backbones: one clip embedding per window (same windows as ``make_windows``).
+
+    Saves ``starts``, ``ends`` (s) and ``feats`` (N, D float16)."""
+    cc = cfg.clip_classifier
+    out = feature_path(cache, cc.backbone, row["video_id"])
+    if out.exists():
+        return out
+    times, frames = [], []
+    for frame in video_frames(raw_root, row, cfg):
+        times.append(frame.t)
+        frames.append(resize_short(frame.image))  # small copies: a long video fits in memory
+    t = np.asarray(times, np.float64)
+    windows = make_windows(t, cc.window_s, cc.stride_s)
+    feats = encoder.encode_clips([frames[w.first : w.last] for w in windows])
+    out.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(
+        out,
+        starts=np.asarray([w.start_s for w in windows], np.float64),
+        ends=np.asarray([w.end_s for w in windows], np.float64),
+        feats=feats.astype(np.float16),
+    )
+    return out
+
+
+def load_window_features(path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    data = np.load(path)
+    return data["starts"], data["ends"], data["feats"].astype(np.float32)
 
 
 def load_features(path: Path) -> tuple[np.ndarray, np.ndarray]:

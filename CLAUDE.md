@@ -48,7 +48,9 @@ A module folder is created in the phase that implements it.
    `source:` field citing the paper. If the source is not confirmed, mark it `UNVERIFIED` and flag it.
 4. Vision splits are by video, never by frame (prevents leakage). Report results per dataset.
 5. Experiments use common random numbers (same seed set across policies) and >= 30 replications.
-6. Privacy by design: faces and number plates are blurred at the edge; only event metadata leaves `vision/`.
+6. Privacy by design: faces and number plates are blurred at the edge by default; only event metadata
+   leaves `vision/`. Unblurred viewing (`--privacy off`) is a local-demo option for public-dataset
+   footage only (local files / simulated 127.0.0.1 streams), never for a real camera (D-026).
 
 ## Commands (create these in the Makefile)
 - `make setup` · `make test` · `make lint`

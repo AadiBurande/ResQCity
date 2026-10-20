@@ -1,0 +1,52 @@
+{
+  "file": "results/vision/video_s0_t0_fittest/train_log.csv",
+  "generated_at_utc": "2026-10-20T09:54:49+00:00",
+  "command": "train_clip.py --run-id video_s0_t0_fittest --overlay configs/vision_sweeps/video_s0_t0.yaml --fit-split test",
+  "synthetic": false,
+  "git": {
+    "commit": "27741917fb32dff76f8d0ab0329ee55070cd4d12",
+    "dirty": true
+  },
+  "configs_sha256": {
+    "configs/vision.yaml": "b60af4dc2cae6867a3752daeb57f8ec888c4238f4fd18e2b197ad842b5660036",
+    "configs/vision_sweeps/video_s0_t0.yaml": "97279b374ec1fc29b434fa6814d0d613da44b6b361aa4ec0ad40b39edc5f4302"
+  },
+  "seeds": {
+    "seed": 20261020
+  },
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  },
+  "run_id": "video_s0_t0_fittest",
+  "temperature": 1.5808997660106177,
+  "weights_sha256_16": "371f720f8403bd39",
+  "device": "cuda:0",
+  "fit_split": "test",
+  "clip_classifier": {
+    "backbone": "r2plus1d_18",
+    "input_size": 112,
+    "clip_frames": 16,
+    "window_s": 3.0,
+    "stride_s": 1.0,
+    "hidden": 128,
+    "dropout": 0.3,
+    "epochs": 40,
+    "batch_size": 64,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "calibration": "temperature",
+    "mil_weight": 0.5,
+    "mil_sparsity": 0.0,
+    "mil_smoothness": 0.0
+  }
+}

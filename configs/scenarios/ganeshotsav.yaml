@@ -1,18 +1,19 @@
 # Ganeshotsav week ending with the Anant Chaturdashi immersion procession. SYNTHETIC scenario.
-# Dates and routes are APPROXIMATE: verify against the 2026 calendar and Pune Traffic Police
-# diversion notices before quoting them.
+# Dates checked 2026-10-20 (D-026): Ganesh Chaturthi Mon 14 Sep 2026, Anant Chaturdashi (final
+# visarjan) Fri 25 Sep 2026 (smartpuja.com, hindutone.com). Routes and closure hours remain
+# APPROXIMATE: check against Pune Traffic Police diversion notices before quoting them.
 name: ganeshotsav
 description: >
   Last week of Ganeshotsav: evening crowds on old-city roads each day, and full closure of the
   immersion routes on the final day.
 synthetic: true
-start: "2026-09-19T00:00:00+05:30"   # immersion day = day_offset 6 (approx. Anant Chaturdashi 2026)
-days: 7
+start: "2026-09-19T00:00:00+05:30"   # day_offset 6 = Fri 25 Sep 2026, Anant Chaturdashi
+days: 8                               # day 7 covers the procession continuing past midnight
 incident_rate_multiplier: 1.0
 rain:
   hourly_mm_h: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                 0.0, 0.2, 0.5, 0.8, 0.8, 0.5, 0.3, 0.2, 0.0, 0.0, 0.0, 0.0]
-  day_factors: [0.0, 1.0, 0.0, 0.5, 0.0, 0.0, 1.0]
+  day_factors: [0.0, 1.0, 0.0, 0.5, 0.0, 0.0, 1.0, 0.0]
 flooding: null
 festival:
   name: Ganeshotsav
@@ -28,6 +29,7 @@ festival:
   windows:
     - {days: [0, 1, 2, 3, 4, 5], start_hour: 18, end_hour: 24, effect: slowed}
     - {days: [6], start_hour: 9, end_hour: 24, effect: closed}
+    - {days: [7], start_hour: 0, end_hour: 14, effect: closed}   # APPROX: Pune's procession runs ~24-30 h
   slowed_multiplier: {value: 0.3, source: UNVERIFIED}   # speed factor on routes while 'slowed'
   influence_radius_m: 800                # diversions congest nearby roads
   influence_speed_multiplier: {value: 0.6, source: UNVERIFIED}

@@ -1,0 +1,34 @@
+# ARCHIVED: time-of-day speed multipliers of the D-014 (TomTom-based) calibration, used as the
+# baseline for the Google-Maps calibration (D-026): resqcity.geo.calibrate_speeds --baseline this-file.
+traffic_periods:
+  - name: am_peak
+    start_hour: 9
+    end_hour: 11
+    multipliers:
+      trunk: {value: 0.70, source: UNVERIFIED}
+      primary: {value: 0.66, source: UNVERIFIED}
+      secondary: {value: 0.70, source: UNVERIFIED}
+      tertiary: {value: 0.80, source: UNVERIFIED}
+      residential: {value: 0.90, source: UNVERIFIED}
+      service: {value: 0.95, source: UNVERIFIED}
+  - name: pm_peak
+    start_hour: 17
+    end_hour: 21
+    multipliers:
+      trunk: {value: 0.64, source: UNVERIFIED}
+      primary: {value: 0.60, source: UNVERIFIED}
+      secondary: {value: 0.64, source: UNVERIFIED}
+      tertiary: {value: 0.75, source: UNVERIFIED}
+      residential: {value: 0.88, source: UNVERIFIED}
+      service: {value: 0.95, source: UNVERIFIED}
+  - name: night
+    start_hour: 23
+    end_hour: 6
+    multipliers:
+      trunk: {value: 1.50, source: UNVERIFIED}
+      primary: {value: 1.50, source: UNVERIFIED}
+      secondary: {value: 1.40, source: UNVERIFIED}
+      tertiary: {value: 1.30, source: UNVERIFIED}
+      residential: {value: 1.20, source: UNVERIFIED}
+      service: {value: 1.10, source: UNVERIFIED}
+

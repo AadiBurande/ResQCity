@@ -66,39 +66,52 @@ base_speeds_kph:
   residential: {value: 13.0, source: UNVERIFIED, note: "calibrated, D-014"}
   service: {value: 10.0, source: UNVERIFIED, note: "calibrated, D-014"}
 
-# Speed multipliers by time of day (local time). Hours not in any period use 1.0.
+# Speed multipliers by time of day (local time). Hours not in any period use 1.0 (base speed).
 # A period may wrap midnight (start > end). Periods must not overlap.
+# am_peak, midday and pm_peak are CALIBRATED to Google Maps typical travel times on 10 Pune routes
+# (resqcity.geo.calibrate_speeds; leave-one-route-out median error 17 % vs 19 % before, D-026).
+# Shoulder hours 06-09 and 21-23 (base speed) and night are NOT calibrated.
 traffic_periods:
   - name: am_peak
     start_hour: 9
     end_hour: 11
     multipliers:
-      trunk: {value: 0.70, source: UNVERIFIED}
-      primary: {value: 0.66, source: UNVERIFIED}
-      secondary: {value: 0.70, source: UNVERIFIED}
-      tertiary: {value: 0.80, source: UNVERIFIED}
-      residential: {value: 0.90, source: UNVERIFIED}
-      service: {value: 0.95, source: UNVERIFIED}
+      trunk: {value: 0.6579, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      primary: {value: 0.6203, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      secondary: {value: 0.6579, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      tertiary: {value: 0.7519, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      residential: {value: 0.8459, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      service: {value: 0.8929, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+  - name: midday
+    start_hour: 11
+    end_hour: 17
+    multipliers:
+      trunk: {value: 0.6714, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      primary: {value: 0.6714, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      secondary: {value: 0.6714, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      tertiary: {value: 0.6714, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      residential: {value: 0.6714, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      service: {value: 0.6714, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
   - name: pm_peak
     start_hour: 17
     end_hour: 21
     multipliers:
-      trunk: {value: 0.64, source: UNVERIFIED}
-      primary: {value: 0.60, source: UNVERIFIED}
-      secondary: {value: 0.64, source: UNVERIFIED}
-      tertiary: {value: 0.75, source: UNVERIFIED}
-      residential: {value: 0.88, source: UNVERIFIED}
-      service: {value: 0.95, source: UNVERIFIED}
+      trunk: {value: 0.5609, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      primary: {value: 0.5258, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      secondary: {value: 0.5609, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      tertiary: {value: 0.6573, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      residential: {value: 0.7712, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      service: {value: 0.8326, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
   - name: night
     start_hour: 23
     end_hour: 6
     multipliers:
-      trunk: {value: 1.50, source: UNVERIFIED}
-      primary: {value: 1.50, source: UNVERIFIED}
-      secondary: {value: 1.40, source: UNVERIFIED}
-      tertiary: {value: 1.30, source: UNVERIFIED}
-      residential: {value: 1.20, source: UNVERIFIED}
-      service: {value: 1.10, source: UNVERIFIED}
+      trunk: {value: 1.5, source: UNVERIFIED}
+      primary: {value: 1.5, source: UNVERIFIED}
+      secondary: {value: 1.4, source: UNVERIFIED}
+      tertiary: {value: 1.3, source: UNVERIFIED}
+      residential: {value: 1.2, source: UNVERIFIED}
+      service: {value: 1.1, source: UNVERIFIED}
 
 # Network-wide speed multiplier by current rain intensity (highest matching band applies).
 rain_speed_bands:

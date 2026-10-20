@@ -1,14 +1,14 @@
 {
   "file": "results/calibration/base_rate.json",
-  "generated_at_utc": "2026-10-20T07:01:45+00:00",
+  "generated_at_utc": "2026-10-20T09:49:32+00:00",
   "command": "base_rate.py",
   "synthetic": false,
   "git": {
-    "commit": "02b89c56b4a335740e5a2d67ca5c32ee312fbca9",
-    "dirty": false
+    "commit": "27741917fb32dff76f8d0ab0329ee55070cd4d12",
+    "dirty": true
   },
   "configs_sha256": {
-    "configs/base_rate.yaml": "fb4fbfc90eebeab42439f9f7e70912aa10b3367ab85dd6d340486a97d1ce7609"
+    "configs/base_rate.yaml": "c5af4aab4da6d8e38dfb51f56b0d5ba461112766cd0cb8bb6386fb256739079e"
   },
   "seeds": {},
   "versions": {
@@ -23,5 +23,6 @@
   "machine": {
     "platform": "Windows-10-10.0.26200-SP0",
     "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
-  }
+  },
+  "extract": "morth_2022_extract.json"
 }

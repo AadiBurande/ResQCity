@@ -1,0 +1,14 @@
+{
+  "evaluation": "crossfit_v4 fold A (fitted on val)",
+  "clip_run": "clip_s03_t1",
+  "candidate": "image_s03_t1",
+  "stacker": "results/vision/crossfit_v4/stacker_foldA.json",
+  "operating_point": {
+    "threshold": 0.45,
+    "consecutive_windows": 4
+  },
+  "models": {
+    "clip_weights_sha256_16": "40cd328b8bcea568",
+    "stacker_sha256_16": "1c83265c32c615f1"
+  }
+}

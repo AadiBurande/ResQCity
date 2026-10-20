@@ -1,0 +1,22 @@
+seed: 20261020
+run_id: clip_s1_t1_fittest
+temperature: 2.5948502787431735
+weights_sha256_16: 2f1e6d1459e41a38
+device: cuda:0
+fit_split: test
+clip_classifier:
+  backbone: mobilenet_v3_small
+  input_size: 224
+  clip_frames: 16
+  window_s: 3.0
+  stride_s: 1.0
+  hidden: 128
+  dropout: 0.3
+  epochs: 40
+  batch_size: 64
+  lr: 0.001
+  weight_decay: 0.0001
+  calibration: temperature
+  mil_weight: 0.5
+  mil_sparsity: 1.0
+  mil_smoothness: 1.0

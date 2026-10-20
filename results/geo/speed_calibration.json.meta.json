@@ -1,0 +1,29 @@
+{
+  "file": "results/geo/speed_calibration.json",
+  "generated_at_utc": "2026-10-20T09:52:18+00:00",
+  "command": "calibrate_speeds.py",
+  "synthetic": false,
+  "git": {
+    "commit": "27741917fb32dff76f8d0ab0329ee55070cd4d12",
+    "dirty": true
+  },
+  "configs_sha256": {
+    "configs/geo.yaml": "777973a613ab9013b04fd68277f53590aa372381ae21dc5fdcb3a952dcf43b34",
+    "configs/archive/geo_speeds_d014.yaml": "db6e8aa3283f75b9d0d8f6c3882ae7bddadc7ff74df1b8de08ac7871386908e0",
+    "configs/maps_check_routes.yaml": "0e1f24ee7966f1096bb41b09423794eba904f9ccc7bf2b45307497bde70d678c"
+  },
+  "seeds": {},
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  }
+}

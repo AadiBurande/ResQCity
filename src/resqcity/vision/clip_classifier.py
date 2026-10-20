@@ -1,8 +1,11 @@
 """Stage 2 accident classifier on short windows.
 
-Frame features: frozen ImageNet MobileNetV3-small (torchvision), global-pooled (576-d), computed
-once per sampled frame and cached. Window features: [mean, max, mean |diff|] over the frames of a
-``window_s`` window (motion enters through the frame-to-frame differences). Head: 2-layer MLP.
+Two kinds of frozen backbone (``clip_classifier.backbone``):
+- image (``mobilenet_v3_small``, ImageNet): per-frame features (576-d), cached per sampled frame;
+  window feature = [mean, max, mean |diff|] over the window's frames (1728-d);
+- video (``r2plus1d_18``, Kinetics-400): the window's frames are resampled to ``clip_frames``,
+  resized to ``input_size`` and embedded as ONE clip (512-d), so motion is modelled directly.
+Head: 2-layer MLP.
 
 Training signal:
 - windows of videos WITH accident onset/offset annotations get exact labels (window overlaps the
@@ -23,7 +26,32 @@ import numpy as np
 from resqcity.vision.config import ClipClassifierConfig
 
 FEATURE_DIM = 576  # mobilenet_v3_small final channels
+VIDEO_BACKBONES = {"r2plus1d_18": 512}  # backbone -> clip embedding size
 MIL_TOP_K = 3
+KINETICS_MEAN = (0.43216, 0.394666, 0.37645)
+KINETICS_STD = (0.22803, 0.22145, 0.216989)
+VIDEO_RESIZE_SHORT = 128  # Kinetics recipe: resize short side to 128, centre-crop input_size
+
+
+def is_video_backbone(name: str) -> bool:
+    return name in VIDEO_BACKBONES
+
+
+def head_input_dim(cfg: ClipClassifierConfig) -> int:
+    return VIDEO_BACKBONES[cfg.backbone] if is_video_backbone(cfg.backbone) else 3 * FEATURE_DIM
+
+
+def sample_indices(n: int, k: int) -> np.ndarray:
+    """``k`` indices spread evenly over ``n`` frames (repeats when n < k)."""
+    return np.linspace(0, n - 1, k).round().astype(int)
+
+
+def resize_short(image_bgr: np.ndarray, short: int = VIDEO_RESIZE_SHORT) -> np.ndarray:
+    import cv2
+
+    h, w = image_bgr.shape[:2]
+    scale = short / min(h, w)
+    return cv2.resize(image_bgr, (round(w * scale), round(h * scale)), interpolation=cv2.INTER_AREA)
 
 
 def window_features(frame_feats: np.ndarray) -> np.ndarray:
@@ -121,9 +149,56 @@ class FrameEncoder:
         return np.concatenate(feats) if feats else np.zeros((0, FEATURE_DIM), np.float32)
 
 
-def build_head(cfg: ClipClassifierConfig, in_dim: int = 3 * FEATURE_DIM):  # noqa: ANN201 (torch type)
+class ClipEncoder:
+    """Frozen Kinetics-400 video backbone: a window of frames -> one clip embedding."""
+
+    def __init__(self, cfg: ClipClassifierConfig, device: str = "cpu") -> None:
+        import torch
+        from torchvision.models.video import R2Plus1D_18_Weights, r2plus1d_18
+
+        if cfg.backbone != "r2plus1d_18":
+            raise ValueError(f"unsupported video backbone {cfg.backbone!r}")
+        model = r2plus1d_18(weights=R2Plus1D_18_Weights.KINETICS400_V1)
+        model.fc = torch.nn.Identity()
+        self.net = model.eval().to(device)
+        self.device = device
+        self.crop = cfg.input_size
+        self.k = cfg.clip_frames
+        self.mean = torch.tensor(KINETICS_MEAN, device=device).view(1, 3, 1, 1, 1)
+        self.std = torch.tensor(KINETICS_STD, device=device).view(1, 3, 1, 1, 1)
+        self._torch = torch
+
+    def _clip_array(self, frames_bgr: Sequence[np.ndarray]) -> np.ndarray:
+        import cv2
+
+        chosen = [frames_bgr[i] for i in sample_indices(len(frames_bgr), self.k)]
+        out = []
+        for im in chosen:
+            if min(im.shape[:2]) != VIDEO_RESIZE_SHORT:
+                im = resize_short(im)
+            h, w = im.shape[:2]
+            y0, x0 = (h - self.crop) // 2, (w - self.crop) // 2
+            crop = im[y0 : y0 + self.crop, x0 : x0 + self.crop]
+            out.append(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
+        return np.stack(out)  # (T, H, W, 3)
+
+    def encode_clips(self, clips: Sequence[Sequence[np.ndarray]], batch: int = 16) -> np.ndarray:
+        torch = self._torch
+        feats = []
+        for i in range(0, len(clips), batch):
+            arr = np.stack([self._clip_array(c) for c in clips[i : i + batch]])  # (B,T,H,W,3)
+            x = torch.from_numpy(arr).to(self.device).permute(0, 4, 1, 2, 3).float() / 255.0
+            x = (x - self.mean) / self.std
+            with torch.inference_mode():
+                feats.append(self.net(x).float().cpu().numpy())
+        dim = VIDEO_BACKBONES["r2plus1d_18"]
+        return np.concatenate(feats) if feats else np.zeros((0, dim), np.float32)
+
+
+def build_head(cfg: ClipClassifierConfig, in_dim: int | None = None):  # noqa: ANN201 (torch type)
     import torch
 
+    in_dim = head_input_dim(cfg) if in_dim is None else in_dim
     return torch.nn.Sequential(
         torch.nn.LayerNorm(in_dim),
         torch.nn.Linear(in_dim, cfg.hidden),
@@ -154,30 +229,54 @@ def fit_temperature(
 
 
 class ClipClassifier:
-    """Inference wrapper: encoder + head + temperature (loaded from a training run)."""
+    """Live inference wrapper for one camera: buffers frames (or frame features) for one window
+    and scores it. The backbone and window settings come from the training run's metadata, so a
+    run is always used with the exact settings it was trained with."""
 
     def __init__(self, run_dir: Path, cfg: ClipClassifierConfig, device: str = "cpu") -> None:
         import json
+        from collections import deque
 
         import torch
 
         meta = json.loads((run_dir / "clip_classifier.json").read_text(encoding="utf-8"))
+        cfg = cfg.model_copy(update=meta.get("clip_classifier", {}))
+        self.cfg = cfg
         self.temperature = float(meta["temperature"])
         self.head = build_head(cfg)
         self.head.load_state_dict(torch.load(run_dir / "clip_head.pt", map_location=device))
         self.head.eval().to(device)
-        self.encoder = FrameEncoder(cfg, device)
+        self.video = is_video_backbone(cfg.backbone)
+        self.encoder: FrameEncoder | ClipEncoder = (
+            ClipEncoder(cfg, device) if self.video else FrameEncoder(cfg, device)
+        )
+        self.buffer: deque[tuple[float, np.ndarray]] = deque()
         self.device = device
         self._torch = torch
 
-    def logit_from_features(self, frame_feats: np.ndarray) -> float:
+    def observe(self, t: float, image_bgr: np.ndarray) -> None:
+        """Add one sampled frame (stored resized for video backbones, as features otherwise)."""
+        if self.video:  # noqa: SIM108 (ClipEncoder has no per-frame encode)
+            item = resize_short(image_bgr)
+        else:
+            item = self.encoder.encode([image_bgr])[0]  # type: ignore[union-attr]
+        self.buffer.append((t, item))
+        while self.buffer and self.buffer[0][0] < t - self.cfg.window_s:
+            self.buffer.popleft()
+
+    def ready(self) -> bool:
+        return len(self.buffer) >= 2
+
+    def logit_now(self) -> float:
         torch = self._torch
-        x = torch.from_numpy(window_features(frame_feats)).unsqueeze(0).to(self.device)
+        items = [x for _, x in self.buffer]
+        if self.video:
+            feat = self.encoder.encode_clips([items])[0]  # type: ignore[union-attr]
+        else:
+            feat = window_features(np.stack(items))
+        x = torch.from_numpy(np.asarray(feat, np.float32)).unsqueeze(0).to(self.device)
         with torch.inference_mode():
             return float(self.head(x).squeeze().cpu())
 
-    def proba_from_features(self, frame_feats: np.ndarray) -> float:
-        return float(sigmoid(self.logit_from_features(frame_feats) / self.temperature))
-
-    def predict_window(self, frames: Sequence[np.ndarray]) -> float:
-        return self.proba_from_features(self.encoder.encode(frames))
+    def proba_now(self) -> float:
+        return float(sigmoid(self.logit_now() / self.temperature))

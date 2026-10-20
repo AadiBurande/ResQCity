@@ -33,6 +33,14 @@ class SanityConfig(ConfigModel):
 TEMPLATE_COLUMNS = ["google_typical_min_low", "google_typical_min_high", "checked_on", "comment"]
 
 
+def has_filled_values(path: Path) -> bool:
+    """True if any manual-entry column of an existing template has content."""
+    existing = pd.read_csv(path, dtype=str)
+    cols = [c for c in TEMPLATE_COLUMNS if c in existing]
+    filled = existing[cols].fillna("").apply(lambda c: c.str.strip()).ne("")
+    return bool(cols) and bool(filled.any().any())
+
+
 def sanity_table(network: RoadNetwork, cfg: SanityConfig, timezone: str) -> pd.DataFrame:
     names = list(cfg.places)
     lat = [cfg.places[n][0] for n in names]
@@ -86,9 +94,11 @@ def main(argv: list[str] | None = None) -> int:
     geo_cfg = load_model(GeoConfig, *geo_paths)
     network = RoadNetwork.load(base.paths.resolve("data_processed"), geo_cfg)
     table = sanity_table(network, load_model(SanityConfig, args.config), base.project.timezone)
-    if args.template:
-        table = table.assign(**{c: "" for c in TEMPLATE_COLUMNS})
     out = args.out or base.paths.resolve("results") / "geo" / "sanity_travel_times.csv"
+    if args.template:
+        if out.exists() and has_filled_values(out):
+            raise SystemExit(f"{out} contains filled-in Google Maps times; refusing to overwrite")
+        table = table.assign(**{c: "" for c in TEMPLATE_COLUMNS})
     out.parent.mkdir(parents=True, exist_ok=True)
     table.to_csv(out, index=False, lineterminator="\n")
     write_meta(

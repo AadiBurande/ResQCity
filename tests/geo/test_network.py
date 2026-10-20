@@ -88,15 +88,15 @@ def test_save_load_round_trip(tmp_path: Path, geo_cfg, toy_network):
 def test_travel_time_by_hour_and_profile(geo_cfg, toy_network):
     u, v = node_id(2, 0), node_id(2, 1)  # primary
     base = toy_network.base_time_s[toy_network.edge_index(u, v)]
-    off_peak = toy_network.travel_time(u, v, at(0, 14))
+    off_peak = toy_network.travel_time(u, v, at(0, 7))  # 07:00 is outside every period
     assert off_peak == pytest.approx(base)
+    midday = geo_cfg.traffic_periods[1].multipliers["primary"].value
+    assert toy_network.travel_time(u, v, at(0, 14)) == pytest.approx(base / midday)
     am = geo_cfg.traffic_periods[0].multipliers["primary"].value
     assert toy_network.travel_time(u, v, at(0, 10)) == pytest.approx(base / am)
     assert toy_network.travel_time(u, v, at(0, 3)) < off_peak  # night is faster
     amb = geo_cfg.vehicle_profiles["ambulance"].value
-    assert toy_network.travel_time(u, v, at(0, 14), profile="ambulance") == pytest.approx(
-        base / amb
-    )
+    assert toy_network.travel_time(u, v, at(0, 7), profile="ambulance") == pytest.approx(base / amb)
 
 
 def test_unknown_profile_rejected(toy_network):
@@ -128,7 +128,7 @@ def test_shortest_times_match_networkx(toy_network):
 def test_peak_is_never_faster_than_off_peak(toy_network):
     src = [node_id(0, 0)]
     peak = toy_network.shortest_times(src, at(0, 18))
-    off = toy_network.shortest_times(src, at(0, 14))
+    off = toy_network.shortest_times(src, at(0, 7))
     assert np.all(peak >= off - 1e-9)
 
 

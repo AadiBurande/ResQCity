@@ -29,17 +29,19 @@ class PrivacyConfig(ConfigModel):
     face_model_url: str
     face_model_file: str
     face_score_threshold: float = Field(gt=0, lt=1)
+    mode: Literal["faces_plates", "full", "off"]
     plate_band: tuple[float, float]
-    blur_persons: bool
+    plate_band_x: tuple[float, float]
     person_blur_kernel_frac: float = Field(gt=0, le=1)
     min_region_px: int = Field(ge=1)
     blur_kernel_frac: float = Field(gt=0, le=1)
 
     @model_validator(mode="after")
     def _band(self) -> Self:
-        lo, hi = self.plate_band
-        if not 0 <= lo < hi <= 1:
-            raise ValueError("plate_band must satisfy 0 <= low < high <= 1")
+        for name in ("plate_band", "plate_band_x"):
+            lo, hi = getattr(self, name)
+            if not 0 <= lo < hi <= 1:
+                raise ValueError(f"{name} must satisfy 0 <= low < high <= 1")
         return self
 
 
@@ -79,6 +81,7 @@ class HeuristicsConfig(ConfigModel):
 class ClipClassifierConfig(ConfigModel):
     backbone: str
     input_size: int = Field(gt=0)
+    clip_frames: int = Field(gt=1)
     window_s: float = Field(gt=0)
     stride_s: float = Field(gt=0)
     hidden: int = Field(gt=0)

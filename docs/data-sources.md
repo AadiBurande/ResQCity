@@ -11,10 +11,11 @@ Synthetic data is listed too, so readers can see which inputs are real.
 | OSM rivers (Mula, Mutha, Mula-Mutha) | OpenStreetMap `waterway=river` | ODbL 1.0 | 2026-10-20 | flood-prone edges | real | yes, with attribution |
 | OSM police / fire / hospital locations | OpenStreetMap `amenity=police/fire_station/hospital` | ODbL 1.0 | 2026-10-20 | stations, hospitals, ambulance bases | real locations; **synthetic** capabilities | yes, with attribution |
 | Camera sites (40 junctions) | `resqcity.geo.cameras` over the OSM network | derived (ODbL) | generated | simulated CCTV locations | **algorithm-chosen**, not real CCTV sites | yes |
-| Pune rush-hour speed (calibration target) | Punekar News, 2026-01-22, reporting TomTom Traffic Index 2025 (33 min 20 s per 10 km; 15.1 km/h rush hour) | press article | 2026-10-20 | speed calibration (D-014) | real aggregate, secondary source | n/a |
+| Pune rush-hour speed (superseded calibration target) | Punekar News, 2026-01-22, reporting TomTom Traffic Index 2025 | press article | 2026-10-20 | speed calibration D-014 (now baseline only; D-026 uses Google Maps) | real aggregate, secondary source | n/a |
 | PMC fire call statistics 2011–2020 + fire-station map | [OpenCity / Pune Municipal Corporation](https://data.opencity.in/dataset/pune-fire-stations) | Public domain (per portal) | 2026-10-20 | base incident rate (D-018); fire-station count check | real | yes |
-| Pune road deaths 2022–2023 | Punekar News, 2024-01-13, citing Pune city police | press article | 2026-10-20 | base incident rate (D-018) | real aggregate, secondary source | n/a |
-| MoRTH severity index 2022 (36.5 deaths/100 accidents) | MoRTH "Road Accidents in India 2022", via Outlook Business | government report (via press) | 2026-10-20 | base incident rate (D-018) | real aggregate | n/a |
+| MoRTH "Road Accidents in India 2022" (Table 6.2 Pune, Annexure 42 Maharashtra time of day, Annexure 45 Pune weather) | Ministry of Road Transport & Highways, Transport Research Wing (Oct 2023); PDF provided by the user, SHA-256 in `results/calibration/morth_2022_extract.json` | Government of India publication | 2026-10-20 | base incident rate, hour profile (D-026) | real aggregates (police-registered) | public report; PDF kept out of git |
+| Google Maps typical travel times, 10 Pune routes × 3 departure times | Collected manually by the user (`results/geo/maps_check_google_2026-10-20.csv`) | user-collected observations | 2026-10-20 | speed calibration (D-026) | real (aggregate estimates by Google) | yes (our own observations) |
+| Superseded: Pune road deaths 2023 (Punekar News) and national severity index (MoRTH via Outlook Business) | press articles | — | 2026-10-20 | former base-rate proxy (D-018/D-025) | — | — |
 | UCF-Crime (RoadAccidents + 60 normal test videos, temporal annotations) | Sultani, Chen & Shah (CVPR 2018); HF mirror [jinmang2/ucf_crime](https://huggingface.co/datasets/jinmang2/ucf_crime) | research use (CRCV, UCF); mirror lists CC0 | 2026-10-20 | accident detector training/evaluation; demo camera clips | real CCTV footage (public) | do not redistribute; download script only |
 | CADP annotations (frames not obtained) | Shah et al. 2018, [project page](https://ankitshah009.github.io/accident_forecasting_traffic_camera) | non-commercial research use | 2026-10-20 | (pending frames; D-020) | real | download script only |
 | D-Fire | Venâncio et al. 2022, [gaiasd/DFireDataset](https://github.com/gaiasd/DFireDataset); HF mirror badsaarow/d-fire | per original providers (see README) | 2026-10-20 | fire/smoke detector fine-tuning | real images | download script only |
@@ -58,10 +59,9 @@ Exact download time, OSMnx version and SHA-256 of every raw file: `data/raw/down
   `data/processed/vision/dfire_yolo/dataset_check.json`).
 - Known issues: mostly wildfire/building scenes, few vehicle fires on Indian roads (L13).
 
-### CADP (vision, not used yet)
-- Annotation JSON downloaded; frames blocked by Google Drive for automated download (D-020).
-  To use: download the frames archive in a browser into `data/raw/vision/cadp/frames/`, then
-  re-run `resqcity.vision.datasets.annotations` (keyframe times read as seconds: unverified).
+### CADP (vision, not available)
+- Annotation JSON downloaded; frames blocked by Google Drive for automated download (D-020) and
+  not available to the user either (D-026). Not used.
 
 <!--
 ### <Dataset name>
