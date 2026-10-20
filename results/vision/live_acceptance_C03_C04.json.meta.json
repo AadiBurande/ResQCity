@@ -1,0 +1,28 @@
+{
+  "file": "results/vision/live_acceptance_C03_C04.json",
+  "generated_at_utc": "2026-10-20T00:58:59+00:00",
+  "command": "acceptance.py --duration 160 --cameras C03 C04 --out results/vision/live_acceptance_C03_C04.json",
+  "synthetic": false,
+  "git": {
+    "commit": "f154d3f70a7d0a43c8e83a1524a7f1fb4a84b6cb",
+    "dirty": true
+  },
+  "configs_sha256": {
+    "configs/streams_acceptance.yaml": "b54efc0c594232a5513e15e05d7f824acd09e81d6f3fd0ee6d378d3c404ab279",
+    "configs/vision.yaml": "0861c6e32bb3f5598b7ac6b1f708a808b35b6f62792c49521c0ed8402c3944f1"
+  },
+  "seeds": {},
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  }
+}

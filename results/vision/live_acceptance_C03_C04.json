@@ -1,0 +1,30 @@
+{
+  "run_start_utc": "2026-10-20T00:56:18.386578+00:00",
+  "run_end_utc": "2026-10-20T00:58:59.123639+00:00",
+  "cameras": [
+    {
+      "camera": "C03",
+      "events": 1,
+      "accident_clip": "RoadAccidents011_x264.mp4",
+      "true_onset_utc": "2026-10-20T00:57:37.369659+00:00",
+      "detected": true,
+      "delay_s": 2.602214,
+      "false_alarms": 0
+    },
+    {
+      "camera": "C04",
+      "events": 0,
+      "accident_clip": "RoadAccidents012_x264.mp4",
+      "true_onset_utc": "2026-10-20T00:57:52.043588+00:00",
+      "detected": false,
+      "delay_s": null,
+      "false_alarms": 0
+    }
+  ],
+  "detected": 1,
+  "accident_clips": 2,
+  "false_alarms": 0,
+  "camera_hours": 0.08929836722222223,
+  "events_published": 1,
+  "note": "Live check of the end-to-end path (RTSP -> vision -> bus); 4 clips is far too few to estimate detector accuracy: see results/vision/<run>/test_video_metrics.csv for that."
+}

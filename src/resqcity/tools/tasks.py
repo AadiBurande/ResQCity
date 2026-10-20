@@ -67,6 +67,28 @@ def data(_: argparse.Namespace) -> int:
     return _run(_py("resqcity.geo.download"), _py("resqcity.geo.build"), _py("resqcity.geo.sanity"))
 
 
+def streams(_: argparse.Namespace) -> int:
+    """Start MediaMTX (Docker) and publish simulated cameras with scenario cues (Ctrl-C stops)."""
+    return _run(_py("resqcity.streams.loop_cameras", "--start-server"))
+
+
+def vision(_: argparse.Namespace) -> int:
+    """Vision pipeline: data, annotations, train/evaluate accident + fire models, demo clips.
+
+    GPU recommended (hours); every step resumes from its cache.
+    """
+    run_id = "clip_main"
+    return _run(
+        _py("resqcity.vision.datasets.download"),
+        _py("resqcity.vision.datasets.annotations"),
+        _py("resqcity.vision.train_clip", "--run-id", run_id),
+        _py("resqcity.vision.eval.evaluate", "--run-id", run_id),
+        _py("resqcity.vision.datasets.prepare_dfire"),
+        _py("resqcity.vision.train_fire", "--run-id", "fire_main"),
+        _py("resqcity.streams.prepare_videos"),
+    )
+
+
 def _stub(phase: int, what: str) -> Callable[[argparse.Namespace], int]:
     def run(args: argparse.Namespace) -> int:
         print(f"{what}: not implemented yet (phase {phase}).", file=sys.stderr)
@@ -82,7 +104,8 @@ TASKS: dict[str, Callable[[argparse.Namespace], int]] = {
     "test": test,
     "types": types,
     "data": data,
-    "streams": _stub(3, "start simulated RTSP cameras"),
+    "streams": streams,
+    "vision": vision,
     "api": _stub(8, "start backend API"),
     "ui": _stub(9, "start dashboard"),
     "demo": _stub(9, "end-to-end live demo"),

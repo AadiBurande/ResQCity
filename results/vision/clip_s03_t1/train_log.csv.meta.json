@@ -1,0 +1,34 @@
+{
+  "file": "results/vision/clip_s03_t1/train_log.csv",
+  "generated_at_utc": "2026-10-20T00:34:04+00:00",
+  "command": "train_clip.py --run-id clip_s03_t1 --overlay configs/vision_sweeps/clip_s03_t1.yaml",
+  "synthetic": false,
+  "git": {
+    "commit": "f154d3f70a7d0a43c8e83a1524a7f1fb4a84b6cb",
+    "dirty": true
+  },
+  "configs_sha256": {
+    "configs/vision.yaml": "75a2d59ecb1ff0e6827c8cc537d26f584d8027aaf860bd28c90f401bfd71b025",
+    "configs/vision_sweeps/clip_s03_t1.yaml": "32a6228ebb95737c468f825eb68cb2cbb81e7cff8975f3d008d30c30fb40c58d"
+  },
+  "seeds": {
+    "seed": 20261020
+  },
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  },
+  "run_id": "clip_s03_t1",
+  "temperature": 1.0539623269551548,
+  "weights_sha256_16": "40cd328b8bcea568",
+  "device": "cuda:0"
+}

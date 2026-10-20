@@ -34,6 +34,18 @@ uv run python -m resqcity.sim.generator --scenario monsoon --replication 0   # s
 Map data © OpenStreetMap contributors (ODbL). Ward boundaries © DataMeet Trust, CC BY-SA 2.5 IN.
 See [docs/data-sources.md](docs/data-sources.md).
 
+## Vision and simulated cameras (phase 3)
+
+```bash
+make vision    # download public datasets, train/evaluate the accident + fire detectors (GPU, hours)
+make streams   # MediaMTX in Docker + 4 simulated RTSP cameras (C01-C04) with scenario cues
+uv run python -m resqcity.vision.run --camera C01 --preview-port 8091   # Events -> data/runtime/events.jsonl
+```
+
+Faces and number plates are blurred before any frame is stored or shown; only event metadata leaves
+`src/resqcity/vision/`. A phone IP camera works too: `--source http://<phone-ip>:8080/video`.
+Colab version of the training: [notebooks/vision/train.ipynb](notebooks/vision/train.ipynb).
+
 ## Layout
 
 ```

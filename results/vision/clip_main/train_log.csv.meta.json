@@ -1,0 +1,33 @@
+{
+  "file": "results/vision/clip_main/train_log.csv",
+  "generated_at_utc": "2026-10-20T00:31:35+00:00",
+  "command": "train_clip.py --run-id clip_main",
+  "synthetic": false,
+  "git": {
+    "commit": "f154d3f70a7d0a43c8e83a1524a7f1fb4a84b6cb",
+    "dirty": true
+  },
+  "configs_sha256": {
+    "configs/vision.yaml": "897a2ad04780300ebe836aeac617ff95eda7908ca88c0dc53428911c70c72a46"
+  },
+  "seeds": {
+    "seed": 20261020
+  },
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  },
+  "run_id": "clip_main",
+  "temperature": 1.281161810742242,
+  "weights_sha256_16": "08456a80c3bf0638",
+  "device": "cuda:0"
+}

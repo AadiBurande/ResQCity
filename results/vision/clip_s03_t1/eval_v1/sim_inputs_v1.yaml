@@ -1,0 +1,81 @@
+source: 'measured: results/vision/clip_s03_t1 (test split; public datasets UCF-Crime/CADP)'
+caveat: Measured on public footage, not Pune CCTV (domain shift); small number of
+  videos with annotated onsets. Treat as an empirical prior and vary in sensitivity
+  analysis.
+synthetic: false
+operating_threshold: 0.8
+per_threshold:
+- threshold: 0.3
+  recall: 0.7027027027027027
+  delay_median_s: 4.0
+  delay_p90_s: 30.666666666666668
+  false_alarms_per_camera_hour: 8.931968175728205
+- threshold: 0.35
+  recall: 0.6756756756756757
+  delay_median_s: 4.0
+  delay_p90_s: 30.666666666666668
+  false_alarms_per_camera_hour: 8.931968175728205
+- threshold: 0.4
+  recall: 0.6756756756756757
+  delay_median_s: 4.0
+  delay_p90_s: 30.666666666666668
+  false_alarms_per_camera_hour: 8.931968175728205
+- threshold: 0.45
+  recall: 0.7027027027027027
+  delay_median_s: 4.0
+  delay_p90_s: 26.733333333333352
+  false_alarms_per_camera_hour: 7.145574540582564
+- threshold: 0.5
+  recall: 0.6756756756756757
+  delay_median_s: 5.0
+  delay_p90_s: 31.666666666666668
+  false_alarms_per_camera_hour: 7.145574540582564
+- threshold: 0.55
+  recall: 0.6216216216216216
+  delay_median_s: 5.0
+  delay_p90_s: 31.666666666666668
+  false_alarms_per_camera_hour: 7.145574540582564
+- threshold: 0.6
+  recall: 0.5945945945945946
+  delay_median_s: 7.5
+  delay_p90_s: 34.66666666666667
+  false_alarms_per_camera_hour: 7.145574540582564
+- threshold: 0.65
+  recall: 0.5135135135135135
+  delay_median_s: 5.666666666666666
+  delay_p90_s: 43.933333333333344
+  false_alarms_per_camera_hour: 7.145574540582564
+- threshold: 0.7
+  recall: 0.4594594594594595
+  delay_median_s: 3.1666666666666665
+  delay_p90_s: 6.6000000000000005
+  false_alarms_per_camera_hour: 5.359180905436923
+- threshold: 0.75
+  recall: 0.4324324324324324
+  delay_median_s: 3.333333333333333
+  delay_p90_s: 4.133333333333334
+  false_alarms_per_camera_hour: 5.359180905436923
+- threshold: 0.8
+  recall: 0.3783783783783784
+  delay_median_s: 3.333333333333333
+  delay_p90_s: 4.133333333333334
+  false_alarms_per_camera_hour: 3.572787270291282
+- threshold: 0.85
+  recall: 0.2162162162162162
+  delay_median_s: 3.6666666666666665
+  delay_p90_s: 4.2
+  false_alarms_per_camera_hour: 3.572787270291282
+- threshold: 0.9
+  recall: 0.2162162162162162
+  delay_median_s: 2.333333333333333
+  delay_p90_s: 2.8666666666666667
+  false_alarms_per_camera_hour: 1.786393635145641
+- threshold: 0.95
+  recall: 0.1621621621621621
+  delay_median_s: 1.666666666666667
+  delay_p90_s: 1.666666666666667
+  false_alarms_per_camera_hour: 0.0
+delays_at_operating_threshold_s:
+- 3.0
+- 3.33
+- 4.33

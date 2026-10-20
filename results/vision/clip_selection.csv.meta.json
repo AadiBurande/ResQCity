@@ -1,0 +1,32 @@
+{
+  "file": "results/vision/clip_selection.csv",
+  "generated_at_utc": "2026-10-20T00:35:11+00:00",
+  "command": "select_clip.py clip_s0_t0 clip_s03_t1 clip_s1_t1",
+  "synthetic": false,
+  "git": {
+    "commit": "f154d3f70a7d0a43c8e83a1524a7f1fb4a84b6cb",
+    "dirty": true
+  },
+  "configs_sha256": {
+    "configs/vision.yaml": "75a2d59ecb1ff0e6827c8cc537d26f584d8027aaf860bd28c90f401bfd71b025",
+    "configs/vision_sweeps/clip_s03_t1.yaml": "32a6228ebb95737c468f825eb68cb2cbb81e7cff8975f3d008d30c30fb40c58d",
+    "configs/vision_sweeps/clip_s0_t0.yaml": "c3d59cebf19938c424da23be3b262161497b0a2d20b46ee7caaef0ce940fd065",
+    "configs/vision_sweeps/clip_s1_t1.yaml": "6909462d03fb889db97309e2b26946160d2fea822772c17eaef962910d098d9d"
+  },
+  "seeds": {},
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  },
+  "criterion": "val_auroc_within",
+  "split": "val"
+}

@@ -1,0 +1,92 @@
+# Vision pipeline configuration (phase 3). Loaded by resqcity.vision.config.load_vision_config().
+# Engineering / tuning parameters. Thresholds marked "calibrated" are re-fitted on the VALIDATION
+# split by the training scripts and written to results/vision/<run>/; values here are defaults.
+
+ingest:
+  sample_fps: 5.0              # frames per second analysed (camera fps is typically 25-30)
+  reconnect_delay_s: 2.0
+  max_reconnects: 50
+  resize_width: 960            # frames are downscaled to this width before detection (null = keep)
+
+detector:
+  weights: yolo11n.pt          # Ultralytics small model; downloaded on first use
+  tracker: bytetrack.yaml
+  device: auto                 # auto | cpu | cuda:0
+  conf: 0.25
+  iou: 0.5
+  vehicle_classes: [car, motorcycle, bus, truck, bicycle]
+  person_class: person
+  # COCO has no auto-rickshaw class; three-wheelers are usually detected as car/motorcycle.
+
+privacy:
+  face_model_url: https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx
+  face_model_file: face_detection_yunet_2023mar.onnx   # under data/models/
+  face_score_threshold: 0.6
+  plate_band: [0.55, 1.0]      # vertical fraction of each vehicle box treated as plate region
+  blur_persons: true           # blur whole person boxes (covers faces the face model misses)
+  person_blur_kernel_frac: 0.6 # strong blur; verified by results/vision/privacy_check.json
+  min_region_px: 24            # tiny regions are grown to at least this size before blurring
+  blur_kernel_frac: 0.25       # Gaussian kernel = this fraction of the region size (odd, >= 9)
+
+heuristics:                    # stage 1 (explainable). Speeds are in box-heights per second.
+  window_s: 3.0
+  min_track_frames: 4
+  decel_drop_frac: 0.6         # speed drop >= 60 % within decel_window_s counts as sudden
+  decel_window_s: 1.0
+  moving_speed: 0.4            # box-heights/s above which a vehicle counts as moving
+  stopped_speed: 0.1
+  overlap_iou: 0.15            # vehicle boxes overlapping this much...
+  stop_after_overlap_s: 1.5    # ...and both (nearly) stopped within this time = collision cue
+  aspect_flip_ratio: 1.6       # w/h ratio change >= 1.6x = orientation change (overturn proxy)
+  person_down_aspect: 1.3      # person box wider than tall by this factor...
+  person_down_still_s: 2.0     # ...and still for this long = person down
+  weights: {deceleration: 0.25, collision: 0.45, orientation: 0.15, person_down: 0.15}
+
+clip_classifier:               # stage 2 (learned)
+  backbone: mobilenet_v3_small # torchvision, ImageNet weights, frozen
+  input_size: 224
+  window_s: 3.0
+  stride_s: 1.0
+  hidden: 128
+  dropout: 0.3
+  epochs: 40
+  batch_size: 64
+  lr: 0.001
+  weight_decay: 0.0001
+  calibration: temperature     # temperature | isotonic
+  mil_weight: 0.5              # weight of the MIL (weak accident video) term
+  mil_sparsity: 0.3            # Sultani et al. 2018: accident windows are rare within a video
+  mil_smoothness: 1.0          # ...and scores change smoothly over time
+
+fire_smoke:
+  base_weights: yolo11n.pt
+  epochs: 50
+  imgsz: 640
+  batch: 16
+  conf: 0.35
+  persistence_frames: 5        # fire/smoke must persist this many sampled frames
+  workers: 2                   # dataloader workers (4 crashed on Windows with ~6 GB RAM free)
+
+alarm:
+  threshold: 0.6               # calibrated: default operating point, re-fitted on val
+  consecutive_windows: 2
+  cooldown_s: 60.0
+
+datasets:
+  cap_gb: 10.0                 # hard cap on downloads (D-019)
+  split: {train: 0.6, val: 0.2, test: 0.2, seed: 1303}
+  ucf_crime:
+    base_url: https://huggingface.co/datasets/jinmang2/ucf_crime/resolve/main
+    accident_zip: Anomaly-Videos-Part-3.zip
+    accident_prefix: RoadAccidents
+    normal_zip: Testing_Normal_Videos.zip
+    normal_max_videos: 60      # subset of normal test videos for false-alarm measurement
+    temporal_annotations: UCF_Crimes-Train-Test-Split/Temporal_Anomaly_Annotation_for_Testing_Videos.txt
+    licence: "UCF-Crime: research use (CRCV, UCF); HF mirror jinmang2/ucf_crime"
+  cadp:
+    annotations_url: https://filedn.com/lQfYylUHSWEYAyORS7PdIKH/annotations_CADP.json
+    frames_gdrive_id: 1PDsYAsOEwZTcFVVt444wvhOTfjqwqTaY
+    licence: "CADP: non-commercial research use (Shah et al., 2018)"
+  dfire:
+    hf_repo: badsaarow/d-fire
+    licence: "D-Fire (Venâncio et al., 2022), HF mirror badsaarow/d-fire; original gaiasd/DFireDataset"

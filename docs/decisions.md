@@ -230,3 +230,124 @@ scans `src/resqcity/` and asserts it actually found the modules, so boundary che
 vacuously.
 Consequences: earlier entries and phase plans keep their original paths as historical record.
 Committed result sidecars before this change name the old module paths in `command`.
+
+## D-018 User answers to the phase-2 questions; cited base incident rate  (2026-10-20)
+User answers:
+1. The re-specified equity metric (D-015) is **accepted**.
+2. The sanity travel times look "close to correct". The user asked for a Google Maps check and
+   will fill in typical times manually on a template (`configs/maps_check_routes.yaml` →
+   `results/geo/maps_check_template.csv`). Hold-out routes not used in calibration are included.
+3. No own fire-station list. The PMC open-data map of fire stations (data.opencity.in,
+   public domain) lists **14 stations**, which matches the 14 found in OSM.
+4. No own incident figures. The base rate was replaced by a derivation from cited sources:
+   - Fires: mean "Fire" calls 2015–2019 = 1,107 per year (PMC Fire Call Statistics 2011–2020, OpenCity /
+     PMC, public domain; 2020 excluded as a COVID year).
+   - Road accidents: 334 deaths in Pune city in 2023 (city police via Punekar News, 2024-01-13)
+     ÷ national severity index 36.5 deaths per 100 accidents (MoRTH, Road Accidents in India 2022)
+     ≈ 915 per year.
+   - The result is 5.54 incidents/day (was 24/day, an assumption), with type mix accident 0.44,
+     fire 0.53 and crowd/other 0.03 (assumed).
+   Caveats: the national severity index probably under-estimates city accidents, and registered
+   accidents miss unreported ones. The phase-10 sensitivity sweep covers 0.5×–4× the rate. A lower
+   rate means less queueing, so benefits of joint dispatch will come mostly from coordination, not
+   capacity. That is reported, not tuned away.
+   An unverified press figure of "1,400 road accidents in Pune in 2024" (attributed to a Rajya
+   Sabha speech) could not be confirmed from the primary source and is not used.
+
+## D-019 Phase-3 permissions and choices  (2026-10-20)
+The user allowed: downloading public datasets that need no account or sign-up (cap ≈ 10 GB; D: had
+23 GB free), overnight GPU training on the RTX 4050, and starting Docker Desktop and pulling MediaMTX.
+Ultralytics YOLO (AGPL-3.0) is accepted for this research project. The vision stack is the
+dependency group `vision` (PyTorch CUDA 12.6 wheels). It is in uv's default groups, so `uv sync` and
+`make setup` keep it, while CI skips it with `--no-group vision`. (An optional extra was tried first,
+but a plain `uv sync` uninstalls extras.) "MADP" (user link: github.com/MADPToolbox/MADP) is the
+Multiagent Decision Process Toolbox, a planning library, not a video dataset. It is dropped as a
+vision dataset and may be cited as related work for multi-agent decision making.
+
+## D-020 Vision datasets actually used, and the split policy  (2026-10-20, phase 3)
+Downloaded (no account; total ≈ 5.6 GB + D-Fire, under the 10 GB cap):
+- UCF-Crime (HF mirror of the original zips): all 150 `RoadAccidents` videos plus 60 seeded-random
+  normal test videos (one unreadable, so 59 used), extracted member by member via HTTP range
+  requests, with CRC checks. The official temporal annotations give accident onsets for **23**
+  accident videos.
+- D-Fire (HF mirror) for fire/smoke. The class-id mapping is inferred from the README box totals
+  and checked in `dataset_check.json`.
+Not obtained:
+- CADP frames: Google Drive refuses automated download ("cannot retrieve the public link"). The
+  annotation JSON was downloaded. Its keyframe `frame` values are non-integer (e.g. 22.03), so
+  the loader reads them as seconds; this is unverified until the frames are available. The user
+  can download the frames in a browser into `data/raw/vision/cadp/frames/` and re-run
+  `resqcity.vision.datasets.annotations`.
+- TAD (no public release found) and IEEE DataPort (needs an account).
+Split policy: the onset-annotated accident videos are the only ones that measure detection delay,
+so they go only to val (11) and test (12) (`onset_videos_eval_only`). The classifier learns from
+the other 127 accident videos through multiple-instance learning (weak labels; Sultani et al.,
+2018), with normal videos as negatives. Splits are by video, stratified and seeded.
+Consequences: accident evaluation rests on one dataset (UCF-Crime: CCTV, mixed countries, low
+resolution, 320×240). Per-dataset reporting currently has one dataset. The detection-delay
+estimate uses 12 test videos, so its uncertainty is large and is reported as such.
+Domain shift to Pune CCTV is a threat to validity (docs/limitations.md L10).
+
+## D-021 Clip-classifier model selection by within-video discrimination  (2026-10-20, phase 3)
+Finding (first run `clip_main`): validation window AUROC was 0.93, but within onset-annotated
+accident videos (pre-accident vs. accident windows of the same scene) it was only 0.66, and 0.62
+on test. Mean scores were 0.08 on normal videos and 0.53 on pre-accident windows. The overall AUROC
+mostly reflects the scene difference between UCF-Crime's normal videos (shops, indoors) and its
+road videos, which says little about a road camera, where every scene is a road.
+Decision:
+1. Model selection uses the VALIDATION within-video AUROC (`val_auroc_within`), not the overall one.
+2. The MIL objective gets Sultani et al.'s sparsity and temporal-smoothness terms (weights in
+   config). Three settings were trained (`configs/vision_sweeps/`):
+   (sparsity, smoothness) ∈ {(0,0), (0.3,1), (1,1)}.
+3. The selection is scripted (`resqcity.vision.select_clip` → `results/vision/clip_selection.csv`).
+   `clip_s03_t1` was selected: val within-video AUROC 0.736 (vs 0.669 / 0.673), val overall 0.945.
+   The test split was NOT looked at for this choice; it is evaluated once, after selection.
+Consequences: the three sweep runs and the discarded first run stay recorded under
+`results/vision/`. The within-video AUROC is reported alongside the overall one in every result,
+because it is the metric that matters for false alarms on road cameras.
+
+## D-022 Accident-detector evaluation: two versions, disclosed  (2026-10-20, phase 3)
+v1 (`results/vision/clip_s03_t1/eval_v1/`): the threshold was chosen on val, with the alarm
+persistence fixed at 2 windows. Test (combined): video recall 0.38, onsets detected 3 of 12,
+false alarms 3.6 per camera-hour.
+After seeing v1 we diagnosed it on VAL: the alarm persistence (consecutive windows) matters as much
+as the threshold. v2 chooses (threshold, persistence) jointly on val, with persistence ∈ {1, 2, 3, 4},
+max video F1 within a budget of 1 false alarm per camera-hour. v2 adds Wilson 95% intervals for
+recall and exact Poisson intervals for false-alarm rates.
+v2 test (combined, threshold 0.60, 4 windows): video recall 0.35 [0.22, 0.51], onsets detected
+1 of 12, false alarms 7.2 per camera-hour [95% upper bound 18.3] on only 0.56 h of normal footage.
+Window AUROC is 0.98 overall but 0.61 within videos; ECE is 0.013.
+**Disclosure:** v2 was adopted after the v1 test result had been seen, so the v2 test figures are
+not strictly held-out. Both versions are kept and reported. Neither meets the 1 false alarm per
+camera-hour budget with useful recall. The honest summary: on UCF-Crime this detector is
+well calibrated at window level but localises accidents poorly in time.
+Diagnosis: several videos alarm at t = 6 s, the earliest time 4 consecutive 3 s windows allow,
+i.e. the scene is flagged as accident-like from the start. Track heuristics are weak at 320×240
+resolution: collision cues almost never fire, and deceleration fires in 25% of accident frames vs
+12% of normal frames.
+Live check (`resqcity.streams.acceptance`, RTSP through MediaMTX, the val operating point): 2 of 4
+accident clips detected (C02 +3.0 s, C03 +2.6 s after onset), 0 false alarms in about 0.18
+camera-hours. This is consistent with the offline result.
+Consequences for the research: the simulator reads detector behaviour from
+`results/vision/sim_inputs.yaml` (measured, with intervals). Because measured recall is low and
+uncertain, phase 10 must treat detector recall, delay and false-alarm rate as sensitivity factors,
+and report the break-even detector quality at which CCTV-triggered dispatch beats call-only
+dispatch. Improving the detector (more onset-annotated data, e.g. CADP frames downloaded by hand;
+higher-resolution footage; a pretrained video model) is future work. It is not tuned further on
+this test split.
+
+## D-023 Privacy filter: whole-person blur, minimum region size; verified numerically  (2026-10-20, phase 3)
+Whole-person pixelation was replaced by a strong Gaussian blur (kernel = 0.6 × region size), so
+every privacy region is checked with the same metric (variance of the Laplacian). Regions smaller
+than 24 px are grown to 24 px, because a blur kernel cannot remove detail from a 3-pixel-wide box.
+The first privacy-check runs failed because of a measurement bug: outline rectangles were drawn
+before the next region was measured. It was fixed by measuring first. The check on a real test frame
+passes: 14 regions (1 face, 5 plates, 8 persons), detail reduction ≥ 98.9% in each
+(`results/vision/privacy_check.json`, `.png`). Only the anonymised frame is ever written.
+
+## D-024 Run GPU jobs one at a time on the 6 GB laptop GPU  (2026-10-20, phase 3)
+One attempt ran fire training, four live vision processes and the privacy check together. GPU
+memory and system RAM ran out (about 6 GB of RAM free beside the user's other containers), which
+killed all of them. Since then, GPU jobs run sequentially, the live acceptance watches two cameras
+per run, and fire training resumes from `last.pt` (`train_fire --resume`). CPU latency is measured
+with nothing else running: 44 ms per frame, 22.5 fps on CPU for 320×240 frames.

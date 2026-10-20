@@ -1,0 +1,20 @@
+clip_classifier:
+  backbone: mobilenet_v3_small
+  input_size: 224
+  window_s: 3.0
+  stride_s: 1.0
+  hidden: 128
+  dropout: 0.3
+  epochs: 40
+  batch_size: 64
+  lr: 0.001
+  weight_decay: 0.0001
+  calibration: temperature
+  mil_weight: 0.5
+  mil_sparsity: 0.3
+  mil_smoothness: 1.0
+seed: 20261020
+run_id: clip_s03_t1
+temperature: 1.0539623269551548
+weights_sha256_16: 40cd328b8bcea568
+device: cuda:0

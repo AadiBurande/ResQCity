@@ -28,8 +28,12 @@ def normal_gen(toy_network):
 
 
 def test_config_is_synthetic_and_flagged():
+    from resqcity.common.config import find_unverified
+
     assert INCIDENTS.synthetic
-    assert INCIDENTS.base_rate_per_day.source == "UNVERIFIED"
+    assert INCIDENTS.base_rate_per_day.verified  # cited derivation (D-018)
+    assert "PMC Fire Call Statistics" in INCIDENTS.base_rate_per_day.source
+    assert {"hour_profile", "type_mix", "features.accident"} <= set(find_unverified(INCIDENTS))
     assert INCIDENTS.hour_factors.mean() == pytest.approx(1.0)
 
 

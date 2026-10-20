@@ -1,0 +1,4 @@
+# Clip-classifier MIL regularisation sweep (D-021); selection on VAL within-video AUROC only.
+clip_classifier:
+  mil_sparsity: 0.3
+  mil_smoothness: 1.0

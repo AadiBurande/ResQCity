@@ -23,6 +23,14 @@ class SanityConfig(ConfigModel):
     profiles: list[str] = Field(min_length=1)
     places: dict[str, tuple[float, float]]
     pairs: list[tuple[str, str]] = Field(min_length=1)
+    holdout_pairs: list[tuple[str, str]] = Field(
+        default_factory=list,
+        description="routes NOT used for speed calibration (independent check)",
+    )
+
+
+# Blank columns a person fills in from Google Maps ("typically X-Y min" for the departure time).
+TEMPLATE_COLUMNS = ["google_typical_min_low", "google_typical_min_high", "checked_on", "comment"]
 
 
 def sanity_table(network: RoadNetwork, cfg: SanityConfig, timezone: str) -> pd.DataFrame:
@@ -35,7 +43,8 @@ def sanity_table(network: RoadNetwork, cfg: SanityConfig, timezone: str) -> pd.D
     tz = ZoneInfo(timezone)
     day = datetime.fromisoformat(cfg.departure_date).date()
     rows = []
-    for a, b in cfg.pairs:
+    holdout = set(cfg.holdout_pairs)
+    for a, b in [*cfg.pairs, *cfg.holdout_pairs]:
         for profile in cfg.profiles:
             for hour in cfg.departure_hours:
                 t = datetime.combine(day, time(hour), tzinfo=tz)
@@ -45,6 +54,7 @@ def sanity_table(network: RoadNetwork, cfg: SanityConfig, timezone: str) -> pd.D
                     {
                         "from": a,
                         "to": b,
+                        "holdout": (a, b) in holdout,
                         "profile": profile,
                         "depart_local": t.strftime("%a %H:%M"),
                         "route_km": round(length_m / 1000, 2),
@@ -67,12 +77,17 @@ def main(argv: list[str] | None = None) -> int:
         help="YAML merged over configs/geo.yaml (e.g. archived speed settings)",
     )
     parser.add_argument("--out", type=Path, default=None, help="output CSV path")
+    parser.add_argument(
+        "--template", action="store_true", help="add blank columns for manual Google Maps times"
+    )
     args = parser.parse_args(argv)
     base = load_base_config()
     geo_paths = [CONFIG_DIR / "geo.yaml", *([args.geo_overlay] if args.geo_overlay else [])]
     geo_cfg = load_model(GeoConfig, *geo_paths)
     network = RoadNetwork.load(base.paths.resolve("data_processed"), geo_cfg)
     table = sanity_table(network, load_model(SanityConfig, args.config), base.project.timezone)
+    if args.template:
+        table = table.assign(**{c: "" for c in TEMPLATE_COLUMNS})
     out = args.out or base.paths.resolve("results") / "geo" / "sanity_travel_times.csv"
     out.parent.mkdir(parents=True, exist_ok=True)
     table.to_csv(out, index=False, lineterminator="\n")

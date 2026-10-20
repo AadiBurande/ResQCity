@@ -13,7 +13,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install
-        run: uv sync --locked
+        run: uv sync --locked --no-group vision
       - name: Lint (ruff + TS types up to date)
         run: uv run python -m resqcity.tools.tasks lint
       - name: Test

@@ -1,0 +1,15 @@
+# MediaMTX RTSP server for the simulated CCTV cameras (phase 3).
+#   docker compose -f streams/docker-compose.yml up -d
+# Cameras publish to rtsp://localhost:8554/<camera_id> (see src/resqcity/streams/loop_cameras.py).
+# Image pinned by digest (pulled 2026-10-20) for reproducibility.
+services:
+  mediamtx:
+    image: bluenviron/mediamtx@sha256:c7540465f868a02652118bea5a0daab12a29ac0f6cb8485abd535939ecddf886
+    container_name: resqcity-mediamtx
+    restart: unless-stopped
+    environment:
+      MTX_RTSPTRANSPORTS: tcp
+    ports:
+      - "8554:8554"   # RTSP
+      - "8888:8888"   # HLS (browser preview)
+      - "9997:9997"   # API

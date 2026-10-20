@@ -11,6 +11,7 @@ MAKEFILE_TARGETS = {
     "test",
     "types",
     "data",
+    "vision",
     "streams",
     "api",
     "ui",

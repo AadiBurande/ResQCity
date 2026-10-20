@@ -1,0 +1,20 @@
+# Phase-3 live acceptance run (resqcity.streams.acceptance): accident clip on every camera.
+# Simulated CCTV cameras (phase 3). Clips are public-dataset videos (UCF-Crime), assigned to real
+# Pune junctions from configs/cameras.yaml by `python -m resqcity.streams.prepare_videos`.
+rtsp_base: rtsp://localhost:8554
+ffmpeg: ffmpeg                  # resolved on PATH, else the winget package folder (Windows)
+video_dir: data/videos          # data/videos/<camera_id>/{normal,accident}/*.mp4
+cameras: [C01, C02, C03, C04]   # >= 4 cameras for the demo (acceptance criterion)
+clips_per_camera: {normal: 2, accident: 1}
+transcode:                      # re-encode for robust RTSP publishing (dataset codecs vary)
+  codec: libx264
+  preset: veryfast
+  tune: zerolatency
+  gop: 50
+# Scenario cues: switch a camera from normal footage to an accident clip at a time offset (s)
+# after the player starts; the camera returns to normal footage when the clip ends.
+scenario:  # acceptance run: every camera gets one accident clip
+  - {camera: C01, at_s: 40}
+  - {camera: C02, at_s: 55}
+  - {camera: C03, at_s: 70}
+  - {camera: C04, at_s: 85}

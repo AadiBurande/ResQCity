@@ -1,0 +1,27 @@
+{
+  "file": "results/vision/privacy_check.json",
+  "generated_at_utc": "2026-10-20T00:53:12+00:00",
+  "command": "privacy_check.py",
+  "synthetic": false,
+  "git": {
+    "commit": "f154d3f70a7d0a43c8e83a1524a7f1fb4a84b6cb",
+    "dirty": true
+  },
+  "configs_sha256": {
+    "configs/vision.yaml": "0861c6e32bb3f5598b7ac6b1f708a808b35b6f62792c49521c0ed8402c3944f1"
+  },
+  "seeds": {},
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "file": "results/geo/maps_check_template.csv",
+  "generated_at_utc": "2026-10-20T00:33:32+00:00",
+  "command": "sanity.py --config configs/maps_check_routes.yaml --template --out results/geo/maps_check_template.csv",
+  "synthetic": false,
+  "git": {
+    "commit": "f154d3f70a7d0a43c8e83a1524a7f1fb4a84b6cb",
+    "dirty": true
+  },
+  "configs_sha256": {
+    "configs/geo.yaml": "777973a613ab9013b04fd68277f53590aa372381ae21dc5fdcb3a952dcf43b34",
+    "configs/maps_check_routes.yaml": "0e1f24ee7966f1096bb41b09423794eba904f9ccc7bf2b45307497bde70d678c"
+  },
+  "seeds": {},
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  },
+  "note": "model travel times for a human sanity check; not observations"
+}

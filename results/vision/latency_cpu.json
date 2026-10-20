@@ -1,0 +1,35 @@
+{
+  "video_id": "ucf_Normal_Videos_940_x264",
+  "frames_measured": 195,
+  "frame_width_px": 960,
+  "stages": {
+    "detect_track": {
+      "mean_ms": 30.991564103020117,
+      "p95_ms": 33.9911499992013
+    },
+    "encode": {
+      "mean_ms": 6.873361024116046,
+      "p95_ms": 7.839030007016844
+    },
+    "heuristics": {
+      "mean_ms": 0.03263487313420345,
+      "p95_ms": 0.08023999980650841
+    },
+    "anonymise": {
+      "mean_ms": 6.4517656409850295,
+      "p95_ms": 12.77201000193597
+    },
+    "total": {
+      "mean_ms": 44.3493256412554,
+      "p95_ms": 53.94477000227194
+    }
+  },
+  "achieved_fps_cpu": 22.548257172816236,
+  "real_time_at_sample_fps": true,
+  "sample_fps": 5.0,
+  "machine": {
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "torch_threads": 8
+  }
+}

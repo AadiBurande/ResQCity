@@ -1,0 +1,115 @@
+"""Offline per-video processing shared by training and evaluation (results cached per video).
+
+For each annotated video, at ``ingest.sample_fps``:
+- ``features/<backbone>/<video_id>.npz``: times (s) and frozen-encoder frame features (float16);
+- ``heuristics/<video_id>.parquet``: per sampled frame, the heuristic score and its components
+  (YOLO + ByteTrack + ``HeuristicScorer``), plus timing for the CPU/GPU latency report.
+"""
+
+import logging
+import time
+from collections.abc import Iterator
+from pathlib import Path
+
+import cv2
+import numpy as np
+import pandas as pd
+
+from resqcity.vision.clip_classifier import FrameEncoder
+from resqcity.vision.config import VisionConfig
+from resqcity.vision.datasets.annotations import video_frame_paths
+from resqcity.vision.heuristics import COMPONENTS, HeuristicScorer
+from resqcity.vision.ingest import file_frames, resize
+from resqcity.vision.types import FramePacket, Tracker
+
+log = logging.getLogger(__name__)
+
+
+def video_frames(raw_root: Path, row: pd.Series, cfg: VisionConfig) -> Iterator[FramePacket]:
+    """Sampled frames of an annotated video (file or frame folder) with media-time stamps."""
+    if row["kind"] == "video":
+        yield from file_frames(raw_root / row["path"], cfg.ingest)
+        return
+    fps = float(row["fps"])
+    step = max(1, round(fps / cfg.ingest.sample_fps))
+    for i, path in enumerate(video_frame_paths(raw_root, row["path"])):
+        if i % step == 0:
+            image = cv2.imread(str(path))
+            if image is not None:
+                yield FramePacket(t=i / fps, image=resize(image, cfg.ingest.resize_width), index=i)
+
+
+def feature_path(cache: Path, backbone: str, video_id: str) -> Path:
+    return cache / "features" / backbone / f"{video_id}.npz"
+
+
+def heuristics_path(cache: Path, video_id: str) -> Path:
+    return cache / "heuristics" / f"{video_id}.parquet"
+
+
+def extract_features(
+    raw_root: Path, row: pd.Series, cfg: VisionConfig, encoder: FrameEncoder, cache: Path
+) -> Path:
+    out = feature_path(cache, cfg.clip_classifier.backbone, row["video_id"])
+    if out.exists():
+        return out
+    times, feats, batch, batch_t = [], [], [], []
+    for frame in video_frames(raw_root, row, cfg):
+        batch.append(frame.image)
+        batch_t.append(frame.t)
+        if len(batch) == 64:
+            feats.append(encoder.encode(batch))
+            times.extend(batch_t)
+            batch, batch_t = [], []
+    if batch:
+        feats.append(encoder.encode(batch))
+        times.extend(batch_t)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    arr = np.concatenate(feats).astype(np.float16) if feats else np.zeros((0, 1), np.float16)
+    np.savez_compressed(out, times=np.asarray(times, np.float64), feats=arr)
+    return out
+
+
+def load_features(path: Path) -> tuple[np.ndarray, np.ndarray]:
+    data = np.load(path)
+    return data["times"], data["feats"].astype(np.float32)
+
+
+def run_heuristics(
+    raw_root: Path,
+    row: pd.Series,
+    cfg: VisionConfig,
+    tracker_factory: "type[Tracker] | object",
+    cache: Path,
+) -> Path:
+    """Track + score every sampled frame. ``tracker_factory()`` returns a fresh tracker."""
+    out = heuristics_path(cache, row["video_id"])
+    if out.exists():
+        return out
+    tracker = tracker_factory()  # type: ignore[operator]
+    scorer = HeuristicScorer(
+        cfg.heuristics, set(cfg.detector.vehicle_classes), cfg.detector.person_class
+    )
+    rows = []
+    for frame in video_frames(raw_root, row, cfg):
+        t0 = time.perf_counter()
+        det = tracker.update(frame)
+        t1 = time.perf_counter()
+        res = scorer.update(det)
+        t2 = time.perf_counter()
+        rows.append(
+            {
+                "t": frame.t,
+                "score": res.score,
+                **{f"c_{k}": res.components[k] for k in COMPONENTS},
+                "n_vehicles": sum(1 for o in det.tracks if o.cls in cfg.detector.vehicle_classes),
+                "n_persons": sum(1 for o in det.tracks if o.cls == cfg.detector.person_class),
+                "overturned": bool(res.overturned_ids),
+                "person_down": bool(res.person_down_ids),
+                "detect_ms": (t1 - t0) * 1000,
+                "heuristic_ms": (t2 - t1) * 1000,
+            }
+        )
+    out.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(rows).to_parquet(out, index=False)
+    return out

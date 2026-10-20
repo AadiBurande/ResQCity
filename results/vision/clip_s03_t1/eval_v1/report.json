@@ -1,0 +1,11 @@
+{
+  "run_id": "clip_s03_t1",
+  "false_alarm_budget_per_hour": 1.0,
+  "thresholds_chosen_on_val": {
+    "classifier": 0.3,
+    "heuristics": 0.3,
+    "combined": 0.8
+  },
+  "test_ece_combined": 0.013183663073299772,
+  "detect_ms_mean_gpu_or_device": 16.103155046332922
+}

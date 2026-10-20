@@ -1,0 +1,37 @@
+# Google Maps cross-check (D-018). Generate the template with
+#   uv run python -m resqcity.geo.sanity --config configs/maps_check_routes.yaml \
+#       --template --out results/geo/maps_check_template.csv
+# then fill google_typical_min_low/high from Google Maps ("Depart at" Tuesday, same hour,
+# the "typically X-Y min" range). `pairs` were used for the speed calibration (D-014);
+# `holdout_pairs` were not, so they are the independent check.
+departure_date: "2026-02-03"     # a Tuesday
+departure_hours: [10, 14, 19]
+profiles: [default]
+places:
+  Shivajinagar bus stand: [18.5309, 73.8474]
+  Swargate bus stand: [18.5018, 73.8636]
+  Pune railway station: [18.5289, 73.8744]
+  Deccan Gymkhana: [18.5167, 73.8414]
+  Kothrud depot: [18.5074, 73.8077]
+  Viman Nagar (Phoenix mall): [18.5622, 73.9167]
+  Katraj chowk: [18.4575, 73.8580]
+  Sassoon hospital: [18.5276, 73.8714]
+  Baner (Baner road): [18.5590, 73.7868]
+  Kondhwa (Kondhwa Khurd): [18.4783, 73.8916]
+  Warje (Warje Malwadi): [18.4836, 73.8045]
+  Yerawada (Shastrinagar): [18.5550, 73.8890]
+  Dhanori: [18.5900, 73.9070]
+  Ruby Hall Clinic: [18.5328, 73.8766]
+  Bibwewadi: [18.4710, 73.8660]
+pairs:
+  - [Shivajinagar bus stand, Swargate bus stand]
+  - [Pune railway station, Deccan Gymkhana]
+  - [Kothrud depot, Viman Nagar (Phoenix mall)]
+  - [Katraj chowk, Shivajinagar bus stand]
+holdout_pairs:
+  - [Baner (Baner road), Pune railway station]
+  - [Kondhwa (Kondhwa Khurd), Shivajinagar bus stand]
+  - [Warje (Warje Malwadi), Swargate bus stand]
+  - [Yerawada (Shastrinagar), Deccan Gymkhana]
+  - [Dhanori, Ruby Hall Clinic]
+  - [Bibwewadi, Sassoon hospital]
