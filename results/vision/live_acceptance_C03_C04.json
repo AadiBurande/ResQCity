@@ -1,6 +1,6 @@
 {
-  "run_start_utc": "2026-10-20T06:50:33.265007+00:00",
-  "run_end_utc": "2026-10-20T06:53:13.908249+00:00",
+  "run_start_utc": "2026-10-20T07:05:07.671219+00:00",
+  "run_end_utc": "2026-10-20T07:07:48.447571+00:00",
   "detection_rule": "event in [onset, offset + 10 s]",
   "detector": {
     "clip_run": "clip_s03_t1",
@@ -19,18 +19,18 @@
       "camera": "C03",
       "events": 3,
       "accident_clip": "RoadAccidents011_x264.mp4",
-      "true_onset_utc": "2026-10-20T06:51:52.255024+00:00",
-      "detection_window_end_utc": "2026-10-20T06:52:03.588357+00:00",
+      "true_onset_utc": "2026-10-20T07:06:26.654075+00:00",
+      "detection_window_end_utc": "2026-10-20T07:06:37.987408+00:00",
       "detected": true,
-      "delay_s": 1.918381,
+      "delay_s": 2.421521,
       "false_alarms": 2
     },
     {
       "camera": "C04",
       "events": 3,
       "accident_clip": "RoadAccidents012_x264.mp4",
-      "true_onset_utc": "2026-10-20T06:52:06.945424+00:00",
-      "detection_window_end_utc": "2026-10-20T06:52:21.612091+00:00",
+      "true_onset_utc": "2026-10-20T07:06:41.327347+00:00",
+      "detection_window_end_utc": "2026-10-20T07:06:55.994014+00:00",
       "detected": false,
       "delay_s": null,
       "false_alarms": 3
@@ -39,7 +39,7 @@
   "detected": 1,
   "accident_clips": 2,
   "false_alarms": 5,
-  "camera_hours": 0.08924624555555555,
+  "camera_hours": 0.08932019555555555,
   "events_published": 6,
   "note": "Live check of the end-to-end path (RTSP -> vision -> bus) on road footage. A few clips cannot estimate detector accuracy; see test_video_metrics.csv for that."
 }

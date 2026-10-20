@@ -1,11 +1,11 @@
 {
   "file": "results/vision/latency_cpu.json",
-  "generated_at_utc": "2026-10-20T06:53:58+00:00",
+  "generated_at_utc": "2026-10-20T07:02:22+00:00",
   "command": "latency.py --frames 200",
   "synthetic": false,
   "git": {
-    "commit": "b6c875fd078a5a338b3c6bcb51ac264b9119159c",
-    "dirty": true
+    "commit": "02b89c56b4a335740e5a2d67ca5c32ee312fbca9",
+    "dirty": false
   },
   "configs_sha256": {
     "configs/vision.yaml": "0861c6e32bb3f5598b7ac6b1f708a808b35b6f62792c49521c0ed8402c3944f1"

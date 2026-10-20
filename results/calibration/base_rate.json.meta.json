@@ -1,11 +1,11 @@
 {
   "file": "results/calibration/base_rate.json",
-  "generated_at_utc": "2026-10-20T06:33:48+00:00",
+  "generated_at_utc": "2026-10-20T07:01:45+00:00",
   "command": "base_rate.py",
   "synthetic": false,
   "git": {
-    "commit": "b6c875fd078a5a338b3c6bcb51ac264b9119159c",
-    "dirty": true
+    "commit": "02b89c56b4a335740e5a2d67ca5c32ee312fbca9",
+    "dirty": false
   },
   "configs_sha256": {
     "configs/base_rate.yaml": "fb4fbfc90eebeab42439f9f7e70912aa10b3367ab85dd6d340486a97d1ce7609"

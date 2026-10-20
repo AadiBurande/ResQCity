@@ -1,11 +1,11 @@
 {
   "file": "results/geo/maps_check_template.csv",
-  "generated_at_utc": "2026-10-20T00:33:32+00:00",
+  "generated_at_utc": "2026-10-20T07:02:25+00:00",
   "command": "sanity.py --config configs/maps_check_routes.yaml --template --out results/geo/maps_check_template.csv",
   "synthetic": false,
   "git": {
-    "commit": "f154d3f70a7d0a43c8e83a1524a7f1fb4a84b6cb",
-    "dirty": true
+    "commit": "02b89c56b4a335740e5a2d67ca5c32ee312fbca9",
+    "dirty": false
   },
   "configs_sha256": {
     "configs/geo.yaml": "777973a613ab9013b04fd68277f53590aa372381ae21dc5fdcb3a952dcf43b34",
