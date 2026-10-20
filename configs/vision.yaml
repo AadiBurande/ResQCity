@@ -23,9 +23,14 @@ privacy:
   face_model_file: face_detection_yunet_2023mar.onnx   # under data/models/
   face_score_threshold: 0.6
   # mode (D-026): faces_plates = default (faces + plate region only; vehicles, people and the scene
-  # stay clear) | full = also blur whole people | off = no blurring, ONLY for local files and the
-  # simulated 127.0.0.1 streams of public-dataset footage (refused for any other live source).
+  # stay clear) | full = also blur whole people | off = no blurring, ONLY for public-dataset footage:
+  # local files under unblurred_local_dirs, or the simulated cameras (loopback MediaMTX + a
+  # simulated camera id). Every other source is refused.
   mode: faces_plates
+  unblurred_local_dirs: [data/raw/vision, data/videos]   # public-dataset footage only
+  unblurred_streams:           # the simulated cameras; must match configs/streams.yaml (tested)
+    rtsp_base: rtsp://127.0.0.1:8554
+    cameras: [C01, C02, C03, C04]
   plate_band: [0.6, 1.0]       # vertical fraction of each vehicle box treated as plate region
   plate_band_x: [0.1, 0.9]     # horizontal fraction of each vehicle box treated as plate region
   person_blur_kernel_frac: 0.6 # strong blur for whole people (mode: full)

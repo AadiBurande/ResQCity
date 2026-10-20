@@ -13,8 +13,9 @@ base_rate_per_day:
     Road accidents: 871 in 2022, MoRTH "Road Accidents in India 2022", Table 6.2 (Pune).
     Accidents + fires = 5.42/day.
   note: >
-    Police-registered accidents; Pune's registered crashes are unusually severe (37 killed per 100
-    vs 22 for all million-plus cities), which suggests non-fatal crashes are under-registered, so
+    Police-registered accidents; Pune's registered crashes are unusually severe (killed per 100
+    accidents: Pune vs all million-plus cities, results/calibration/base_rate.json), which suggests
+    non-fatal crashes are under-registered, so
     this is likely a LOWER bound. Phase-10 sensitivity covers 0.5x-4x. Superseded values:
     24.0/day (assumption), 5.54 and 5.71/day (death-count / severity-index proxy).
 
@@ -26,7 +27,17 @@ hour_profile:
   source: >
     MoRTH "Road Accidents in India 2022", Annexure 42 (Maharashtra, road accidents by 3-hour
     interval), spread evenly within each interval (resqcity.sim.base_rate).
-  note: "State-level road accidents (incl. highways); applied to fires as well (UNVERIFIED for fires)."
+  note: "State-level road accidents (incl. highways). Used for every type without its own profile."
+# Per-type hour profiles that replace hour_profile for that type (each normalised to mean 1).
+type_hour_profiles:
+  fire_smoke:
+    value: [0.5027, 0.5027, 0.5027, 0.3887, 0.3887, 0.3887, 0.7598, 0.7598, 0.7598, 1.1522, 1.1522,
+             1.1522, 1.2041, 1.2041, 1.2041, 1.3753, 1.3753, 1.3753, 1.6095, 1.6095, 1.6095, 1.0076,
+             1.0076, 1.0076]
+    source: UNVERIFIED
+    note: >
+      Assumed equal to the road-accident profile: no Pune fire-calls-by-hour data was found
+      (fires are ~54 % of incidents). Phase-10 sensitivity factor.
 # Relative intensity Monday..Sunday (normalised to mean 1 at load time).
 weekday_profile:
   value: [1.00, 0.97, 0.97, 0.98, 1.03, 1.05, 1.00]

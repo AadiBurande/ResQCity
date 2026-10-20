@@ -5,10 +5,13 @@
 Input: ``data/raw/morth/road_accidents_in_india_2022.pdf`` (Ministry of Road Transport and
 Highways, Transport Research Wing, published Oct 2023; provided by the user, SHA-256 recorded).
 Output: ``results/calibration/morth_2022_extract.json`` with the page each figure was read from:
-- Table 6.2: Pune (million-plus city) road accidents, persons killed and injured, 2021 and 2022;
-- Annexure 45: Pune accidents by weather (2022);
-- Annexure 42: Maharashtra accidents by 3-hour time interval (2022).
-Every row is checked against its total, so a mis-parsed table fails loudly.
+- Table 6.2: Pune (million-plus city) road accidents, persons killed and injured, 2021 and 2022,
+  and the all-million-plus-cities total row (checked: the 50 city rows must sum to it);
+- Annexure 45: Pune accidents by weather (2022; checked: buckets must not exceed the Table 6.2
+  total);
+- Annexure 42: Maharashtra accidents by 3-hour time interval (2022; checked: intervals + unknown
+  must equal the row total).
+A mis-parsed table therefore fails loudly.
 """
 
 import argparse
@@ -22,6 +25,12 @@ from resqcity.common.provenance import write_meta
 
 PDF = Path("morth") / "road_accidents_in_india_2022.pdf"  # under data/raw
 TIME_BUCKETS = ["06-09", "09-12", "12-15", "15-18", "18-21", "21-24", "00-03", "03-06"]
+MILLION_PLUS_CITIES = 50
+# Table 6.2 rows: rank, city, then accidents / killed / injured, each 2021, 2022, rank 2021, 2022
+CITY_ROW = re.compile(
+    r"^\s*(\d{1,2})\s+([A-Za-z][A-Za-z .\-()&]*?)\s+((?:[\d,]+\s+){11}[\d,]+)\s*$"
+)
+TOTAL_ROW = re.compile(r"^\s*((?:[\d,]+\s+){5}[\d,]+)\s*Total\s*$")  # label printed last
 
 
 def _num(token: str) -> int:
@@ -52,6 +61,27 @@ def find_row(
     raise ValueError(f"row {row_prefix!r} not found on a page containing {must_contain!r}")
 
 
+def million_plus_total(pages: list[str]) -> tuple[int, dict[str, int]]:
+    """Table 6.2 total row (accidents, killed, injured; 2021 and 2022), checked against the sum
+    of the city rows on the same page."""
+    for i, text in enumerate(pages, start=1):
+        if "Table 6.2" not in text:
+            continue
+        cities = [CITY_ROW.match(line) for line in text.splitlines()]
+        rows = {int(m.group(1)): [_num(t) for t in m.group(3).split()] for m in cities if m}
+        totals = [TOTAL_ROW.match(line) for line in text.splitlines()]
+        total = next(([_num(t) for t in m.group(1).split()] for m in totals if m), None)
+        if len(rows) != MILLION_PLUS_CITIES or total is None:
+            continue
+        sums = [sum(r[j] for r in rows.values()) for j in (0, 1, 4, 5, 8, 9)]
+        if sums != total:
+            raise ValueError(f"Table 6.2 city rows {sums} do not add up to the total {total}")
+        keys = ["accidents_2021", "accidents_2022", "killed_2021", "killed_2022"]
+        keys += ["injured_2021", "injured_2022"]
+        return i, dict(zip(keys, total, strict=True))
+    raise ValueError("Table 6.2 total row with all 50 cities not found")
+
+
 def extract(pages: list[str]) -> dict[str, object]:
     # Table 6.2: accidents 2021, 2022, ranks; killed 2021, 2022, ranks; injured 2021, 2022, ranks
     p62, t62 = find_row(pages, "Table 6.2", "39 Pune", 12)
@@ -63,6 +93,7 @@ def extract(pages: list[str]) -> dict[str, object]:
         "injured_2021": t62[8],
         "injured_2022": t62[9],
     }
+    p_tot, all_cities = million_plus_total(pages)
     # Annexure 45 (weather): per condition accidents, killed, grievous, minor, total injured
     p45, w = find_row(pages, "Type of Weather Condition", "39 Pune", 10)
     weather = {"clear_sunny": w[0], "rainy": w[5]}
@@ -78,6 +109,12 @@ def extract(pages: list[str]) -> dict[str, object]:
     return {
         "source": "MoRTH, Road Accidents in India 2022 (Transport Research Wing, 2023)",
         "pune_million_plus_city": {**pune, "page": p62, "table": "Table 6.2"},
+        "all_million_plus_cities": {
+            **all_cities,
+            "cities": MILLION_PLUS_CITIES,
+            "page": p_tot,
+            "table": "Table 6.2 (Total)",
+        },
         "pune_weather_2022": {**weather, "page": p45, "table": "Annexure 45"},
         "maharashtra_time_of_day_2022": {
             "accidents_by_interval": buckets,

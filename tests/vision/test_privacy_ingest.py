@@ -103,12 +103,26 @@ def test_missing_file_raises(tmp_path, vcfg):
     ("source", "allowed"),
     [
         ("data/videos/C01/accident/x.mp4", True),
+        ("data/raw/vision/ucf_crime/RoadAccidents/x.mp4", True),
         ("rtsp://127.0.0.1:8554/C01", True),
         ("http://192.168.1.20:8080/video", False),  # phone IP camera: real people
         ("rtsp://10.0.0.5/stream", False),
+        ("rtsp://127.0.0.1:8554/relay", False),  # a relay that is not a simulated camera
+        ("recordings/street.mp4", False),  # a local file outside the public-dataset folders
     ],
 )
-def test_unblurred_only_for_local_or_simulated_sources(source, allowed):
-    from resqcity.vision.run import unblurred_allowed
+def test_unblurred_only_for_public_dataset_sources(source, allowed, vcfg):
+    from resqcity.vision.privacy import unblurred_allowed
 
-    assert unblurred_allowed(source) is allowed
+    assert unblurred_allowed(source, vcfg.privacy) is allowed
+
+
+def test_pipeline_refuses_unblurred_mode_for_other_sources(vcfg):
+    from resqcity.vision.privacy import require_source_allowed
+
+    off = vcfg.privacy.model_copy(update={"mode": "off"})
+    require_source_allowed(vcfg.privacy, None)  # default mode needs no source check
+    require_source_allowed(off, "rtsp://127.0.0.1:8554/C01")
+    for bad in (None, "http://192.168.1.20:8080/video"):
+        with pytest.raises(PermissionError):
+            require_source_allowed(off, bad)

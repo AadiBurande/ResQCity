@@ -22,7 +22,7 @@ from resqcity.common.schemas import Camera
 from resqcity.vision.config import load_vision_config
 from resqcity.vision.ingest import frames, is_live
 from resqcity.vision.pipeline import CameraPipeline
-from resqcity.vision.privacy import Anonymizer
+from resqcity.vision.privacy import Anonymizer, require_source_allowed
 from resqcity.vision.scoring import Stacker
 
 log = logging.getLogger(__name__)
@@ -73,16 +73,6 @@ def deployed_detector(results: Path, models: Path) -> tuple[Path, Path | None, d
     return (run, None, None) if run is not None else None
 
 
-def unblurred_allowed(source: str) -> bool:
-    """Unblurred viewing is limited to local files and the simulated loopback streams (D-026):
-    never a real camera such as a phone IP camera."""
-    from urllib.parse import urlparse
-
-    if not is_live(source):
-        return True
-    return urlparse(source).hostname in {"127.0.0.1", "localhost", "::1"}
-
-
 def newest(path: Path) -> Path | None:
     runs = sorted((p for p in path.glob("*") if p.is_dir()), key=lambda p: p.stat().st_mtime)
     return runs[-1] if runs else None
@@ -127,10 +117,10 @@ def main(argv: list[str] | None = None) -> int:
         cfg = cfg.model_copy(
             update={"privacy": cfg.privacy.model_copy(update={"mode": args.privacy})}
         )
-    if cfg.privacy.mode == "off" and not unblurred_allowed(source):
-        parser.error(
-            "--privacy off is only allowed for local files and simulated 127.0.0.1 streams"
-        )
+    try:
+        require_source_allowed(cfg.privacy, source)
+    except PermissionError as exc:
+        parser.error(str(exc))
     if cfg.privacy.mode == "off":
         log.warning("privacy OFF: unblurred preview of public-dataset footage (local demo only)")
 
@@ -177,7 +167,11 @@ def main(argv: list[str] | None = None) -> int:
         store = FrameStore()
         serve(store, args.preview_port)
         on_preview = store.update
-        log.info("preview: http://127.0.0.1:%d/stream.mjpg (anonymised)", args.preview_port)
+        log.info(
+            "preview: http://127.0.0.1:%d/stream.mjpg (privacy mode %s)",
+            args.preview_port,
+            cfg.privacy.mode,
+        )
 
     pipeline = CameraPipeline(
         camera,
@@ -192,6 +186,7 @@ def main(argv: list[str] | None = None) -> int:
         threshold=threshold,
         start_time=datetime.now(UTC),
         on_preview=on_preview,
+        source=source,
     )
     t0 = time.perf_counter()
     n = 0

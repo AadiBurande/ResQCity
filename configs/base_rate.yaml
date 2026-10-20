@@ -20,6 +20,6 @@ assumed_extra_share:     # crowd + other events, ADDED on top of accidents + fir
   source: UNVERIFIED
 caveats:
   - "Years differ: fires 2015-2019, road accidents 2022."
-  - "MoRTH city figures are police-registered accidents; Pune's registered accidents are severe (325 killed per 871 accidents = 37 per 100, vs 22 for all million-plus cities), suggesting under-registration of non-fatal crashes."
+  - "MoRTH city figures are police-registered accidents; Pune's registered accidents are severe (killed per 100 accidents: Pune vs all million-plus cities, both in results/calibration/base_rate.json), suggesting under-registration of non-fatal crashes."
   - "Police jurisdiction (Pune city) is not identical to the 58 PMC wards."
   - "Hour profile is for all Maharashtra road accidents (state level, incl. highways) and is applied to fires too."

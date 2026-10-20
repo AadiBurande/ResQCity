@@ -112,6 +112,10 @@ class IncidentsConfig(ConfigModel):
     synthetic: bool
     base_rate_per_day: SourcedValue[float]
     hour_profile: SourcedValue[list[float]]
+    type_hour_profiles: dict[EventType, SourcedValue[list[float]]] = Field(
+        default_factory=dict,
+        description="per-type hour profile replacing hour_profile for that type",
+    )
     weekday_profile: SourcedValue[list[float]]
     hotspot: HotspotConfig
     rain_effect: RainEffect
@@ -126,6 +130,8 @@ class IncidentsConfig(ConfigModel):
             )
         if len(self.hour_profile.value) != 24 or len(self.weekday_profile.value) != 7:
             raise ValueError("hour_profile needs 24 values and weekday_profile 7")
+        if any(len(p.value) != 24 for p in self.type_hour_profiles.values()):
+            raise ValueError("every type_hour_profiles entry needs 24 values")
         if self.base_rate_per_day.value <= 0:
             raise ValueError("base_rate_per_day must be positive")
         _normalised_mix(self.type_mix.value)
@@ -136,6 +142,20 @@ class IncidentsConfig(ConfigModel):
     def hour_factors(self) -> np.ndarray:
         h = np.asarray(self.hour_profile.value, float)
         return h / h.mean()
+
+    def type_hour_weights(self, hour: int) -> dict[EventType, float]:
+        """type_mix share x that type's hour factor (each profile has mean 1, so the daily total
+        is unchanged): the summed weight scales the rate and the weights give the type mix."""
+        mix = _normalised_mix(self.type_mix.value)
+        out = {}
+        for k, share in mix.items():
+            profile = self.type_hour_profiles.get(k)
+            if profile is None:
+                out[k] = share * float(self.hour_factors[hour])
+            else:
+                h = np.asarray(profile.value, float)
+                out[k] = share * float(h[hour] / h.mean())
+        return out
 
     @property
     def weekday_factors(self) -> np.ndarray:
@@ -195,7 +215,7 @@ class IncidentGenerator:
         return float(
             self.cfg.base_rate_per_day.value
             / 24.0
-            * self.cfg.hour_factors[local.hour]
+            * sum(self.cfg.type_hour_weights(local.hour).values())
             * self.cfg.weekday_factors[local.weekday()]
             * self.cfg.rain_effect.multiplier(s.rain_mm_h(t))
             * s.cfg.incident_rate_multiplier
@@ -252,9 +272,10 @@ class IncidentGenerator:
         return SeverityFeatures(person_down=bool(rng.random() < simple.p_person_down))
 
     def generate(self, seed_base: int, replication: int) -> list[GroundTruthIncident]:
-        base_mix = _normalised_mix(self.cfg.type_mix.value)
         incidents: list[GroundTruthIncident] = []
         for h, t in enumerate(self.hours()):
+            local_hour = t.astimezone(self.scenario.tz).hour
+            base_mix = _normalised_mix(self.cfg.type_hour_weights(local_hour))
             arrivals = stream(seed_base, replication, ARRIVALS_STREAM, h)
             rates = self.node_rates(t)
             total = rates.sum()

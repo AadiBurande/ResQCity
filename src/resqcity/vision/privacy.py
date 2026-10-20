@@ -5,8 +5,8 @@ Modes (``privacy.mode``, D-026):
   and the plate region of every vehicle (no reliable open plate detector exists, so the lower-centre
   part of the vehicle box is blurred). Vehicles, people's bodies and the scene stay clear.
 - ``full``: additionally blurs every person box (covers faces the face model misses).
-- ``off``: no blurring; allowed only for local files and the simulated 127.0.0.1 streams of
-  public-dataset footage (enforced in ``resqcity.vision.run``).
+- ``off``: no blurring; allowed only for public-dataset footage (:func:`unblurred_allowed`),
+  enforced when a ``CameraPipeline`` is built (:func:`require_source_allowed`).
 Only event metadata leaves ``vision/`` (research-integrity rule 6).
 """
 
@@ -25,6 +25,32 @@ from resqcity.vision.types import Box, TrackObs
 log = logging.getLogger(__name__)
 MODEL_DIR = PROJECT_ROOT / "data" / "models"
 MIN_KERNEL = 9
+
+
+def unblurred_allowed(source: str, cfg: PrivacyConfig) -> bool:
+    """Whether mode ``off`` may be used for ``source`` (D-026): a local file under one of
+    ``cfg.unblurred_local_dirs`` (public-dataset footage), or a simulated camera
+    (``cfg.unblurred_streams``: loopback base + simulated camera id). A phone or IP camera, any
+    other file, or a relay under another name is refused. Footage deliberately copied into those
+    folders or published under a simulated camera's name cannot be detected."""
+    from resqcity.vision.ingest import is_live
+
+    if not is_live(source):
+        path = Path(source).resolve()
+        return any(
+            path.is_relative_to((PROJECT_ROOT / d).resolve()) for d in cfg.unblurred_local_dirs
+        )
+    return source.rstrip("/") in cfg.unblurred_streams.urls()
+
+
+def require_source_allowed(cfg: PrivacyConfig, source: str | None) -> None:
+    """Raise unless the privacy mode may be used for ``source`` (mode ``off`` needs a source that
+    passes :func:`unblurred_allowed`)."""
+    if cfg.mode == "off" and (source is None or not unblurred_allowed(source, cfg)):
+        raise PermissionError(
+            f"privacy mode 'off' is only for public-dataset footage (files under "
+            f"{cfg.unblurred_local_dirs} or the simulated cameras); refused for {source!r}"
+        )
 
 
 def _kernel(size: int, frac: float) -> int:

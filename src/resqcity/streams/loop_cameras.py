@@ -4,8 +4,9 @@
 
 Each camera loops its normal clips (``ffmpeg -re -stream_loop -1``) to ``rtsp://.../<camera_id>``.
 A scenario cue (``configs/streams.yaml``) switches a camera to an accident clip at ``at_s`` seconds,
-played once, then back to normal. Every switch is logged to ``data/runtime/scenario_log.jsonl``
-with the clip's annotated accident onset, so live alarms can be checked against ground truth.
+played once, then back to normal. Every clip start (normal or accident) is logged to
+``data/runtime/scenario_log.jsonl`` with the clip's duration and annotated accident onset, so live
+alarms can be checked against ground truth and against scene cuts (clip switches and loops).
 """
 
 import argparse
@@ -64,6 +65,18 @@ def clips(cfg: StreamsConfig, camera: str, kind: str) -> list[Path]:
     return sorted((cfg.camera_dir(camera) / kind).glob("*.mp4"))
 
 
+def clip_duration_s(clip: Path) -> float | None:
+    """Duration from the container's frame count and rate (None if unknown)."""
+    import cv2
+
+    cap = cv2.VideoCapture(str(clip))
+    try:
+        fps, n = cap.get(cv2.CAP_PROP_FPS), cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    finally:
+        cap.release()
+    return float(n / fps) if fps > 0 and n > 0 else None
+
+
 def clip_onsets(cfg: StreamsConfig, camera: str) -> dict[str, tuple[float | None, float | None]]:
     """clip file -> (accident onset, accident offset) in seconds into the clip (None if normal)."""
     path = cfg.camera_dir(camera) / "clips.yaml"
@@ -91,6 +104,23 @@ class CameraPublisher(threading.Thread):
         cmd = build_command(self.ffmpeg, clip, self.cfg.url(self.camera), self.cfg, loop)
         self.proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL)
 
+    def _play(self, clip: Path, loop: bool) -> tuple[float | None, float | None]:
+        """Start a clip and log it; returns its (accident onset, offset) in seconds."""
+        started = datetime.now(UTC)
+        self._start(clip, loop)
+        onset, offset = self.onsets.get(clip.name, (None, None))
+        log_switch(
+            self.camera,
+            clip.name,
+            started,
+            onset,
+            offset,
+            kind="normal" if loop else "accident",
+            duration_s=clip_duration_s(clip),
+            looped=loop,
+        )
+        return onset, offset
+
     def _stop_proc(self) -> None:
         if self.proc is not None and self.proc.poll() is None:
             self.proc.terminate()
@@ -100,17 +130,14 @@ class CameraPublisher(threading.Thread):
                 self.proc.kill()
 
     def run(self) -> None:
-        self._start(next(self.normal), loop=True)
+        self._play(next(self.normal), loop=True)
         log.info("%s publishing normal footage at %s", self.camera, self.cfg.url(self.camera))
         while not self.stop_event.is_set():
             if self.trigger.is_set():
                 self.trigger.clear()
                 self._stop_proc()
                 clip = next(self.accidents)
-                started = datetime.now(UTC)
-                self._start(clip, loop=False)
-                onset, offset = self.onsets.get(clip.name, (None, None))
-                log_switch(self.camera, clip.name, started, onset, offset)
+                onset, offset = self._play(clip, loop=False)
                 log.info(
                     "%s ACCIDENT clip %s (accident %s-%s s into the clip)",
                     self.camera,
@@ -125,24 +152,34 @@ class CameraPublisher(threading.Thread):
                 ):
                     time.sleep(POLL_S)
                 if not self.stop_event.is_set():
-                    self._start(next(self.normal), loop=True)
+                    self._play(next(self.normal), loop=True)
             elif self.proc is not None and self.proc.poll() is not None:
                 log.warning(
                     "%s publisher exited (%s); restarting", self.camera, self.proc.returncode
                 )
-                self._start(next(self.normal), loop=True)
+                self._play(next(self.normal), loop=True)
             time.sleep(POLL_S)
         self._stop_proc()
 
 
 def log_switch(
-    camera: str, clip: str, started: datetime, onset_s: float | None, offset_s: float | None
+    camera: str,
+    clip: str,
+    started: datetime,
+    onset_s: float | None,
+    offset_s: float | None,
+    kind: str = "accident",
+    duration_s: float | None = None,
+    looped: bool = False,
 ) -> None:
     SCENARIO_LOG.parent.mkdir(parents=True, exist_ok=True)
     record = {
         "camera": camera,
         "clip": clip,
+        "kind": kind,
         "started_at_utc": started.isoformat(),
+        "clip_duration_s": duration_s,
+        "looped": looped,
         "accident_onset_s_in_clip": onset_s,
         "accident_offset_s_in_clip": offset_s,
     }

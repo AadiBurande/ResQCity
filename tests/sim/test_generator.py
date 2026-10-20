@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from resqcity.common.requirements import load_requirements_config
+from resqcity.common.schemas import EventType
 from resqcity.geo.scenario import ScenarioConfig, ScenarioState, load_scenario
 from resqcity.sim.generator import (
     IncidentGenerator,
@@ -35,8 +36,28 @@ def test_config_is_synthetic_and_flagged():
     assert "PMC Fire Call Statistics" in INCIDENTS.base_rate_per_day.source
     assert "MoRTH" in INCIDENTS.base_rate_per_day.source
     assert INCIDENTS.hour_profile.verified and "Annexure 42" in INCIDENTS.hour_profile.source
-    assert {"weekday_profile", "type_mix", "features.accident"} <= set(find_unverified(INCIDENTS))
+    flagged = set(find_unverified(INCIDENTS))
+    assert {"weekday_profile", "type_mix", "features.accident"} <= flagged
+    assert "type_hour_profiles.fire_smoke" in flagged  # fires reuse the accident profile (S5)
     assert INCIDENTS.hour_factors.mean() == pytest.approx(1.0)
+
+
+def test_type_hour_profiles_keep_the_daily_total_and_shift_the_mix():
+    data = INCIDENTS.model_dump(mode="json")
+    night_fires = [3.0 if h < 6 else 0.5 for h in range(24)]
+    data["type_hour_profiles"] = {"fire_smoke": {"value": night_fires, "source": "UNVERIFIED"}}
+    cfg = IncidentsConfig.model_validate(data)
+    daily = sum(sum(cfg.type_hour_weights(h).values()) for h in range(24))
+    assert daily == pytest.approx(24.0)
+    base = sum(INCIDENTS.type_hour_weights(h)[EventType.FIRE_SMOKE] for h in range(24))
+    assert sum(cfg.type_hour_weights(h)[EventType.FIRE_SMOKE] for h in range(24)) == (
+        pytest.approx(base)
+    )
+    share = {
+        h: cfg.type_hour_weights(h)[EventType.FIRE_SMOKE] / sum(cfg.type_hour_weights(h).values())
+        for h in (2, 14)
+    }
+    assert share[2] > share[14]
 
 
 def test_hotspot_weights(toy_network):

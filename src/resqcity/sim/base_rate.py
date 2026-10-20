@@ -99,6 +99,9 @@ def derive(cfg: BaseRateConfig, csv_path: Path, extract: dict) -> dict[str, obje
             extract["maharashtra_time_of_day_2022"]["accidents_by_interval"]
         ),
         "pune_killed_per_100_accidents": 100.0 * killed / accidents,
+        "million_plus_cities_killed_per_100_accidents": 100.0
+        * extract["all_million_plus_cities"][f"killed_{cfg.road_accidents.year}"]
+        / extract["all_million_plus_cities"][f"accidents_{cfg.road_accidents.year}"],
         "pune_rainy_weather_share": extract["pune_weather_2022"]["rainy"] / accidents,
         "sources": {
             "fires": cfg.fire_calls.source,

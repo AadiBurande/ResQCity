@@ -60,11 +60,21 @@ def selection_score(results: Path, run: str) -> float:
     return float(pd.read_csv(results / run / "train_log.csv")[SELECTION_COLUMN].max())
 
 
+def fit_split_of(results: Path, run: str) -> str:
+    """The split a run was fitted on. Runs trained before ``train_clip --fit-split`` existed record
+    no ``fit_split``; they were fitted on val (then hard-coded)."""
+    cfg = yaml.safe_load((results / run / "config.yaml").read_text(encoding="utf-8")) or {}
+    return str(cfg.get("fit_split", "val"))
+
+
 def run_fold(
     fold: str, cache: Path, results: Path, ann: pd.DataFrame, out: Path
 ) -> tuple[dict[str, object], pd.DataFrame, pd.DataFrame]:
     fit, ev, idx = FOLDS[fold]
     cfg = load_vision_config()
+    for runs in CANDIDATES.values():
+        if fit_split_of(results, runs[idx]) != fit:
+            raise ValueError(f"fold {fold}: run {runs[idx]} was not fitted on {fit}")
     scores = {c: selection_score(results, runs[idx]) for c, runs in CANDIDATES.items()}
     chosen = max(scores, key=lambda c: scores[c])
     run = CANDIDATES[chosen][idx]
@@ -138,6 +148,15 @@ def main(argv: list[str] | None = None) -> int:
         )
     summary = pd.DataFrame(summary_rows)
     summary.to_csv(out / "pooled_metrics.csv", index=False, lineterminator="\n")
+    # Per fold: the two folds may choose different detectors, so the pooled numbers describe the
+    # PROCEDURE; fold A's row is the deployed detector's own (smaller-sample) estimate.
+    per_fold = pd.DataFrame(
+        [
+            {"fold": f, "score": name, **summarise_alarms(g)}
+            for (f, name), g in pv_all.groupby(["fold", "score"])
+        ]
+    )
+    per_fold.to_csv(out / "per_fold_metrics.csv", index=False, lineterminator="\n")
     pd.DataFrame(auroc_rows).to_csv(
         out / "pooled_per_video_auroc.csv", index=False, lineterminator="\n"
     )
@@ -165,6 +184,15 @@ def main(argv: list[str] | None = None) -> int:
         "detection_rule": f"alarm in [onset, offset + {DETECTION_GRACE_S:g} s]",
         "folds": folds,
         "pooled_combined": summary[summary["score"] == "combined"].iloc[0].to_dict(),
+        "per_fold_combined": {
+            f: per_fold[(per_fold["fold"] == f) & (per_fold["score"] == "combined")]
+            .iloc[0]
+            .drop(["fold", "score"])
+            .to_dict()
+            for f in FOLDS
+        },
+        "note": "Pooled = the cross-fitted PROCEDURE (folds may choose different detectors); "
+        "per_fold_combined.A = the deployed detector (deployed_detector.json).",
         "calibration_combined_pooled": calib,
     }
     (out / "report.json").write_text(
@@ -186,6 +214,7 @@ def main(argv: list[str] | None = None) -> int:
     for f in (
         out / "report.json",
         out / "pooled_metrics.csv",
+        out / "per_fold_metrics.csv",
         results / "sim_inputs.yaml",
         results / "deployed_detector.json",
     ):
@@ -217,8 +246,10 @@ def _num(x: object) -> float | None:
 
 def export_sim_inputs(path: Path, report: dict) -> None:
     """Detector behaviour for the simulator: pooled cross-fitted estimates (timing-checked
-    onset detection, delays, ROAD false-alarm rate) with intervals."""
+    onset detection, delays, ROAD false-alarm rate) with intervals, plus the deployed detector's
+    own fold-A estimates."""
     p = report["pooled_combined"]
+    a = report["per_fold_combined"]["A"]
     doc = {
         "source": "measured: results/vision/crossfit_v4 (UCF-Crime val+test, 2-fold cross-fitting)",
         "evaluation_version": 4,
@@ -254,6 +285,22 @@ def export_sim_inputs(path: Path, report: dict) -> None:
             _num(p["road_fa_cluster_ci95_lo"]),
             _num(p["road_fa_cluster_ci95_hi"]),
         ],
+        "estimates_describe": (
+            "the cross-fitted procedure (fold A and B may choose different detectors); the "
+            "deployed live detector's own fold-A estimates are under deployed_detector_fold_A"
+        ),
+        "deployed_detector_fold_A": {
+            "candidate": report["folds"]["A"]["chosen_candidate"],
+            "onset_detected": int(a["onset_detected"]),
+            "onset_videos": int(a["onset_videos"]),
+            "road_false_alarms": int(a["road_false_alarms"]),
+            "road_hours": _num(a["road_hours"]),
+            "road_false_alarms_per_hour": _num(a["road_false_alarms_per_hour"]),
+            "road_fa_poisson_ci95": [
+                _num(a["road_fa_poisson_ci95_lo"]),
+                _num(a["road_fa_poisson_ci95_hi"]),
+            ],
+        },
     }
     path.write_text(yaml.safe_dump(doc, sort_keys=False), encoding="utf-8", newline="\n")
 

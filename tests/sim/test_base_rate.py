@@ -12,6 +12,7 @@ CFG = load_model(BaseRateConfig, CONFIG_DIR / "base_rate.yaml")
 BASE = load_base_config()
 EXTRACT = {
     "pune_million_plus_city": {"accidents_2022": 300, "killed_2022": 30},
+    "all_million_plus_cities": {"accidents_2022": 1000, "killed_2022": 200},
     "pune_weather_2022": {"rainy": 30},
     "maharashtra_time_of_day_2022": {
         "accidents_by_interval": {
@@ -58,6 +59,7 @@ def test_extra_share_is_added_on_top(tmp_path):
     total = r["type_share_accident"] + r["type_share_fire"] + r["type_share_crowd_other"]
     assert total == pytest.approx(1)
     assert r["pune_killed_per_100_accidents"] == pytest.approx(10.0)
+    assert r["million_plus_cities_killed_per_100_accidents"] == pytest.approx(20.0)
 
 
 def test_incidents_config_matches_derivation():

@@ -52,7 +52,8 @@ road_classes:
     service: service
     road: service
 
-# Typical off-peak travel speed per class (km/h), capped by a tagged maxspeed.
+# Base travel speed per class (km/h), capped by a tagged maxspeed: used at hours outside every
+# traffic period (06-09, 21-23), which is probably too fast (L2).
 # Calibration (D-014): speeds and peak multipliers were hand-tuned so that route-weighted average
 # speeds on the sanity routes (configs/sanity_pairs.yaml) at 10:00 and 19:00 are near the TomTom
 # Traffic Index 2025 rush-hour speed for Pune, 15.1 km/h, as reported by Punekar News on
@@ -68,20 +69,23 @@ base_speeds_kph:
 
 # Speed multipliers by time of day (local time). Hours not in any period use 1.0 (base speed).
 # A period may wrap midnight (start > end). Periods must not overlap.
-# am_peak, midday and pm_peak are CALIBRATED to Google Maps typical travel times on 10 Pune routes
-# (resqcity.geo.calibrate_speeds; leave-one-route-out median error 17 % vs 19 % before, D-026).
-# Shoulder hours 06-09 and 21-23 (base speed) and night are NOT calibrated.
+# midday is CALIBRATED to Google Maps typical travel times on 10 Pune routes (resqcity.geo.
+# calibrate_speeds, D-026): at 14:00 the uncalibrated model was faster than Google on 10/10 routes.
+# am_peak and pm_peak keep their D-014 values: Google Maps did not support changing them (the
+# per-hour leave-one-route-out error did not improve at 10:00 or 19:00). Shoulder hours 06-09 and
+# 21-23 (base speed) and night are NOT calibrated. results/geo/speed_calibration.json lists
+# exactly these multipliers (tested).
 traffic_periods:
   - name: am_peak
     start_hour: 9
     end_hour: 11
     multipliers:
-      trunk: {value: 0.6579, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
-      primary: {value: 0.6203, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
-      secondary: {value: 0.6579, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
-      tertiary: {value: 0.7519, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
-      residential: {value: 0.8459, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
-      service: {value: 0.8929, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      trunk: {value: 0.70, source: UNVERIFIED, note: "D-014; kept by D-026"}
+      primary: {value: 0.66, source: UNVERIFIED, note: "D-014; kept by D-026"}
+      secondary: {value: 0.70, source: UNVERIFIED, note: "D-014; kept by D-026"}
+      tertiary: {value: 0.80, source: UNVERIFIED, note: "D-014; kept by D-026"}
+      residential: {value: 0.90, source: UNVERIFIED, note: "D-014; kept by D-026"}
+      service: {value: 0.95, source: UNVERIFIED, note: "D-014; kept by D-026"}
   - name: midday
     start_hour: 11
     end_hour: 17
@@ -96,12 +100,12 @@ traffic_periods:
     start_hour: 17
     end_hour: 21
     multipliers:
-      trunk: {value: 0.5609, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
-      primary: {value: 0.5258, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
-      secondary: {value: 0.5609, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
-      tertiary: {value: 0.6573, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
-      residential: {value: 0.7712, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
-      service: {value: 0.8326, source: "calibrated: Google Maps typical times, results/geo/speed_calibration.json (D-026)"}
+      trunk: {value: 0.64, source: UNVERIFIED, note: "D-014; kept by D-026"}
+      primary: {value: 0.60, source: UNVERIFIED, note: "D-014; kept by D-026"}
+      secondary: {value: 0.64, source: UNVERIFIED, note: "D-014; kept by D-026"}
+      tertiary: {value: 0.75, source: UNVERIFIED, note: "D-014; kept by D-026"}
+      residential: {value: 0.88, source: UNVERIFIED, note: "D-014; kept by D-026"}
+      service: {value: 0.95, source: UNVERIFIED, note: "D-014; kept by D-026"}
   - name: night
     start_hour: 23
     end_hour: 6

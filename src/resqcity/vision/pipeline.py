@@ -21,7 +21,7 @@ from resqcity.common.schemas import Camera, Event, EventType
 from resqcity.vision.alarm import Alarm
 from resqcity.vision.config import VisionConfig
 from resqcity.vision.heuristics import COMPONENTS, HeuristicResult, HeuristicScorer
-from resqcity.vision.privacy import Anonymizer
+from resqcity.vision.privacy import Anonymizer, require_source_allowed
 from resqcity.vision.scoring import Stacker
 from resqcity.vision.severity import assess, severity_features
 from resqcity.vision.types import Detections, FramePacket, Tracker
@@ -54,7 +54,9 @@ class CameraPipeline:
         threshold: float | None = None,
         start_time: datetime | None = None,
         on_preview: Callable[[np.ndarray], None] | None = None,
+        source: str | None = None,
     ) -> None:
+        require_source_allowed(cfg.privacy, source)
         self.camera = camera
         self.cfg = cfg
         self.tracker = tracker

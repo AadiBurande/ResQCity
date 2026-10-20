@@ -25,11 +25,29 @@ class DetectorConfig(ConfigModel):
     person_class: str
 
 
+class SimulatedStreams(ConfigModel):
+    rtsp_base: str
+    cameras: list[str] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _loopback(self) -> Self:
+        from urllib.parse import urlparse
+
+        if urlparse(self.rtsp_base).hostname not in {"127.0.0.1", "localhost", "::1"}:
+            raise ValueError("unblurred_streams.rtsp_base must be a loopback address")
+        return self
+
+    def urls(self) -> set[str]:
+        return {f"{self.rtsp_base.rstrip('/')}/{c}" for c in self.cameras}
+
+
 class PrivacyConfig(ConfigModel):
     face_model_url: str
     face_model_file: str
     face_score_threshold: float = Field(gt=0, lt=1)
     mode: Literal["faces_plates", "full", "off"]
+    unblurred_local_dirs: list[str] = Field(min_length=1)
+    unblurred_streams: SimulatedStreams
     plate_band: tuple[float, float]
     plate_band_x: tuple[float, float]
     person_blur_kernel_frac: float = Field(gt=0, le=1)
