@@ -1,0 +1,21 @@
+{
+  "run_id": "clip_s03_t1",
+  "evaluation_version": 2,
+  "false_alarm_budget_per_hour": 1.0,
+  "operating_points_chosen_on_val": {
+    "classifier": {
+      "threshold": 0.35,
+      "consecutive_windows": 4
+    },
+    "heuristics": {
+      "threshold": 0.3,
+      "consecutive_windows": 1
+    },
+    "combined": {
+      "threshold": 0.6,
+      "consecutive_windows": 4
+    }
+  },
+  "test_ece_combined": 0.013183663073299772,
+  "detect_ms_mean_gpu_or_device": 16.103155046332922
+}

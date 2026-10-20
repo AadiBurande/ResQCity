@@ -1,0 +1,29 @@
+{
+  "file": "results/vision/fire_main/fire_metrics.json",
+  "generated_at_utc": "2026-10-20T02:44:14+00:00",
+  "command": "train_fire.py --run-id fire_main --resume",
+  "synthetic": false,
+  "git": {
+    "commit": "197c76f8340398040c53d8a038aca16f1d3d5c57",
+    "dirty": false
+  },
+  "configs_sha256": {
+    "configs/vision.yaml": "0861c6e32bb3f5598b7ac6b1f708a808b35b6f62792c49521c0ed8402c3944f1"
+  },
+  "seeds": {
+    "seed": 20261020
+  },
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  }
+}

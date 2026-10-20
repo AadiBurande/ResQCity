@@ -1,0 +1,24 @@
+# Inputs for the cited base incident rate (D-018, corrected in D-025). Computed by
+#   uv run python -m resqcity.sim.base_rate     -> results/calibration/base_rate.json
+# configs/incidents.yaml must agree with that output (tested).
+fire_calls:
+  url: https://data.opencity.in/dataset/49fd476d-ace4-4610-918c-cb09f4171cb2/resource/5bd37e88-583b-46a3-b0a4-01be071c14c0/download/ad3c3c8a-6df0-4297-86cc-5db40b7ac3f9.csv
+  raw_file: pmc/pune_fire_call_statistics_2011_2020.csv      # under data/raw
+  source: "PMC Fire Call Statistics 2011-2020 (OpenCity / Pune Municipal Corporation, public domain)"
+  call_types: ["Fire"]   # structural/vehicle fires only; excluded: garbage, short circuit, gas/oil leaks,
+                         # tree falls, rescues (not CCTV-relevant fire_smoke incidents of this study)
+  years: [2015, 2016, 2017, 2018, 2019]   # 2020 excluded (COVID); most recent five normal years
+road_deaths_per_year:
+  value: 334
+  source: "Pune city police, road deaths 2023, via Punekar News 2024-01-13 (secondary source)"
+severity_index_deaths_per_100_accidents:
+  value: 36.5
+  source: "MoRTH, Road Accidents in India 2022 (national), via Outlook Business (secondary source)"
+  note: "National proxy; MoRTH's million-plus-city table for Pune would be better (open action)"
+assumed_extra_share:     # crowd + other events, ADDED on top of accidents + fires (assumption)
+  value: 0.03
+  source: UNVERIFIED
+caveats:
+  - "Years differ: fires 2015-2019, deaths 2023, severity index 2022."
+  - "Police commissionerate area is not identical to the 58 PMC wards."
+  - "Registered accidents miss unreported crashes; the national severity index likely under-states city accidents."

@@ -10,6 +10,6 @@ services:
     environment:
       MTX_RTSPTRANSPORTS: tcp
     ports:
-      - "8554:8554"   # RTSP
-      - "8888:8888"   # HLS (browser preview)
-      - "9997:9997"   # API
+      # Localhost only: these streams carry RAW (un-anonymised) dataset footage. The dashboard
+      # must use the anonymised MJPEG preview of resqcity.vision.run, never these streams.
+      - "127.0.0.1:8554:8554"   # RTSP (vision workers on this machine only)

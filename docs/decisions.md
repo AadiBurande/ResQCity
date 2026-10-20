@@ -351,3 +351,66 @@ memory and system RAM ran out (about 6 GB of RAM free beside the user's other co
 killed all of them. Since then, GPU jobs run sequentially, the live acceptance watches two cameras
 per run, and fire training resumes from `last.pt` (`train_fire --resume`). CPU latency is measured
 with nothing else running: 44 ms per frame, 22.5 fps on CPU for 320×240 frames.
+
+## D-025 Response to the phase-3 research audit; evaluation v3  (2026-10-20, phase 3)
+The audit found two blockers in the v2 export: (a) "recall" counted any alarm in accident videos
+without onsets (12 of 13 detected videos), so timing was not checked; (b) the false-alarm rate
+pooled road footage before onsets (where all 4 false alarms fell, in 0.032 h) with mostly
+non-road UCF "Normal" footage (0.53 h). Both are fixed in v3:
+- **Detection rule (fixed before running v3):** an alarm in [onset, offset + 10 s] is a detection.
+  Alarms before onset are road false alarms. Alarms later than offset + 10 s are "late"
+  (neither). The same rule is used for the live acceptance run.
+- False alarms are reported separately for road and non-road footage, with exact Poisson and
+  video-clustered bootstrap intervals. Only the ROAD rate is exported to the simulator.
+  "any_alarm_rate" (no timing check) is reported, not exported.
+- **Operating point:** the max of Youden's J on val videos (onset-detection rate minus the share of
+  videos with a false alarm). The 1/h budget could not be resolved with ~0.37 h of val footage.
+- Added: per-video AUROC within onset videos with bootstrap intervals over videos, and
+  calibration within onset videos and above the operating threshold, with model hashes in
+  `sim_inputs.yaml` and `report.json`.
+**v3 development-test results** (combined; val operating point threshold 0.45, 4 windows;
+`results/vision/clip_s03_t1/`):
+- onset detection 3 of 12 = 0.25 (Wilson 95% interval 0.09–0.53); median delay 6.0 s;
+- road false alarms 4 in 0.032 h = 126/h (Poisson 34–322; video-clustered bootstrap 30–233);
+- non-road false alarms 0 in 0.53 h (≤ 7.0/h);
+- any-alarm rate on unannotated accident videos 0.72 (0.52–0.86);
+- per-video AUROC within onset videos 0.74 (0.53–0.91) on test and 0.65 (0.47–0.80) on val;
+- calibration: ECE 0.013 over all windows (driven by easy normal windows), but ECE 0.23 within
+  onset videos. Above the threshold the mean predicted probability is 0.73 while 0.54 are
+  accidents, i.e. **over-confident where alarms fire**. "Well calibrated" in D-022 is withdrawn.
+  Phase-4 fusion must not treat this confidence as a calibrated likelihood without correction.
+**Corrections to earlier entries.** D-021 said the test split was not looked at; in fact the
+first run's within-video TEST AUROC (0.62) was seen before the selection criterion was changed
+and the MIL sweep was run. D-022's heuristic-cue figures (25% vs 12%) were per-video averages
+computed ad hoc. The scripted frame-level figures are in `results/vision/diagnostics.json`
+(deceleration cue 18.1% of accident-video frames vs 3.4% of normal-video frames). Every number
+quoted in D-021/D-022 now comes from that file or the evaluation outputs. The run selected on val
+(`clip_s03_t1`, val within-video AUROC 0.736) has a lower test within-video AUROC (0.572) than
+`clip_s1_t1` (0.668): with about 11 val videos the selection is noise, not a significant
+improvement.
+**Status of the UCF-Crime test split:** it has been looked at three times (v1, v2, v3), so it is
+reported as a DEVELOPMENT-TEST set. A held-out claim needs a frozen pipeline (this commit) and
+footage never used (e.g. CADP frames downloaded by hand, or Pune footage). v1 and v2 are kept with
+ERRATA notes (`eval_v1/`, `eval_v2/`).
+**Other fixes:**
+- MediaMTX is bound to 127.0.0.1:8554 only (HLS/API ports removed), because the raw streams are
+  un-anonymised. Stream URLs use 127.0.0.1 explicitly, since `localhost` resolved to IPv6 and hung.
+  Live sources have 10 s open/read timeouts.
+- Demo "normal" clips are now road footage (pre-onset parts of other onset videos), so a scene
+  change cannot pass for an accident. Live JSON records the operating point and model hashes.
+  Live v3 run (`results/vision/live_acceptance_C0*.json`): 2 of 4 accident clips detected (C02
+  +3.8 s, C03 +1.9 s). There were 8 false events (7 accident, 1 fire_smoke) in 0.18 camera-hours
+  of road footage. The earlier "0 false alarms" came from non-road normal clips. This is
+  consistent with the offline road false-alarm rate.
+- The privacy-check frame (UCF-Crime-derived) is no longer committed. It was removed from the
+  local, unpushed history. The privacy check verifies the blur MECHANISM on the regions the
+  anonymiser chose; it cannot measure missed faces/plates/persons. A coverage check needs
+  hand-labelled frames (open action for the user, L12).
+- Base rate: computed by `resqcity.sim.base_rate` from `configs/base_rate.yaml`
+  (`results/calibration/base_rate.json`). The 3% crowd/other share is now ADDED on top of
+  accidents + fires (5.54/day → 5.71/day), and only the "Fire" call type is used (documented).
+  Year and area mismatches are listed as caveats. MoRTH's million-plus-city table for Pune
+  (open action) would replace the national severity-index proxy.
+- Latency: measured on road footage (320×240), including the fire model: 77.8 ms per frame,
+  12.8 fps on CPU (`results/vision/latency_cpu.json`). That is real-time at 5 fps, about two
+  cameras per laptop CPU (the D-024 figure of 44 ms excluded the fire model).

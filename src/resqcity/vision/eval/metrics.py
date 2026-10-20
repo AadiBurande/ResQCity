@@ -9,6 +9,11 @@ from resqcity.vision.alarm import alarm_times
 from resqcity.vision.config import AlarmConfig
 
 SECONDS_PER_HOUR = 3600.0
+# An alarm counts as a detection if it falls in [onset, offset + DETECTION_GRACE_S]. Fixed before
+# the v3 evaluation (D-025): covers the 3 s window plus up to four windows of alarm persistence.
+DETECTION_GRACE_S = 10.0
+BOOTSTRAP_REPS = 2000
+BOOTSTRAP_SEED = 20261020
 
 
 @dataclass(frozen=True)
@@ -71,48 +76,56 @@ def reliability(y: np.ndarray, p: np.ndarray, bins: int = 10) -> pd.DataFrame:
 
 
 def video_alarm_summary(
-    windows: pd.DataFrame, videos: pd.DataFrame, score_col: str, cfg: AlarmConfig, threshold: float
+    windows: pd.DataFrame,
+    videos: pd.DataFrame,
+    score_col: str,
+    cfg: AlarmConfig,
+    threshold: float,
+    grace_s: float = DETECTION_GRACE_S,
 ) -> pd.DataFrame:
-    """Per video: alarms, first alarm after onset, delay, and false alarms on the normal portion.
+    """Per video: alarms classified by WHEN they fire (alarms are timestamped at window end).
 
-    ``windows`` needs video_id, end_s and ``score_col``; alarms are timestamped at window end.
-    Normal portion = whole normal video, or [0, onset) of an annotated accident video.
+    - accident video with annotated onset: detection = an alarm in [onset, offset + grace_s];
+      alarms before onset are false alarms on ROAD footage (``road_hours`` = onset);
+      alarms after offset + grace_s are ``late_alarms`` (aftermath: neither hit nor false alarm);
+    - normal video (UCF-Crime "Normal", mostly NOT road scenes): every alarm is a false alarm on
+      ``nonroad_hours``;
+    - accident video without onset: only ``any_alarm`` (no timing can be checked).
     """
     rows = []
     for _, v in videos.iterrows():
         w = windows[windows["video_id"] == v["video_id"]].sort_values("end_s")
-        times = w["end_s"].tolist()
-        alarms = alarm_times(times, w[score_col].tolist(), cfg, threshold)
-        onset = v["accident_onset_s"] if v.get("has_onset", False) else None
+        alarms = alarm_times(w["end_s"].tolist(), w[score_col].tolist(), cfg, threshold)
+        has_onset = bool(v.get("has_onset", False))
+        row = {
+            "video_id": v["video_id"],
+            "source": v["source"],
+            "label": v["label"],
+            "has_onset": has_onset,
+            "threshold": threshold,
+            "n_alarms": len(alarms),
+            "any_alarm": bool(alarms),
+            "detected": False,
+            "delay_s": None,
+            "road_false_alarms": 0,
+            "road_hours": 0.0,
+            "nonroad_false_alarms": 0,
+            "nonroad_hours": 0.0,
+            "late_alarms": 0,
+        }
         if v["label"] == "normal":
-            normal_s, false_alarms, detected, delay = (
-                float(v["duration_s"]),
-                len(alarms),
-                False,
-                None,
-            )
-        elif onset is not None:
-            early = [a for a in alarms if a < onset]
-            late = [a for a in alarms if a >= onset]
-            normal_s, false_alarms = float(onset), len(early)
-            detected = bool(late)
-            delay = (late[0] - onset) if late else None
-        else:  # accident video without onset: detection only
-            normal_s, false_alarms, detected, delay = 0.0, 0, bool(alarms), None
-        rows.append(
-            {
-                "video_id": v["video_id"],
-                "source": v["source"],
-                "label": v["label"],
-                "has_onset": bool(onset is not None),
-                "threshold": threshold,
-                "n_alarms": len(alarms),
-                "detected": detected,
-                "delay_s": delay,
-                "false_alarms": false_alarms,
-                "normal_hours": normal_s / SECONDS_PER_HOUR,
-            }
-        )
+            row["nonroad_false_alarms"] = len(alarms)
+            row["nonroad_hours"] = float(v["duration_s"]) / SECONDS_PER_HOUR
+        elif has_onset:
+            onset = float(v["accident_onset_s"])
+            offset = float(v["accident_offset_s"]) if pd.notna(v["accident_offset_s"]) else onset
+            hits = [a for a in alarms if onset <= a <= offset + grace_s]
+            row["detected"] = bool(hits)
+            row["delay_s"] = (hits[0] - onset) if hits else None
+            row["road_false_alarms"] = sum(a < onset for a in alarms)
+            row["road_hours"] = onset / SECONDS_PER_HOUR
+            row["late_alarms"] = sum(a > offset + grace_s for a in alarms)
+        rows.append(row)
     return pd.DataFrame(rows)
 
 
@@ -138,41 +151,84 @@ def poisson_rate_interval(count: int, exposure: float) -> tuple[float, float]:
     return float(lo / exposure), float(hi / exposure)
 
 
+def cluster_bootstrap_rate(counts: np.ndarray, hours: np.ndarray) -> tuple[float, float]:
+    """95 % percentile interval of sum(counts) / sum(hours), resampling VIDEOS (false alarms in
+    one video are not independent)."""
+    counts, hours = np.asarray(counts, float), np.asarray(hours, float)
+    if len(counts) == 0 or hours.sum() <= 0:
+        return float("nan"), float("nan")
+    rng = np.random.default_rng(BOOTSTRAP_SEED)
+    idx = rng.integers(0, len(counts), size=(BOOTSTRAP_REPS, len(counts)))
+    tot_h = hours[idx].sum(axis=1)
+    ok = tot_h > 0
+    rates = counts[idx].sum(axis=1)[ok] / tot_h[ok]
+    return float(np.percentile(rates, 2.5)), float(np.percentile(rates, 97.5))
+
+
 def _ci(name: str, interval: tuple[float, float]) -> dict[str, float]:
     return {f"{name}_ci95_lo": interval[0], f"{name}_ci95_hi": interval[1]}
 
 
-def summarise_alarms(per_video: pd.DataFrame) -> dict[str, float]:
-    acc = per_video[per_video["label"] == "accident"]
-    with_onset = acc[acc["has_onset"]]
-    delays = with_onset["delay_s"].dropna().to_numpy(float)
-    normal_vids = per_video[per_video["label"] == "normal"]
-    hours = per_video["normal_hours"].sum()
-    tp = int(acc["detected"].sum())
-    fp_videos = int((normal_vids["n_alarms"] > 0).sum())
-    precision = tp / (tp + fp_videos) if tp + fp_videos else float("nan")
-    recall = tp / len(acc) if len(acc) else float("nan")
+def _rate_block(name: str, counts: pd.Series, hours: pd.Series) -> dict[str, float]:
+    total_h = float(hours.sum())
+    total = int(counts.sum())
     return {
-        "videos_accident": len(acc),
-        "videos_normal": len(normal_vids),
-        "video_recall": recall,
-        "video_precision": precision,
-        "video_f1": 2 * precision * recall / (precision + recall) if tp else 0.0,
-        "onset_videos": len(with_onset),
-        "onset_detected": int(with_onset["detected"].sum()),
-        "delay_median_s": float(np.median(delays)) if len(delays) else float("nan"),
-        "delay_p90_s": float(np.quantile(delays, 0.9)) if len(delays) else float("nan"),
-        "false_alarms": int(per_video["false_alarms"].sum()),
-        "normal_hours": float(hours),
-        "false_alarms_per_camera_hour": float(per_video["false_alarms"].sum() / hours)
-        if hours > 0
-        else float("nan"),
-        **_ci(
-            "false_alarms_per_camera_hour",
-            poisson_rate_interval(int(per_video["false_alarms"].sum()), float(hours)),
-        ),
-        **_ci("video_recall", wilson_interval(tp, len(acc))),
-        **_ci(
-            "onset_detected", wilson_interval(int(with_onset["detected"].sum()), len(with_onset))
-        ),
+        f"{name}_false_alarms": total,
+        f"{name}_hours": total_h,
+        f"{name}_false_alarms_per_hour": total / total_h if total_h > 0 else float("nan"),
+        **_ci(f"{name}_fa_poisson", poisson_rate_interval(total, total_h)),
+        **_ci(f"{name}_fa_cluster", cluster_bootstrap_rate(counts.to_numpy(), hours.to_numpy())),
     }
+
+
+def summarise_alarms(per_video: pd.DataFrame) -> dict[str, float]:
+    """Headline metrics. ``onset_detection_rate`` (timing-checked) is the recall exported to the
+    simulator; ``any_alarm_rate`` (accident videos without onsets) does NOT check timing."""
+    acc = per_video[per_video["label"] == "accident"]
+    onset = acc[acc["has_onset"]]
+    weak = acc[~acc["has_onset"]]
+    normal = per_video[per_video["label"] == "normal"]
+    delays = onset["delay_s"].dropna().to_numpy(float)
+    det = int(onset["detected"].sum())
+    fp_videos = int((onset["road_false_alarms"] > 0).sum()) + int(
+        (normal["nonroad_false_alarms"] > 0).sum()
+    )
+    neg_videos = len(onset) + len(normal)
+    tpr = det / len(onset) if len(onset) else float("nan")
+    fpr = fp_videos / neg_videos if neg_videos else float("nan")
+    return {
+        "onset_videos": len(onset),
+        "onset_detected": det,
+        "onset_detection_rate": tpr,
+        **_ci("onset_detection_rate", wilson_interval(det, len(onset))),
+        "n_delays": len(delays),
+        "delay_median_s": float(np.median(delays)) if len(delays) else float("nan"),
+        "delay_max_s": float(np.max(delays)) if len(delays) else float("nan"),
+        "late_alarms": int(onset["late_alarms"].sum()),
+        "weak_videos": len(weak),
+        "any_alarm_rate": float(weak["any_alarm"].mean()) if len(weak) else float("nan"),
+        **_ci("any_alarm_rate", wilson_interval(int(weak["any_alarm"].sum()), len(weak))),
+        "fp_video_rate": fpr,
+        "youden_j": tpr - fpr if neg_videos and len(onset) else float("nan"),
+        **_rate_block("road", onset["road_false_alarms"], onset["road_hours"]),
+        **_rate_block("nonroad", normal["nonroad_false_alarms"], normal["nonroad_hours"]),
+    }
+
+
+def per_video_auroc(
+    windows: pd.DataFrame, score_col: str
+) -> tuple[float, tuple[float, float], int]:
+    """Mean per-video AUROC (pre-onset vs accident windows inside each onset video) with a 95 %
+    bootstrap interval over videos; videos without both classes are skipped."""
+    values = []
+    for _, g in windows.groupby("video_id"):
+        a = auroc(g["label"].to_numpy(), g[score_col].to_numpy())
+        if not np.isnan(a):
+            values.append(a)
+    if not values:
+        return float("nan"), (float("nan"), float("nan")), 0
+    v = np.asarray(values)
+    rng = np.random.default_rng(BOOTSTRAP_SEED)
+    boots = v[rng.integers(0, len(v), size=(BOOTSTRAP_REPS, len(v)))].mean(axis=1)
+    ci = (float(np.percentile(boots, 2.5)), float(np.percentile(boots, 97.5)))
+    return float(v.mean()), ci, len(v)

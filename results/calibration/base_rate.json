@@ -1,0 +1,20 @@
+{
+  "fires_per_year": 1107.4,
+  "accidents_per_year": 915.068493150685,
+  "accident_plus_fire_per_day": 5.5410095702758495,
+  "incidents_per_day": 5.712381000284381,
+  "type_share_accident": 0.4388777582257407,
+  "type_share_fire": 0.5311222417742594,
+  "type_share_crowd_other": 0.03,
+  "sources": {
+    "fires": "PMC Fire Call Statistics 2011-2020 (OpenCity / Pune Municipal Corporation, public domain)",
+    "road_deaths": "Pune city police, road deaths 2023, via Punekar News 2024-01-13 (secondary source)",
+    "severity_index": "MoRTH, Road Accidents in India 2022 (national), via Outlook Business (secondary source)",
+    "extra_share": "UNVERIFIED"
+  },
+  "caveats": [
+    "Years differ: fires 2015-2019, deaths 2023, severity index 2022.",
+    "Police commissionerate area is not identical to the 58 PMC wards.",
+    "Registered accidents miss unreported crashes; the national severity index likely under-states city accidents."
+  ]
+}

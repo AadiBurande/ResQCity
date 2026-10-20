@@ -1,0 +1,27 @@
+{
+  "file": "results/calibration/base_rate.json",
+  "generated_at_utc": "2026-10-20T06:33:48+00:00",
+  "command": "base_rate.py",
+  "synthetic": false,
+  "git": {
+    "commit": "b6c875fd078a5a338b3c6bcb51ac264b9119159c",
+    "dirty": true
+  },
+  "configs_sha256": {
+    "configs/base_rate.yaml": "fb4fbfc90eebeab42439f9f7e70912aa10b3367ab85dd6d340486a97d1ce7609"
+  },
+  "seeds": {},
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  }
+}

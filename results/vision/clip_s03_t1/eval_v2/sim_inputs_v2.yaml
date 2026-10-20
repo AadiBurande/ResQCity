@@ -1,0 +1,153 @@
+source: 'measured: results/vision/clip_s03_t1 (test split; UCF-Crime)'
+evaluation_version: 2
+caveat: Measured on public CCTV footage (UCF-Crime, 320x240), not Pune cameras; 12
+  test videos with annotated onsets and ~0.6 h of normal test footage, so intervals
+  are wide. The v2 operating-point procedure was adopted after the v1 test result
+  had been seen (D-022). Treat as an empirical prior; vary in sensitivity analysis.
+synthetic: false
+operating_point:
+  threshold: 0.6
+  consecutive_windows: 4
+per_threshold:
+- threshold: 0.3
+  consecutive_windows: 4
+  recall: 0.6486486486486487
+  onset_detection_rate: 0.4166666666666667
+  delay_median_s: 6.0
+  delay_p90_s: 39.00000000000001
+  false_alarms_per_camera_hour: 8.931968175728205
+  false_alarms_per_camera_hour_ci95:
+  - 2.90018575405312
+  - 20.84423415926772
+- threshold: 0.35
+  consecutive_windows: 4
+  recall: 0.6486486486486487
+  onset_detection_rate: 0.4166666666666667
+  delay_median_s: 6.0
+  delay_p90_s: 39.00000000000001
+  false_alarms_per_camera_hour: 8.931968175728205
+  false_alarms_per_camera_hour_ci95:
+  - 2.90018575405312
+  - 20.84423415926772
+- threshold: 0.4
+  consecutive_windows: 4
+  recall: 0.6486486486486487
+  onset_detection_rate: 0.4166666666666667
+  delay_median_s: 7.0
+  delay_p90_s: 44.2
+  false_alarms_per_camera_hour: 8.931968175728205
+  false_alarms_per_camera_hour_ci95:
+  - 2.90018575405312
+  - 20.84423415926772
+- threshold: 0.45
+  consecutive_windows: 4
+  recall: 0.5945945945945946
+  onset_detection_rate: 0.3333333333333333
+  delay_median_s: 7.0
+  delay_p90_s: 44.63333333333334
+  false_alarms_per_camera_hour: 7.145574540582564
+  false_alarms_per_camera_hour_ci95:
+  - 1.946928566611693
+  - 18.29550882352084
+- threshold: 0.5
+  consecutive_windows: 4
+  recall: 0.5675675675675675
+  onset_detection_rate: 0.3333333333333333
+  delay_median_s: 7.0
+  delay_p90_s: 44.63333333333334
+  false_alarms_per_camera_hour: 7.145574540582564
+  false_alarms_per_camera_hour_ci95:
+  - 1.946928566611693
+  - 18.29550882352084
+- threshold: 0.55
+  consecutive_windows: 4
+  recall: 0.5675675675675675
+  onset_detection_rate: 0.3333333333333333
+  delay_median_s: 7.0
+  delay_p90_s: 44.63333333333334
+  false_alarms_per_camera_hour: 7.145574540582564
+  false_alarms_per_camera_hour_ci95:
+  - 1.946928566611693
+  - 18.29550882352084
+- threshold: 0.6
+  consecutive_windows: 4
+  recall: 0.3513513513513513
+  onset_detection_rate: 0.08333333333333333
+  delay_median_s: 5.333333333333333
+  delay_p90_s: 5.333333333333333
+  false_alarms_per_camera_hour: 7.145574540582564
+  false_alarms_per_camera_hour_ci95:
+  - 1.946928566611693
+  - 18.29550882352084
+- threshold: 0.65
+  consecutive_windows: 4
+  recall: 0.3513513513513513
+  onset_detection_rate: 0.08333333333333333
+  delay_median_s: 5.333333333333333
+  delay_p90_s: 5.333333333333333
+  false_alarms_per_camera_hour: 7.145574540582564
+  false_alarms_per_camera_hour_ci95:
+  - 1.946928566611693
+  - 18.29550882352084
+- threshold: 0.7
+  consecutive_windows: 4
+  recall: 0.2972972972972973
+  onset_detection_rate: 0.16666666666666666
+  delay_median_s: 3.8333333333333335
+  delay_p90_s: 5.033333333333333
+  false_alarms_per_camera_hour: 5.359180905436923
+  false_alarms_per_camera_hour_ci95:
+  - 1.105191942582744
+  - 15.661800809371472
+- threshold: 0.75
+  consecutive_windows: 4
+  recall: 0.2972972972972973
+  onset_detection_rate: 0.16666666666666666
+  delay_median_s: 5.833333333333334
+  delay_p90_s: 6.233333333333334
+  false_alarms_per_camera_hour: 3.572787270291282
+  false_alarms_per_camera_hour_ci95:
+  - 0.4326811135641568
+  - 12.906136065537288
+- threshold: 0.8
+  consecutive_windows: 4
+  recall: 0.2702702702702703
+  onset_detection_rate: 0.08333333333333333
+  delay_median_s: 5.333333333333333
+  delay_p90_s: 5.333333333333333
+  false_alarms_per_camera_hour: 3.572787270291282
+  false_alarms_per_camera_hour_ci95:
+  - 0.4326811135641568
+  - 12.906136065537288
+- threshold: 0.85
+  consecutive_windows: 4
+  recall: 0.1621621621621621
+  onset_detection_rate: 0.0
+  delay_median_s: null
+  delay_p90_s: null
+  false_alarms_per_camera_hour: 3.572787270291282
+  false_alarms_per_camera_hour_ci95:
+  - 0.4326811135641568
+  - 12.906136065537288
+- threshold: 0.9
+  consecutive_windows: 4
+  recall: 0.1891891891891892
+  onset_detection_rate: 0.08333333333333333
+  delay_median_s: 3.666666666666667
+  delay_p90_s: 3.666666666666667
+  false_alarms_per_camera_hour: 0.0
+  false_alarms_per_camera_hour_ci95:
+  - 0.0
+  - 6.589790777648661
+- threshold: 0.95
+  consecutive_windows: 4
+  recall: 0.1351351351351351
+  onset_detection_rate: 0.08333333333333333
+  delay_median_s: 48.66666666666666
+  delay_p90_s: 48.66666666666666
+  false_alarms_per_camera_hour: 0.0
+  false_alarms_per_camera_hour_ci95:
+  - 0.0
+  - 6.589790777648661
+delays_at_operating_point_s:
+- 5.33

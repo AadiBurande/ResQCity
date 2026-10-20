@@ -23,6 +23,8 @@ data/runtime/
 
 # Large/raw results (summaries, stats and figures ARE committed)
 results/raw/
+# Frames derived from licence-restricted datasets (anonymised, but not redistributable)
+results/vision/privacy_check.png
 *.parquet
 
 # Model weights (stored with content hash outside git)

@@ -64,12 +64,17 @@ def clips(cfg: StreamsConfig, camera: str, kind: str) -> list[Path]:
     return sorted((cfg.camera_dir(camera) / kind).glob("*.mp4"))
 
 
-def clip_onsets(cfg: StreamsConfig, camera: str) -> dict[str, float | None]:
+def clip_onsets(cfg: StreamsConfig, camera: str) -> dict[str, tuple[float | None, float | None]]:
+    """clip file -> (accident onset, accident offset) in seconds into the clip (None if normal)."""
     path = cfg.camera_dir(camera) / "clips.yaml"
     if not path.exists():
         return {}
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    return {c["file"]: c.get("accident_onset_s") for k in data.values() for c in k}
+    return {
+        c["file"]: (c.get("accident_onset_s"), c.get("accident_offset_s"))
+        for k in data.values()
+        for c in k
+    }
 
 
 class CameraPublisher(threading.Thread):
@@ -104,12 +109,14 @@ class CameraPublisher(threading.Thread):
                 clip = next(self.accidents)
                 started = datetime.now(UTC)
                 self._start(clip, loop=False)
-                log_switch(self.camera, clip.name, started, self.onsets.get(clip.name))
+                onset, offset = self.onsets.get(clip.name, (None, None))
+                log_switch(self.camera, clip.name, started, onset, offset)
                 log.info(
-                    "%s ACCIDENT clip %s (onset %ss into the clip)",
+                    "%s ACCIDENT clip %s (accident %s-%s s into the clip)",
                     self.camera,
                     clip.name,
-                    self.onsets.get(clip.name),
+                    onset,
+                    offset,
                 )
                 while (
                     self.proc is not None
@@ -128,13 +135,16 @@ class CameraPublisher(threading.Thread):
         self._stop_proc()
 
 
-def log_switch(camera: str, clip: str, started: datetime, onset_s: float | None) -> None:
+def log_switch(
+    camera: str, clip: str, started: datetime, onset_s: float | None, offset_s: float | None
+) -> None:
     SCENARIO_LOG.parent.mkdir(parents=True, exist_ok=True)
     record = {
         "camera": camera,
         "clip": clip,
         "started_at_utc": started.isoformat(),
         "accident_onset_s_in_clip": onset_s,
+        "accident_offset_s_in_clip": offset_s,
     }
     with SCENARIO_LOG.open("a", encoding="utf-8", newline="\n") as fh:
         fh.write(json.dumps(record) + "\n")

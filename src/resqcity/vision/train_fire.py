@@ -68,7 +68,13 @@ def main(argv: list[str] | None = None) -> int:
     weight_hash = hashlib.sha256((dest_dir / "best.pt").read_bytes()).hexdigest()[:16]
 
     metrics = YOLO(str(dest_dir / "best.pt")).val(
-        data=str(data_yaml), split="test", imgsz=fc.imgsz, verbose=False
+        data=str(data_yaml),
+        split="test",
+        imgsz=fc.imgsz,
+        verbose=False,
+        project=str(work),
+        name=f"{run_id}_test",
+        exist_ok=True,
     )
     names = metrics.names
     per_class = {

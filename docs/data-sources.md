@@ -42,6 +42,27 @@ Exact download time, OSMnx version and SHA-256 of every raw file: `data/raw/down
 - Known issues: speed tags sparse (D-008); many small clinics tagged `amenity=hospital` (D-013);
   completeness of police posts varies.
 
+### UCF-Crime (vision, phase 3)
+- Citation: W. Sultani, C. Chen, M. Shah, "Real-world Anomaly Detection in Surveillance Videos",
+  CVPR 2018. Mirror: Hugging Face `jinmang2/ucf_crime` (original zips + split files).
+- Used: all 150 `RoadAccidents` videos; 60 seeded-random `Testing_Normal_Videos` (59 readable);
+  `Temporal_Anomaly_Annotation_for_Testing_Videos.txt` (23 accident onsets).
+- Download: `uv run python -m resqcity.vision.datasets.download --only ucf_crime` (range reads
+  of the zip members, with CRC checks; SHA-256 in `data/raw/vision/manifest.json`).
+- Known issues: 320×240, mixed countries; "Normal" videos are mostly not road scenes; only
+  23 onsets; possible near-duplicates (L16). Terms: research use; not redistributed.
+
+### D-Fire (vision, phase 3)
+- Citation: P. V. A. B. de Venâncio et al., Neural Computing and Applications, 2022. Mirror:
+  Hugging Face `badsaarow/d-fire`. Class ids inferred from README box totals (exact match,
+  `data/processed/vision/dfire_yolo/dataset_check.json`).
+- Known issues: mostly wildfire/building scenes, few vehicle fires on Indian roads (L13).
+
+### CADP (vision, not used yet)
+- Annotation JSON downloaded; frames blocked by Google Drive for automated download (D-020).
+  To use: download the frames archive in a browser into `data/raw/vision/cadp/frames/`, then
+  re-run `resqcity.vision.datasets.annotations` (keyframe times read as seconds: unverified).
+
 <!--
 ### <Dataset name>
 - Citation:

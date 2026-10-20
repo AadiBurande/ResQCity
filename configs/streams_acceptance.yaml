@@ -1,7 +1,7 @@
 # Phase-3 live acceptance run (resqcity.streams.acceptance): accident clip on every camera.
 # Simulated CCTV cameras (phase 3). Clips are public-dataset videos (UCF-Crime), assigned to real
 # Pune junctions from configs/cameras.yaml by `python -m resqcity.streams.prepare_videos`.
-rtsp_base: rtsp://localhost:8554
+rtsp_base: rtsp://127.0.0.1:8554   # IPv4 explicitly: MediaMTX listens on 127.0.0.1 only
 ffmpeg: ffmpeg                  # resolved on PATH, else the winget package folder (Windows)
 video_dir: data/videos          # data/videos/<camera_id>/{normal,accident}/*.mp4
 cameras: [C01, C02, C03, C04]   # >= 4 cameras for the demo (acceptance criterion)

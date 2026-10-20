@@ -1,0 +1,99 @@
+{
+  "classifier_runs": [
+    {
+      "run_id": "clip_main",
+      "split": "val",
+      "auroc_all_windows": 0.9288345172323073,
+      "auroc_within_onset_videos_pooled": 0.6607179487179488,
+      "mean_p_normal_videos": 0.0815127044916153,
+      "mean_p_pre_onset": 0.5302218794822693,
+      "mean_p_accident_windows": 0.6602267026901245
+    },
+    {
+      "run_id": "clip_main",
+      "split": "test",
+      "auroc_all_windows": 0.9657544968123861,
+      "auroc_within_onset_videos_pooled": 0.6209839357429718,
+      "mean_p_normal_videos": 0.046644601970911026,
+      "mean_p_pre_onset": 0.5223730802536011,
+      "mean_p_accident_windows": 0.6675021648406982
+    },
+    {
+      "run_id": "clip_s0_t0",
+      "split": "val",
+      "auroc_all_windows": 0.9201019974500637,
+      "auroc_within_onset_videos_pooled": 0.6693333333333333,
+      "mean_p_normal_videos": 0.2537370026111603,
+      "mean_p_pre_onset": 0.726002037525177,
+      "mean_p_accident_windows": 0.7914844155311584
+    },
+    {
+      "run_id": "clip_s0_t0",
+      "split": "test",
+      "auroc_all_windows": 0.9748690801457195,
+      "auroc_within_onset_videos_pooled": 0.5915327978580991,
+      "mean_p_normal_videos": 0.08460946381092072,
+      "mean_p_pre_onset": 0.7418365478515625,
+      "mean_p_accident_windows": 0.8245508670806885
+    },
+    {
+      "run_id": "clip_s03_t1",
+      "split": "val",
+      "auroc_all_windows": 0.9449335195191548,
+      "auroc_within_onset_videos_pooled": 0.7362051282051282,
+      "mean_p_normal_videos": 0.09830284863710403,
+      "mean_p_pre_onset": 0.6376028060913086,
+      "mean_p_accident_windows": 0.7633358240127563
+    },
+    {
+      "run_id": "clip_s03_t1",
+      "split": "test",
+      "auroc_all_windows": 0.9527977003642987,
+      "auroc_within_onset_videos_pooled": 0.571954484605087,
+      "mean_p_normal_videos": 0.07480360567569733,
+      "mean_p_pre_onset": 0.6313307285308838,
+      "mean_p_accident_windows": 0.7378857731819153
+    },
+    {
+      "run_id": "clip_s1_t1",
+      "split": "val",
+      "auroc_all_windows": 0.9238763078542084,
+      "auroc_within_onset_videos_pooled": 0.6727179487179488,
+      "mean_p_normal_videos": 0.030235644429922104,
+      "mean_p_pre_onset": 0.11023115366697311,
+      "mean_p_accident_windows": 0.15453995764255524
+    },
+    {
+      "run_id": "clip_s1_t1",
+      "split": "test",
+      "auroc_all_windows": 0.954099783697632,
+      "auroc_within_onset_videos_pooled": 0.6676706827309237,
+      "mean_p_normal_videos": 0.018504027277231216,
+      "mean_p_pre_onset": 0.11945050209760666,
+      "mean_p_accident_windows": 0.14527612924575806
+    }
+  ],
+  "heuristic_cue_activity_frames": [
+    {
+      "video_label": "accident",
+      "frames": 20262,
+      "collision_any": 0.08064356924291778,
+      "collision_full": 0.00483664001579311,
+      "deceleration_full": 0.18127529365314382,
+      "orientation_full": 0.031092685815812853,
+      "person_down": 0.0033560359293258314,
+      "mean_vehicles": 2.572006712071859
+    },
+    {
+      "video_label": "normal",
+      "frames": 15377,
+      "collision_any": 0.012876373805033491,
+      "collision_full": 0.002146062300838915,
+      "deceleration_full": 0.03381673928594654,
+      "orientation_full": 0.006568251284385771,
+      "person_down": 0.009429667685504324,
+      "mean_vehicles": 0.8180399297652338
+    }
+  ],
+  "note": "frame shares are over sampled frames (5 fps) of val+test videos"
+}

@@ -3,7 +3,7 @@
     uv run python -m resqcity.vision.run --camera C01 [--source URL_OR_FILE] [--preview-port 8091]
 
 Source: ``--source`` (file, RTSP, or a phone IP-camera HTTP URL) > the camera's ``stream_url`` in
-``configs/cameras.yaml`` > ``rtsp://localhost:8554/<camera_id>`` (simulated MediaMTX stream).
+``configs/cameras.yaml`` > ``rtsp://127.0.0.1:8554/<camera_id>`` (simulated MediaMTX stream).
 Models: the newest clip-classifier run under ``data/models/clip/`` (+ its stacker) and fire run
 under ``data/models/fire/``; without them it runs in heuristics-only mode and says so.
 Events: JSON lines in ``data/runtime/events.jsonl`` (topic ``events.vision``) and the log.
@@ -26,7 +26,7 @@ from resqcity.vision.privacy import Anonymizer
 from resqcity.vision.scoring import Stacker
 
 log = logging.getLogger(__name__)
-DEFAULT_RTSP = "rtsp://localhost:8554/{camera_id}"
+DEFAULT_RTSP = "rtsp://127.0.0.1:8554/{camera_id}"
 EVENTS_FILE = PROJECT_ROOT / "data" / "runtime" / "events.jsonl"
 
 

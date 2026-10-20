@@ -9,7 +9,7 @@ from resqcity.streams.loop_cameras import build_command
 def test_config_has_at_least_four_cameras():
     cfg = load_streams_config()
     assert len(cfg.cameras) >= 4
-    assert cfg.url("C01") == "rtsp://localhost:8554/C01"
+    assert cfg.url("C01") == "rtsp://127.0.0.1:8554/C01"
     assert all(c.camera in cfg.cameras for c in cfg.scenario)
 
 

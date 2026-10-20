@@ -1,10 +1,10 @@
 {
   "file": "results/vision/clip_s03_t1/test_video_metrics.csv",
-  "generated_at_utc": "2026-10-20T01:02:16+00:00",
+  "generated_at_utc": "2026-10-20T06:31:42+00:00",
   "command": "evaluate.py --run-id clip_s03_t1",
   "synthetic": false,
   "git": {
-    "commit": "f154d3f70a7d0a43c8e83a1524a7f1fb4a84b6cb",
+    "commit": "197c76f8340398040c53d8a038aca16f1d3d5c57",
     "dirty": true
   },
   "configs_sha256": {

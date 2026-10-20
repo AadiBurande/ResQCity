@@ -4,21 +4,20 @@
 synthetic: true
 
 base_rate_per_day:
-  value: 5.54
+  value: 5.71
   source: >
-    Derived (D-018): (fires + road accidents) / 365 = (1107 + 915) / 365.
-    Fires: mean "Fire" calls 2015-2019 = 1107/yr, PMC Fire Call Statistics 2011-2020
+    Derived by resqcity.sim.base_rate from configs/base_rate.yaml (D-018, corrected in D-025):
+    (fires + road accidents) / 365 / (1 - 0.03 assumed crowd/other share).
+    Fires: mean "Fire" calls 2015-2019 = 1107.4/yr, PMC Fire Call Statistics 2011-2020
     (data.opencity.in, Pune Municipal Corporation, public domain).
     Road accidents: 334 road deaths in Pune city in 2023 (Pune city police, via Punekar News,
-    2024-01-13) divided by the national severity index 36.5 deaths per 100 accidents
-    (MoRTH, Road Accidents in India 2022, via Outlook Business) = 915/yr.
+    2024-01-13) / national severity index 36.5 deaths per 100 accidents (MoRTH, Road Accidents in
+    India 2022, via Outlook Business) = 915/yr. Accidents + fires = 5.54/day.
   note: >
-    Applying the national severity index to a city probably UNDER-estimates accidents (urban crashes
-    are less often fatal), and police-registered figures miss unreported crashes. The phase-10
-    sensitivity sweep covers 0.5x-4x of this rate. Superseded value: 24.0/day (assumption).
-
-# Type mix follows the same derivation: accidents 915/2022 = 0.45, fires 1107/2022 = 0.55, then
-# small assumed shares for crowd/other events are taken out of both.
+    Secondary sources for deaths and the severity index; years and areas differ (see
+    configs/base_rate.yaml caveats). The national severity index probably UNDER-estimates city
+    accidents, and police-registered figures miss unreported crashes. Phase-10 sensitivity
+    covers 0.5x-4x. Superseded values: 24.0/day (assumption), 5.54/day (crowd/other carved out).
 
 # Relative intensity by local hour 0..23 (normalised to mean 1 at load time).
 hour_profile:
@@ -46,9 +45,9 @@ rain_effect:
   max_multiplier: {value: 2.0, source: UNVERIFIED}
 
 type_mix:
-  value: {accident: 0.44, fire_smoke: 0.53, crowd: 0.01, other: 0.02}
+  value: {accident: 0.439, fire_smoke: 0.531, crowd: 0.01, other: 0.02}
   source: UNVERIFIED
-  note: "accident/fire split derived from the base-rate sources (D-018); crowd/other assumed"
+  note: "accident/fire split from results/calibration/base_rate.json; crowd/other (0.03) assumed, added on top"
 
 # Feature model used to sample observable cues per incident type (SYNTHETIC). These set the share
 # of multi-agency incidents, which strongly affects RQ2, so they are sensitivity factors.

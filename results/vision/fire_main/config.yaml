@@ -1,0 +1,10 @@
+fire_smoke:
+  base_weights: yolo11n.pt
+  epochs: 50
+  imgsz: 640
+  batch: 16
+  conf: 0.35
+  persistence_frames: 5
+  workers: 2
+seed: 20261020
+epochs: 50

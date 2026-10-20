@@ -1,13 +1,14 @@
 """Live end-to-end acceptance run: simulated RTSP cameras -> ``vision.run`` -> Events on the bus.
 
-    uv run python -m resqcity.streams.acceptance [--duration 180]
+    uv run python -m resqcity.streams.acceptance [--duration 180] [--cameras C01 C02]
 
 Starts the stream player with ``configs/streams_acceptance.yaml`` (one accident clip per camera,
-on cue) and one ``vision.run`` process per camera, then compares the Events published on the
-JSONL bus with the ground truth from the scenario log (clip start + annotated onset in the clip).
-Scoring follows the offline evaluation: an Event at/after the true onset (within the clip, plus
-``GRACE_S``) is a detection; any other Event is a false alarm. Results:
-``results/vision/live_acceptance.json``. Requires MediaMTX (``make streams`` starts it).
+on cue; normal clips are road footage, D-025) and one ``vision.run`` process per watched camera,
+then compares the Events published on the JSONL bus with the ground truth from the scenario log.
+Scoring uses the SAME rule as the offline evaluation: an Event in [onset, offset + grace] is a
+detection (grace = ``resqcity.vision.eval.metrics.DETECTION_GRACE_S``); any other Event is a
+false alarm. The JSON records the model hashes and operating point used. Requires MediaMTX
+(``make streams`` starts it).
 """
 
 import argparse
@@ -21,41 +22,50 @@ from pathlib import Path
 from resqcity.common.config import CONFIG_DIR, PROJECT_ROOT
 from resqcity.common.provenance import write_meta
 from resqcity.streams.config import load_streams_config
-from resqcity.streams.loop_cameras import SCENARIO_LOG, clips, start_server
+from resqcity.streams.loop_cameras import SCENARIO_LOG, start_server
+from resqcity.vision.eval.metrics import DETECTION_GRACE_S
 
 RUNTIME = PROJECT_ROOT / "data" / "runtime"
 EVENTS = RUNTIME / "acceptance_events.jsonl"
 CONFIG = CONFIG_DIR / "streams_acceptance.yaml"
-GRACE_S = 15.0  # an alarm this long after the accident clip ends still counts (stream latency)
 STARTUP_S = 20.0  # vision processes load models before the first cue
 
 
-def clip_duration_s(path: Path) -> float:
-    import cv2
+def detector_provenance() -> dict[str, object]:
+    """Selected clip run, its val operating point and model hashes (as used by vision.run)."""
+    import pandas as pd
 
-    cap = cv2.VideoCapture(str(path))
-    try:
-        return (cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0) / (cap.get(cv2.CAP_PROP_FPS) or 30.0)
-    finally:
-        cap.release()
+    results = PROJECT_ROOT / "results" / "vision"
+    selection = results / "clip_selection.csv"
+    if not selection.exists():
+        return {"mode": "no trained model"}
+    table = pd.read_csv(selection)
+    run = str(table.loc[table["selected"], "run_id"].iloc[0])
+    report_path = results / run / "report.json"
+    report = json.loads(report_path.read_text(encoding="utf-8")) if report_path.exists() else {}
+    return {
+        "clip_run": run,
+        "evaluation_version": report.get("evaluation_version"),
+        "operating_point": report.get("operating_points_chosen_on_val", {}).get("combined"),
+        "models": report.get("models"),
+    }
+
+
+def _read_jsonl(path: Path) -> list[dict]:
+    if not path.exists():
+        return []
+    return [
+        json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()
+    ]
 
 
 def score(run_start: datetime, run_end: datetime, cameras: list[str]) -> dict[str, object]:
-    cfg = load_streams_config(CONFIG)
     switches = [
-        json.loads(line)
-        for line in SCENARIO_LOG.read_text(encoding="utf-8").splitlines()
-        if line.strip() and datetime.fromisoformat(json.loads(line)["started_at_utc"]) >= run_start
+        s
+        for s in _read_jsonl(SCENARIO_LOG)
+        if datetime.fromisoformat(s["started_at_utc"]) >= run_start
     ]
-    events = (
-        [
-            json.loads(line)["payload"]
-            for line in EVENTS.read_text(encoding="utf-8").splitlines()
-            if line.strip()
-        ]
-        if EVENTS.exists()
-        else []
-    )
+    events = [r["payload"] for r in _read_jsonl(EVENTS)]
     per_camera = []
     for cam in cameras:
         sw = next((s for s in switches if s["camera"] == cam), None)
@@ -68,15 +78,15 @@ def score(run_start: datetime, run_end: datetime, cameras: list[str]) -> dict[st
             per_camera.append(row)
             continue
         start = datetime.fromisoformat(sw["started_at_utc"])
-        duration = clip_duration_s(
-            next(p for p in clips(cfg, cam, "accident") if p.name == sw["clip"])
-        )
-        onset = start + timedelta(seconds=sw["accident_onset_s_in_clip"] or 0.0)
-        end = start + timedelta(seconds=duration + GRACE_S)
+        onset_s = sw.get("accident_onset_s_in_clip") or 0.0
+        offset_s = sw.get("accident_offset_s_in_clip") or onset_s
+        onset = start + timedelta(seconds=onset_s)
+        end = start + timedelta(seconds=offset_s + DETECTION_GRACE_S)
         hits = [t for t in cam_events if onset <= t <= end]
         row.update(
             accident_clip=sw["clip"],
             true_onset_utc=onset.isoformat(),
+            detection_window_end_utc=end.isoformat(),
             detected=bool(hits),
             delay_s=(hits[0] - onset).total_seconds() if hits else None,
             false_alarms=len(cam_events) - len(hits),
@@ -86,14 +96,16 @@ def score(run_start: datetime, run_end: datetime, cameras: list[str]) -> dict[st
     return {
         "run_start_utc": run_start.isoformat(),
         "run_end_utc": run_end.isoformat(),
+        "detection_rule": f"event in [onset, offset + {DETECTION_GRACE_S:g} s]",
+        "detector": detector_provenance(),
         "cameras": per_camera,
         "detected": sum(bool(r["detected"]) for r in per_camera),
         "accident_clips": sum(r["accident_clip"] is not None for r in per_camera),
         "false_alarms": sum(int(r["false_alarms"]) for r in per_camera),
         "camera_hours": hours,
         "events_published": len(events),
-        "note": "Live check of the end-to-end path (RTSP -> vision -> bus); 4 clips is far too few "
-        "to estimate detector accuracy: see results/vision/<run>/test_video_metrics.csv for that.",
+        "note": "Live check of the end-to-end path (RTSP -> vision -> bus) on road footage. "
+        "A few clips cannot estimate detector accuracy; see test_video_metrics.csv for that.",
     }
 
 

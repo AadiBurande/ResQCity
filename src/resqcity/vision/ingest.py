@@ -32,8 +32,20 @@ def resize(image: np.ndarray, width: int | None) -> np.ndarray:
     return cv2.resize(image, (width, height), interpolation=cv2.INTER_AREA)
 
 
+LIVE_TIMEOUT_MS = 10_000  # fail (and reconnect) instead of blocking forever on a dead stream
+
+
 def _open(source: str) -> cv2.VideoCapture:
-    cap = cv2.VideoCapture(source, cv2.CAP_FFMPEG) if is_live(source) else cv2.VideoCapture(source)
+    if is_live(source):
+        params = [
+            cv2.CAP_PROP_OPEN_TIMEOUT_MSEC,
+            LIVE_TIMEOUT_MS,
+            cv2.CAP_PROP_READ_TIMEOUT_MSEC,
+            LIVE_TIMEOUT_MS,
+        ]
+        cap = cv2.VideoCapture(source, cv2.CAP_FFMPEG, params)
+    else:
+        cap = cv2.VideoCapture(source)
     if not cap.isOpened():
         raise OSError(f"cannot open video source {source!r}")
     return cap

@@ -1,6 +1,6 @@
 # Phase 3 — Simulated CCTV streams and the vision pipeline
 
-Status: in progress · Date: 2026-10-20 · Skill: `vision-eval` · Decisions D-018…
+Status: implemented (development evaluation; see Outcome) · Date: 2026-10-20 · Skill: `vision-eval` · Decisions D-018…D-025
 
 ## User decisions (2026-10-20)
 Allowed: download public datasets (no account or sign-up, cap ≈ 10 GB), GPU training overnight on
@@ -64,3 +64,15 @@ for the simulator goes to `results/vision/sim_inputs.yaml`.
 - `python -m resqcity.vision.run --camera C01` emits Events when an accident clip plays.
 - Metrics report on the test split. Privacy check image saved.
 - Unit tests use synthetic videos and fake detectors (no network, no GPU).
+
+## Outcome (2026-10-20)
+- Streams: 4 RTSP cameras served by MediaMTX (localhost only), scenario cues, live acceptance runner.
+- Vision: pipeline runs in real time on CPU (`results/vision/latency_cpu.json`). Privacy blur is
+  verified on a real frame (mechanism check; coverage needs hand labels).
+- Accident detector (UCF-Crime development-test, v3, D-025): onset detection 3/12, road false alarms
+  ~126/h with wide intervals, over-confident above its threshold. It is weak, and this is reported
+  as such. Detector quality is a phase-10 sensitivity factor (break-even analysis).
+- Fire/smoke detector (D-Fire test split): mAP50 0.76 (`results/vision/fire_main/fire_metrics.json`).
+- Datasets actually used: UCF-Crime, D-Fire (CADP frames, TAD and IEEE DataPort not obtained; D-020).
+- Open actions: CADP frames by hand (held-out evaluation); hand-labelled privacy coverage check;
+  Pune-specific footage if the college letter yields data.

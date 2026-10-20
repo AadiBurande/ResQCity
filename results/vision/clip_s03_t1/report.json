@@ -1,10 +1,12 @@
 {
   "run_id": "clip_s03_t1",
-  "evaluation_version": 2,
-  "false_alarm_budget_per_hour": 1.0,
+  "evaluation_version": 3,
+  "test_split_status": "development-test (looked at during development; D-025)",
+  "detection_rule": "alarm in [onset, offset + 10 s]",
+  "operating_point_rule": "max Youden J on val videos",
   "operating_points_chosen_on_val": {
     "classifier": {
-      "threshold": 0.35,
+      "threshold": 0.7,
       "consecutive_windows": 4
     },
     "heuristics": {
@@ -12,10 +14,33 @@
       "consecutive_windows": 1
     },
     "combined": {
-      "threshold": 0.6,
+      "threshold": 0.45,
       "consecutive_windows": 4
     }
   },
-  "test_ece_combined": 0.013183663073299772,
-  "detect_ms_mean_gpu_or_device": 16.103155046332922
+  "calibration_combined": {
+    "all_windows": {
+      "n": 2024,
+      "ece": 0.013183663073299772,
+      "mean_p": 0.03830054539609691,
+      "observed": 0.03557312252964427
+    },
+    "within_onset_videos": {
+      "n": 155,
+      "ece": 0.23254767889092953,
+      "mean_p": 0.4367978922905217,
+      "observed": 0.4645161290322581
+    },
+    "above_threshold": {
+      "n": 78,
+      "ece": 0.23419023020997806,
+      "mean_p": 0.7333484040080013,
+      "observed": 0.5384615384615384
+    }
+  },
+  "detect_ms_mean_eval_device": 16.103155046332922,
+  "models": {
+    "clip_weights_sha256_16": "40cd328b8bcea568",
+    "stacker_sha256_16": "1c83265c32c615f1"
+  }
 }
