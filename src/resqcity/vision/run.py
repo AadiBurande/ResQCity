@@ -73,6 +73,19 @@ def deployed_detector(results: Path, models: Path) -> tuple[Path, Path | None, d
     return (run, None, None) if run is not None else None
 
 
+def deployed_extras(results: Path) -> dict[str, object]:
+    """Heuristics detector and verifier of the deployed detector (evaluation v5; D-027)."""
+    import json
+
+    deployed = results / "deployed_detector.json"
+    d = json.loads(deployed.read_text(encoding="utf-8")) if deployed.exists() else {}
+    return {
+        "detector": d.get("detector", "coco"),
+        "verifier": d.get("verifier", "none"),
+        "verifier_tau": d.get("verifier_tau"),
+    }
+
+
 def newest(path: Path) -> Path | None:
     runs = sorted((p for p in path.glob("*") if p.is_dir()), key=lambda p: p.stat().st_mtime)
     return runs[-1] if runs else None
@@ -93,6 +106,9 @@ def main(argv: list[str] | None = None) -> int:
         help="override privacy.mode; 'off' only for local files / simulated 127.0.0.1 streams",
     )
     parser.add_argument("--events", type=Path, default=EVENTS_FILE)
+    parser.add_argument(
+        "--no-verifier", action="store_true", help="skip the deployed VLM verifier (no GPU)"
+    )
     parser.add_argument("--preview-port", type=int, default=None)
     parser.add_argument(
         "--max-seconds", type=float, default=None, help="stop after this stream time"
@@ -100,7 +116,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-    from resqcity.vision.detect_track import YoloTracker, resolve_device
+    from resqcity.vision.detect_track import (
+        DualTracker,
+        YoloTracker,
+        resolve_device,
+        uvh26_vehicle_classes,
+    )
 
     base, cfg = load_base_config(), load_vision_config()
     cameras = {c.id: c for c in load_cameras(CONFIG_DIR / "cameras.yaml")}
@@ -124,9 +145,15 @@ def main(argv: list[str] | None = None) -> int:
     if cfg.privacy.mode == "off":
         log.warning("privacy OFF: unblurred preview of public-dataset footage (local demo only)")
 
-    classifier = stacker = fire = None
+    classifier = stacker = fire = verifier = None
     threshold = None
     results = base.paths.resolve("results") / "vision"
+    extras = deployed_extras(results) if not (args.no_models or args.clip_run) else {}
+    if extras.get("detector") == "uvh26":  # Indian vehicle classes; people from COCO
+        vehicles = sorted(set(cfg.detector.vehicle_classes) | uvh26_vehicle_classes(cfg.detector))
+        cfg = cfg.model_copy(
+            update={"detector": cfg.detector.model_copy(update={"vehicle_classes": vehicles})}
+        )
     if not args.no_models:
         models = PROJECT_ROOT / "data" / "models" / "clip"
         chosen = (
@@ -150,14 +177,24 @@ def main(argv: list[str] | None = None) -> int:
             from resqcity.vision.fire_smoke import FireSmokeDetector
 
             fire = FireSmokeDetector(fire_run / "best.pt", cfg.fire_smoke, device)
+        name = extras.get("verifier", "none")
+        if name != "none" and cfg.verifier is not None and not args.no_verifier:
+            if device.startswith("cuda"):
+                from resqcity.vision.verifier import load_verifier
+
+                verifier = load_verifier(str(name), cfg.verifier, device)
+            else:
+                log.warning("verifier %s needs a GPU; running without it", name)
     mode = "combined" if stacker else ("classifier+heuristics" if classifier else "heuristics only")
     log.info(
-        "camera %s, source %s, device %s, mode %s, fire %s",
+        "camera %s, source %s, device %s, mode %s, fire %s, detector %s, verifier %s",
         camera.id,
         source,
         device,
         mode,
         bool(fire),
+        extras.get("detector", "coco"),
+        extras.get("verifier", "none") if verifier is not None else "none",
     )
 
     on_preview = None
@@ -176,7 +213,9 @@ def main(argv: list[str] | None = None) -> int:
     pipeline = CameraPipeline(
         camera,
         cfg,
-        YoloTracker(cfg.detector),
+        DualTracker(cfg.detector)
+        if extras.get("detector") == "uvh26"
+        else YoloTracker(cfg.detector),
         Anonymizer(cfg.privacy, cfg.detector.vehicle_classes, cfg.detector.person_class),
         load_requirements_config(),
         JsonlBus(args.events),
@@ -187,6 +226,8 @@ def main(argv: list[str] | None = None) -> int:
         start_time=datetime.now(UTC),
         on_preview=on_preview,
         source=source,
+        verifier=verifier,
+        verifier_tau=extras.get("verifier_tau") if verifier is not None else None,
     )
     t0 = time.perf_counter()
     n = 0

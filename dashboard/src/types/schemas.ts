@@ -95,6 +95,8 @@ export interface Event {
   clip_ref: string | null;
   /** Explainable parts of the confidence score (heuristics, classifier, ...). */
   confidence_components: Record<string, number>;
+  /** One-sentence scene description written by the offline verifier model (machine-generated; may be wrong). */
+  description: string | null;
 }
 
 export interface Explanation {

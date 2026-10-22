@@ -2,7 +2,10 @@
 alarm -> ``common.schemas.Event`` on the bus. Fire/smoke runs alongside with its own persistence.
 
 Only anonymised frames are ever handed to ``on_preview`` (privacy by design); raw frames stay in
-memory inside this module for the duration of one window.
+memory inside this module for the duration of one window. With a ``verifier`` (phase 3b, D-027),
+every candidate accident alarm is checked on anonymised frames of the last ``verifier.span_s``
+seconds; a rejected alarm raises no Event and starts no cooldown, an accepted one carries the
+verifier score and a one-sentence description.
 """
 
 import itertools
@@ -55,8 +58,17 @@ class CameraPipeline:
         start_time: datetime | None = None,
         on_preview: Callable[[np.ndarray], None] | None = None,
         source: str | None = None,
+        verifier: object | None = None,  # resqcity.vision.verifier.HfVerifier; optional
+        verifier_tau: float | None = None,
     ) -> None:
         require_source_allowed(cfg.privacy, source)
+        if verifier is not None and (verifier_tau is None or cfg.verifier is None):
+            raise ValueError("a verifier needs verifier_tau and the verifier config section")
+        self.verifier, self.verifier_tau = verifier, verifier_tau
+        span = cfg.verifier.span_s if cfg.verifier is not None else 0.0
+        self.recent: deque[tuple[FramePacket, Detections]] = deque(
+            maxlen=int(np.ceil(span * cfg.ingest.sample_fps)) + 1
+        )
         self.camera = camera
         self.cfg = cfg
         self.tracker = tracker
@@ -103,6 +115,8 @@ class CameraPipeline:
         det = self.tracker.update(frame)
         heur = self.scorer.update(det)
         self.heur.append((frame.t, heur))
+        if self.verifier is not None:
+            self.recent.append((frame, det))
         if self.classifier is not None:
             self.classifier.observe(frame.t, frame.image)  # type: ignore[attr-defined]
         emitted: list[Event] = []
@@ -110,7 +124,11 @@ class CameraPipeline:
             self.last_window_t = frame.t
             ws = self._window_score(frame.t)
             if self.alarm.update(frame.t, ws.confidence):
-                emitted.append(self._accident_event(frame, det, heur, ws))
+                event = self._verified(self._accident_event(frame, det, heur, ws))
+                if event is None:
+                    self.alarm.state.last_alarm_t = None  # rejected: no Event, no cooldown
+                else:
+                    emitted.append(event)
         fire_seen = False
         if self.fire is not None:
             obs, persisted = self.fire.update(frame)  # type: ignore[attr-defined]
@@ -127,6 +145,31 @@ class CameraPipeline:
         return emitted
 
     # -- events -----------------------------------------------------------------------------------
+
+    def _verified(self, event: Event) -> Event | None:
+        """Second-stage check on anonymised recent frames (None = rejected)."""
+        if self.verifier is None:
+            return event
+        from resqcity.vision.verifier import resize_long
+
+        v = self.cfg.verifier
+        items = list(self.recent)
+        picks = np.linspace(0, len(items) - 1, min(v.frames, len(items))).round().astype(int)
+        frames = [
+            resize_long(
+                self.anonymizer.apply(items[i][0].image, items[i][1].tracks), v.frame_long_side
+            )
+            for i in picks
+        ]
+        p = self.verifier.score(frames)  # type: ignore[attr-defined]
+        log.info("%s: verifier p(yes) = %.2f (tau %.2f)", self.camera.id, p, self.verifier_tau)
+        if p < self.verifier_tau:
+            return None
+        components = {**event.confidence_components, "verifier_p": round(float(p), 4)}
+        description = self.verifier.describe(frames)  # type: ignore[attr-defined]
+        return event.model_copy(
+            update={"confidence_components": components, "description": description}
+        )
 
     def _ts(self, t: float) -> datetime:
         return self.start_time + timedelta(seconds=t)

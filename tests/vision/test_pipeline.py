@@ -72,3 +72,52 @@ def test_events_reach_jsonl_bus(vcfg, tmp_path):
     records = list(bus.read(TOPIC))
     assert len(records) == 1 and records[0]["type"] == "Event"
     Event.model_validate(records[0]["payload"])
+
+
+class FakeVerifier:
+    def __init__(self, p: float) -> None:
+        self.p, self.calls = p, 0
+
+    def score(self, frames_bgr):
+        self.calls += 1
+        assert frames_bgr and all(f.ndim == 3 for f in frames_bgr)
+        return self.p
+
+    def describe(self, frames_bgr):
+        return "Two cars collided at the junction."
+
+
+def _with_verifier(vcfg, p):
+    verifier = FakeVerifier(p)
+    bus = InProcessBus()
+    got: list[Event] = []
+    bus.subscribe(TOPIC, lambda _t, m: got.append(m))
+    anon = Anonymizer(
+        vcfg.privacy, vcfg.detector.vehicle_classes, vcfg.detector.person_class, faces=NoFaces()
+    )
+    pipe = CameraPipeline(
+        CAMERA,
+        vcfg,
+        ScriptedTracker(collision_script),
+        anon,
+        load_requirements_config(),
+        bus,
+        start_time=datetime(2026, 10, 20, 9, 0, tzinfo=UTC),
+        verifier=verifier,
+        verifier_tau=0.5,
+    )
+    for f in frames(12.0):
+        pipe.process(f)
+    return got, verifier
+
+
+def test_verifier_rejection_suppresses_the_event(vcfg):
+    got, verifier = _with_verifier(vcfg, 0.1)
+    assert got == [] and verifier.calls >= 1
+
+
+def test_verified_event_carries_score_and_description(vcfg):
+    got, verifier = _with_verifier(vcfg, 0.9)
+    assert len(got) == 1 and verifier.calls == 1
+    assert got[0].confidence_components["verifier_p"] == 0.9
+    assert got[0].description == "Two cars collided at the junction."

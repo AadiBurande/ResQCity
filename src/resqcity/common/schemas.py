@@ -201,6 +201,11 @@ class Event(Schema):
         default_factory=dict,
         description="Explainable parts of the confidence score (heuristics, classifier, ...).",
     )
+    description: str | None = Field(
+        default=None,
+        description="One-sentence scene description written by the offline verifier model "
+        "(machine-generated; may be wrong).",
+    )
 
 
 class Call(Schema):
