@@ -51,8 +51,11 @@ def _open(source: str) -> cv2.VideoCapture:
     return cap
 
 
-def file_frames(path: str | Path, cfg: IngestConfig) -> Iterator[FramePacket]:
-    """Sampled frames of a video file with media-time timestamps."""
+def file_frames(
+    path: str | Path, cfg: IngestConfig, use_pts: bool = False
+) -> Iterator[FramePacket]:
+    """Sampled frames of a video file with media-time timestamps: frame index / fps by default,
+    or each frame's presentation timestamp with ``use_pts`` (variable-frame-rate clips, D-027)."""
     cap = _open(str(path))
     try:
         fps = cap.get(cv2.CAP_PROP_FPS) or DEFAULT_FPS
@@ -66,7 +69,8 @@ def file_frames(path: str | Path, cfg: IngestConfig) -> Iterator[FramePacket]:
                 ok, image = cap.retrieve()
                 if not ok:
                     break
-                yield FramePacket(t=index / fps, image=resize(image, cfg.resize_width), index=index)
+                t = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000.0 if use_pts else index / fps
+                yield FramePacket(t=t, image=resize(image, cfg.resize_width), index=index)
             index += 1
     finally:
         cap.release()

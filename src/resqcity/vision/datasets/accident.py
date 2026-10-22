@@ -38,6 +38,10 @@ LABEL_COLUMNS = [
     "rollover",
 ]
 SPLIT_COLUMN = "split_in_distribution"
+# The impact times are presentation timestamps (checked on train clips: |error| <= 0.033 s, while
+# frame index / fps is off by up to 1.8 s on variable-frame-rate clips), so frames of these
+# sources are timestamped by PTS (``ingest.file_frames(use_pts=True)``).
+PTS_SOURCES = frozenset({"accident"})
 HOLDOUT = "holdout"
 
 

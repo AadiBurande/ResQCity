@@ -23,6 +23,7 @@ from resqcity.vision.clip_classifier import (
     resize_short,
 )
 from resqcity.vision.config import VisionConfig
+from resqcity.vision.datasets.accident import PTS_SOURCES
 from resqcity.vision.datasets.annotations import video_frame_paths
 from resqcity.vision.heuristics import COMPONENTS, HeuristicScorer
 from resqcity.vision.ingest import file_frames, resize
@@ -34,7 +35,9 @@ log = logging.getLogger(__name__)
 def video_frames(raw_root: Path, row: pd.Series, cfg: VisionConfig) -> Iterator[FramePacket]:
     """Sampled frames of an annotated video (file or frame folder) with media-time stamps."""
     if row["kind"] == "video":
-        yield from file_frames(raw_root / row["path"], cfg.ingest)
+        yield from file_frames(
+            raw_root / row["path"], cfg.ingest, use_pts=row["source"] in PTS_SOURCES
+        )
         return
     fps = float(row["fps"])
     step = max(1, round(fps / cfg.ingest.sample_fps))

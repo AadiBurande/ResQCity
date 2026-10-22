@@ -92,6 +92,8 @@ def test_file_frames_sampling_and_timestamps(tmp_path, vcfg):
     assert len(got) == 20
     assert [f.t for f in got[:3]] == pytest.approx([0.0, 0.2, 0.4])
     assert got[0].image.shape == (240, 320, 3)  # narrower than resize_width: unchanged
+    pts = list(file_frames(path, vcfg.ingest, use_pts=True))  # constant frame rate: same times
+    assert [f.t for f in pts] == pytest.approx([f.t for f in got], abs=1e-3)
 
 
 def test_missing_file_raises(tmp_path, vcfg):
