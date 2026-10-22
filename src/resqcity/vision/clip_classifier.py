@@ -1,8 +1,9 @@
 """Stage 2 accident classifier on short windows.
 
 Two kinds of frozen backbone (``clip_classifier.backbone``):
-- image (``mobilenet_v3_small``, ImageNet): per-frame features (576-d), cached per sampled frame;
-  window feature = [mean, max, mean |diff|] over the window's frames (1728-d);
+- image: ``mobilenet_v3_small`` (ImageNet, 576-d) or ``siglip2_base`` (image-text, D-027: 768-d
+  normalised embedding + cosine similarity to each of ``text_prompts``), cached per sampled frame;
+  window feature = [mean, max, mean |diff|] over the window's frames;
 - video (``r2plus1d_18``, Kinetics-400): the window's frames are resampled to ``clip_frames``,
   resized to ``input_size`` and embedded as ONE clip (512-d), so motion is modelled directly.
 Head: 2-layer MLP.
@@ -16,6 +17,7 @@ Training signal:
 Probabilities are calibrated with temperature scaling on the validation split.
 """
 
+import hashlib
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -26,6 +28,9 @@ import numpy as np
 from resqcity.vision.config import ClipClassifierConfig
 
 FEATURE_DIM = 576  # mobilenet_v3_small final channels
+IMAGE_BACKBONES = {"mobilenet_v3_small": FEATURE_DIM, "siglip2_base": 768}
+TEXT_BACKBONES = {"siglip2_base"}  # image-text models: prompt similarities are appended
+SIGLIP_TEXT_LENGTH = 64  # SigLIP2 text inputs are padded to this length (model card)
 VIDEO_BACKBONES = {"r2plus1d_18": 512}  # backbone -> clip embedding size
 MIL_TOP_K = 3
 KINETICS_MEAN = (0.43216, 0.394666, 0.37645)
@@ -37,8 +42,25 @@ def is_video_backbone(name: str) -> bool:
     return name in VIDEO_BACKBONES
 
 
+def frame_dim(cfg: ClipClassifierConfig) -> int:
+    """Per-frame feature size of an image backbone."""
+    extra = len(cfg.text_prompts) if cfg.backbone in TEXT_BACKBONES else 0
+    return IMAGE_BACKBONES[cfg.backbone] + extra
+
+
 def head_input_dim(cfg: ClipClassifierConfig) -> int:
-    return VIDEO_BACKBONES[cfg.backbone] if is_video_backbone(cfg.backbone) else 3 * FEATURE_DIM
+    if is_video_backbone(cfg.backbone):
+        return VIDEO_BACKBONES[cfg.backbone]
+    return 3 * frame_dim(cfg)
+
+
+def feature_tag(cfg: ClipClassifierConfig) -> str:
+    """Feature-cache folder: the backbone, plus a hash of the prompts when they are features (so a
+    prompt change can never reuse stale features)."""
+    if cfg.backbone in TEXT_BACKBONES:
+        digest = hashlib.sha256("\n".join(cfg.text_prompts).encode("utf-8")).hexdigest()[:8]
+        return f"{cfg.backbone}_{digest}"
+    return cfg.backbone
 
 
 def sample_indices(n: int, k: int) -> np.ndarray:
@@ -105,30 +127,79 @@ def window_label(w: Window, onset_s: float | None, offset_s: float | None) -> fl
 
 
 class FrameEncoder:
-    """Frozen MobileNetV3-small feature extractor (torch imported lazily)."""
+    """Frozen per-frame feature extractor: MobileNetV3-small or SigLIP2 (torch imported lazily)."""
 
     def __init__(self, cfg: ClipClassifierConfig, device: str = "cpu") -> None:
         import torch
-        from torchvision.models import MobileNet_V3_Small_Weights, mobilenet_v3_small
 
+        self._torch = torch
+        self.device = device
+        self.dim = frame_dim(cfg) if cfg.backbone in IMAGE_BACKBONES else 0
+        if cfg.backbone == "siglip2_base":
+            self._init_siglip2(cfg)
+            return
         if cfg.backbone != "mobilenet_v3_small":
             raise ValueError(f"unsupported backbone {cfg.backbone!r}")
+        from torchvision.models import MobileNet_V3_Small_Weights, mobilenet_v3_small
+
+        self.siglip = None
         weights = MobileNet_V3_Small_Weights.IMAGENET1K_V1
         model = mobilenet_v3_small(weights=weights)
         self.net = torch.nn.Sequential(
             model.features, torch.nn.AdaptiveAvgPool2d(1), torch.nn.Flatten()
         )
         self.net.eval().to(device)
-        self.device = device
         self.size = cfg.input_size
         self.mean = torch.tensor([0.485, 0.456, 0.406], device=device).view(1, 3, 1, 1)
         self.std = torch.tensor([0.229, 0.224, 0.225], device=device).view(1, 3, 1, 1)
-        self._torch = torch
+
+    def _init_siglip2(self, cfg: ClipClassifierConfig) -> None:
+        from transformers import AutoModel, AutoProcessor
+
+        torch, w = self._torch, cfg.siglip2
+        if w is None or not cfg.text_prompts:
+            raise ValueError("siglip2_base needs clip_classifier.siglip2 and text_prompts")
+        self.dtype = torch.float16 if self.device.startswith("cuda") else torch.float32
+        self.processor = AutoProcessor.from_pretrained(w.repo, revision=w.revision)
+        model = AutoModel.from_pretrained(w.repo, revision=w.revision, dtype=self.dtype)
+        self.siglip = model.eval().to(self.device)
+        text = self.processor(
+            text=list(cfg.text_prompts),
+            padding="max_length",
+            max_length=SIGLIP_TEXT_LENGTH,
+            return_tensors="pt",
+        ).to(self.device)
+        with torch.inference_mode():
+            self.text = torch.nn.functional.normalize(self._features(text, "text"), dim=-1)
+
+    def _features(self, inputs: object, kind: str):  # noqa: ANN202 (torch tensor)
+        """Pooled embedding (transformers may return a tensor or an output object)."""
+        fn = self.siglip.get_text_features if kind == "text" else self.siglip.get_image_features
+        out = fn(**inputs)  # type: ignore[arg-type]
+        out = getattr(out, "pooler_output", out)
+        return out.float()
+
+    def _encode_siglip(self, rgb: list[np.ndarray]) -> np.ndarray:
+        torch = self._torch
+        inputs = self.processor(images=rgb, return_tensors="pt").to(self.device)
+        inputs["pixel_values"] = inputs["pixel_values"].to(self.dtype)
+        with torch.inference_mode():
+            emb = torch.nn.functional.normalize(self._features(inputs, "image"), dim=-1)
+            sims = emb @ self.text.T
+        return torch.cat([emb, sims], dim=1).cpu().numpy()
 
     def encode(self, images_bgr: Sequence[np.ndarray], batch: int = 64) -> np.ndarray:
         import cv2
 
         torch = self._torch
+        if self.siglip is not None:
+            parts = [
+                self._encode_siglip(
+                    [cv2.cvtColor(im, cv2.COLOR_BGR2RGB) for im in images_bgr[i : i + batch]]
+                )
+                for i in range(0, len(images_bgr), batch)
+            ]
+            return np.concatenate(parts) if parts else np.zeros((0, self.dim), np.float32)
         feats = []
         for i in range(0, len(images_bgr), batch):
             chunk = [
@@ -146,7 +217,7 @@ class FrameEncoder:
             x = (x - self.mean) / self.std
             with torch.inference_mode():
                 feats.append(self.net(x).float().cpu().numpy())
-        return np.concatenate(feats) if feats else np.zeros((0, FEATURE_DIM), np.float32)
+        return np.concatenate(feats) if feats else np.zeros((0, self.dim), np.float32)
 
 
 class ClipEncoder:

@@ -5,7 +5,10 @@
 Writes ``data/processed/vision/annotations.parquet`` and ``splits.csv`` with one row per video:
 video_id, source, path, kind (video | frames), fps, n_frames, duration_s, label (accident |
 normal), accident_onset_s, accident_offset_s (null when unknown), has_onset, split.
-Splits are stratified by (source, label, has_onset) and seeded.
+Splits are stratified by (source, label, has_onset) and seeded. ACCIDENT clips (D-027) are added
+AFTER that split, with their own split from the official benchmark split
+(``resqcity.vision.datasets.accident``), so the UCF-Crime splits are unchanged; their never-seen
+test clips get split ``holdout`` and no labels here (sealed in ``accident_holdout_labels.parquet``).
 """
 
 import argparse
@@ -21,6 +24,7 @@ import pandas as pd
 from resqcity.common.config import CONFIG_DIR, load_base_config
 from resqcity.common.provenance import write_meta
 from resqcity.vision.config import SplitConfig, VisionConfig, load_vision_config
+from resqcity.vision.datasets.accident import HOLDOUT_FILE, accident_records
 
 log = logging.getLogger(__name__)
 COLUMNS = [
@@ -206,15 +210,20 @@ def assign_splits(df: pd.DataFrame, cfg: SplitConfig) -> pd.Series:
     return split
 
 
-def build_annotations(root: Path, cfg: VisionConfig) -> pd.DataFrame:
+def build_annotations(root: Path, cfg: VisionConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """(annotations, sealed ACCIDENT holdout labels; empty if ACCIDENT is not downloaded)."""
     records = ucf_records(root, cfg) + cadp_records(root)
     df = pd.DataFrame([asdict(r) for r in records], columns=COLUMNS)
     if df.empty:
         raise RuntimeError(
             f"no videos found under {root}; run resqcity.vision.datasets.download first"
         )
-    df["split"] = assign_splits(df, cfg.datasets.split)
-    return df.sort_values("video_id", ignore_index=True)
+    df["split"] = assign_splits(df, cfg.datasets.split)  # UCF/CADP only: unchanged by ACCIDENT
+    holdout = pd.DataFrame()
+    if (root / "accident" / "metadata-real.csv").exists():
+        acc, holdout = accident_records(root, cfg.datasets.accident)
+        df = pd.concat([df, acc], ignore_index=True)
+    return df.sort_values("video_id", ignore_index=True), holdout
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -224,9 +233,11 @@ def main(argv: list[str] | None = None) -> int:
     root = base.paths.resolve("data_raw") / "vision"
     out_dir = base.paths.resolve("data_processed") / "vision"
     out_dir.mkdir(parents=True, exist_ok=True)
-    df = build_annotations(root, cfg)
+    df, holdout = build_annotations(root, cfg)
     out = out_dir / "annotations.parquet"
     df.to_parquet(out, index=False)
+    if not holdout.empty:
+        holdout.to_parquet(out_dir / HOLDOUT_FILE, index=False)  # read only by the final run
     df[["video_id", "source", "label", "has_onset", "split"]].to_csv(
         out_dir / "splits.csv", index=False, lineterminator="\n"
     )
@@ -234,7 +245,10 @@ def main(argv: list[str] | None = None) -> int:
         out,
         configs=[CONFIG_DIR / "vision.yaml"],
         synthetic=False,
-        seeds={"split_seed": cfg.datasets.split.seed},
+        seeds={
+            "split_seed": cfg.datasets.split.seed,
+            "accident_split_seed": cfg.datasets.accident.split_seed,
+        },
     )
     print(df.groupby(["source", "label", "has_onset", "split"]).size().to_string())
     return 0

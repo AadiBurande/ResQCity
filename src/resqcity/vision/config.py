@@ -15,6 +15,16 @@ class IngestConfig(ConfigModel):
     resize_width: int | None = Field(default=None, gt=0)
 
 
+class HfWeights(ConfigModel):
+    repo: str
+    revision: str = Field(min_length=40, max_length=40)
+
+
+class UvhDetectorConfig(HfWeights):
+    weights_file: str
+    class_map: dict[str, str] = Field(min_length=1)
+
+
 class DetectorConfig(ConfigModel):
     weights: str
     tracker: str
@@ -23,6 +33,7 @@ class DetectorConfig(ConfigModel):
     iou: float = Field(gt=0, lt=1)
     vehicle_classes: list[str] = Field(min_length=1)
     person_class: str
+    uvh26: UvhDetectorConfig | None = None
 
 
 class SimulatedStreams(ConfigModel):
@@ -98,6 +109,11 @@ class HeuristicsConfig(ConfigModel):
 
 class ClipClassifierConfig(ConfigModel):
     backbone: str
+    siglip2: HfWeights | None = None
+    text_prompts: list[str] = Field(default_factory=list)
+    labels: Literal["mil", "interval"] = "mil"
+    sources: list[str] = Field(default_factory=lambda: ["ucf_crime"], min_length=1)
+    train_sources: list[str] = Field(default_factory=lambda: ["ucf_crime"], min_length=1)
     input_size: int = Field(gt=0)
     clip_frames: int = Field(gt=1)
     window_s: float = Field(gt=0)
@@ -112,6 +128,22 @@ class ClipClassifierConfig(ConfigModel):
     mil_weight: float = Field(ge=0)
     mil_sparsity: float = Field(ge=0)
     mil_smoothness: float = Field(ge=0)
+
+
+class VerifierCandidate(HfWeights):
+    quantization: Literal["4bit", "8bit", "none"]
+
+
+class VerifierConfig(ConfigModel):
+    prompt: str
+    describe_prompt: str
+    frames: int = Field(ge=1)
+    span_s: float = Field(gt=0)
+    frame_long_side: int = Field(gt=0)
+    min_detection_retention: float = Field(gt=0, le=1)
+    max_latency_s: float = Field(gt=0)
+    thresholds: list[float] = Field(min_length=1)
+    candidates: dict[str, VerifierCandidate] = Field(min_length=1)
 
 
 class FireSmokeConfig(ConfigModel):
@@ -167,11 +199,31 @@ class DFireConfig(ConfigModel):
     licence: str
 
 
+class AccidentConfig(ConfigModel):
+    kaggle_dataset: str
+    files_prefix: str
+    metadata: list[str] = Field(min_length=1)
+    licence: str
+    val_fraction: float = Field(gt=0, lt=1)
+    split_seed: int = Field(ge=0)
+    offset_after_impact_s: float = Field(ge=0)
+
+
+class UcaConfig(ConfigModel):
+    repo: str
+    commit: str = Field(min_length=40, max_length=40)
+    files: list[str] = Field(min_length=1)
+    licence: str
+    accident_keywords: list[str] = Field(min_length=1)
+
+
 class DatasetsConfig(ConfigModel):
     cap_gb: float = Field(gt=0)
     split: SplitConfig
     ucf_crime: UcfCrimeConfig
     cadp: CadpConfig
+    accident: AccidentConfig
+    uca: UcaConfig
     dfire: DFireConfig
 
 
@@ -184,6 +236,7 @@ class VisionConfig(ConfigModel):
     fire_smoke: FireSmokeConfig
     alarm: AlarmConfig
     datasets: DatasetsConfig
+    verifier: VerifierConfig | None = None
 
 
 def load_vision_config(path: Path | None = None) -> VisionConfig:

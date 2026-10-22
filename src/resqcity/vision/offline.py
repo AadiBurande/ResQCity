@@ -15,7 +15,13 @@ import cv2
 import numpy as np
 import pandas as pd
 
-from resqcity.vision.clip_classifier import ClipEncoder, FrameEncoder, make_windows, resize_short
+from resqcity.vision.clip_classifier import (
+    ClipEncoder,
+    FrameEncoder,
+    feature_tag,
+    make_windows,
+    resize_short,
+)
 from resqcity.vision.config import VisionConfig
 from resqcity.vision.datasets.annotations import video_frame_paths
 from resqcity.vision.heuristics import COMPONENTS, HeuristicScorer
@@ -43,14 +49,16 @@ def feature_path(cache: Path, backbone: str, video_id: str) -> Path:
     return cache / "features" / backbone / f"{video_id}.npz"
 
 
-def heuristics_path(cache: Path, video_id: str) -> Path:
-    return cache / "heuristics" / f"{video_id}.parquet"
+def heuristics_path(cache: Path, video_id: str, detector: str = "") -> Path:
+    """``heuristics/`` for the default COCO detector (v1-v4); ``heuristics_<detector>/`` else."""
+    folder = f"heuristics_{detector}" if detector else "heuristics"
+    return cache / folder / f"{video_id}.parquet"
 
 
 def extract_features(
     raw_root: Path, row: pd.Series, cfg: VisionConfig, encoder: FrameEncoder, cache: Path
 ) -> Path:
-    out = feature_path(cache, cfg.clip_classifier.backbone, row["video_id"])
+    out = feature_path(cache, feature_tag(cfg.clip_classifier), row["video_id"])
     if out.exists():
         return out
     times, feats, batch, batch_t = [], [], [], []
@@ -113,35 +121,61 @@ def run_heuristics(
     cfg: VisionConfig,
     tracker_factory: "type[Tracker] | object",
     cache: Path,
+    detector: str = "",
+    vehicle_classes: set[str] | None = None,
 ) -> Path:
-    """Track + score every sampled frame. ``tracker_factory()`` returns a fresh tracker."""
-    out = heuristics_path(cache, row["video_id"])
+    """Track + score every sampled frame. ``tracker_factory()`` returns a fresh tracker;
+    ``detector`` names the cache folder (see ``heuristics_path``)."""
+    out = heuristics_path(cache, row["video_id"], detector)
     if out.exists():
         return out
     tracker = tracker_factory()  # type: ignore[operator]
-    scorer = HeuristicScorer(
-        cfg.heuristics, set(cfg.detector.vehicle_classes), cfg.detector.person_class
-    )
-    rows = []
-    for frame in video_frames(raw_root, row, cfg):
+    rows = heuristic_rows(video_frames(raw_root, row, cfg), tracker, cfg, vehicle_classes)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(rows).to_parquet(out, index=False)
+    return out
+
+
+class HeuristicRecorder:
+    """Per-frame heuristic score, components, counts and timing for ONE video (fresh tracker)."""
+
+    def __init__(
+        self, tracker: Tracker, cfg: VisionConfig, vehicle_classes: set[str] | None = None
+    ) -> None:
+        self.tracker, self.cfg = tracker, cfg
+        self.vehicles = vehicle_classes or set(cfg.detector.vehicle_classes)
+        self.scorer = HeuristicScorer(cfg.heuristics, self.vehicles, cfg.detector.person_class)
+        self.rows: list[dict] = []
+
+    def add(self, frame: FramePacket) -> None:
         t0 = time.perf_counter()
-        det = tracker.update(frame)
+        det = self.tracker.update(frame)
         t1 = time.perf_counter()
-        res = scorer.update(det)
+        res = self.scorer.update(det)
         t2 = time.perf_counter()
-        rows.append(
+        person = self.cfg.detector.person_class
+        self.rows.append(
             {
                 "t": frame.t,
                 "score": res.score,
                 **{f"c_{k}": res.components[k] for k in COMPONENTS},
-                "n_vehicles": sum(1 for o in det.tracks if o.cls in cfg.detector.vehicle_classes),
-                "n_persons": sum(1 for o in det.tracks if o.cls == cfg.detector.person_class),
+                "n_vehicles": sum(1 for o in det.tracks if o.cls in self.vehicles),
+                "n_persons": sum(1 for o in det.tracks if o.cls == person),
                 "overturned": bool(res.overturned_ids),
                 "person_down": bool(res.person_down_ids),
                 "detect_ms": (t1 - t0) * 1000,
                 "heuristic_ms": (t2 - t1) * 1000,
             }
         )
-    out.parent.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame(rows).to_parquet(out, index=False)
-    return out
+
+
+def heuristic_rows(
+    frames: "Iterator[FramePacket]",
+    tracker: Tracker,
+    cfg: VisionConfig,
+    vehicle_classes: set[str] | None = None,
+) -> list[dict]:
+    recorder = HeuristicRecorder(tracker, cfg, vehicle_classes)
+    for frame in frames:
+        recorder.add(frame)
+    return recorder.rows

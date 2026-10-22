@@ -50,10 +50,11 @@ EVALUATION_VERSION = 3
 SCORES = {"classifier": "clf_p", "heuristics": "heur_p", "combined": "combined_p"}
 
 
-def add_scores(windows: pd.DataFrame, cache: Path) -> pd.DataFrame:
+def add_scores(windows: pd.DataFrame, cache: Path, detector: str = "") -> pd.DataFrame:
+    """Join per-window heuristics (``detector`` selects the cache, see ``heuristics_path``)."""
     parts = []
     for vid, w in windows.groupby("video_id"):
-        heur = pd.read_parquet(heuristics_path(cache, vid))
+        heur = pd.read_parquet(heuristics_path(cache, vid, detector))
         parts.append(window_heuristics(w, heur))
     return pd.concat(parts).sort_index()
 

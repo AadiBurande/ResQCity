@@ -1,0 +1,135 @@
+"""Second-stage alarm verifier: a small offline vision-language model (phase 3b, D-027).
+
+When the detector raises a candidate alarm, ``frames`` anonymised frames from the last ``span_s``
+seconds are shown to the model with the pre-registered yes/no prompt. The verifier score is the
+probability of "yes" against "no" for the first answer token (thinking disabled), so no free text
+has to be parsed. ``describe`` returns a one-sentence description for the operator (optional
+``Event`` metadata). Everything runs locally; frames never leave ``vision/``.
+
+Backends: Hugging Face image-text-to-text models (Qwen3.5, Qwen3-VL, Gemma 4) loaded in 4/8-bit.
+"""
+
+import logging
+import math
+import time
+from pathlib import Path
+
+import cv2
+import numpy as np
+
+from resqcity.vision.config import VerifierCandidate, VerifierConfig
+from resqcity.vision.privacy import Anonymizer
+from resqcity.vision.types import FramePacket
+
+log = logging.getLogger(__name__)
+YES, NO = ("yes", "Yes", " yes", " Yes", "YES"), ("no", "No", " no", " No", "NO")
+DESCRIBE_TOKENS = 48
+
+
+def resize_long(image: np.ndarray, long_side: int) -> np.ndarray:
+    h, w = image.shape[:2]
+    scale = long_side / max(h, w)
+    if scale >= 1:
+        return image
+    return cv2.resize(image, (round(w * scale), round(h * scale)), interpolation=cv2.INTER_AREA)
+
+
+def clip_frames(
+    path: Path,
+    t_end: float,
+    cfg: VerifierConfig,
+    anonymizer: Anonymizer | None = None,
+    tracker: object | None = None,
+) -> list[np.ndarray]:
+    """``cfg.frames`` BGR frames evenly spaced in [t_end - span_s, t_end] of a video file,
+    anonymised (``tracker`` supplies the vehicle/person boxes the anonymiser needs)."""
+    cap = cv2.VideoCapture(str(path))
+    out = []
+    try:
+        for t in np.linspace(max(0.0, t_end - cfg.span_s), t_end, cfg.frames):
+            cap.set(cv2.CAP_PROP_POS_MSEC, float(t) * 1000.0)
+            ok, image = cap.read()
+            if not ok:
+                continue
+            if anonymizer is not None:
+                tracks = (
+                    tracker.update(FramePacket(t=float(t), image=image)).tracks if tracker else []
+                )  # type: ignore[attr-defined]
+                image = anonymizer.apply(image, tracks)
+            out.append(resize_long(image, cfg.frame_long_side))
+    finally:
+        cap.release()
+    return out
+
+
+class HfVerifier:
+    """Image-text-to-text model from the Hugging Face hub, pinned revision, quantised."""
+
+    def __init__(
+        self, cand: VerifierCandidate, cfg: VerifierConfig, device: str = "cuda:0"
+    ) -> None:
+        import torch
+        from transformers import AutoModelForImageTextToText, AutoProcessor, BitsAndBytesConfig
+
+        self.cfg, self.device, self._torch = cfg, device, torch
+        quant = None
+        if cand.quantization == "4bit":
+            quant = BitsAndBytesConfig(
+                load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=torch.float16
+            )
+        elif cand.quantization == "8bit":
+            quant = BitsAndBytesConfig(load_in_8bit=True)
+        self.processor = AutoProcessor.from_pretrained(cand.repo, revision=cand.revision)
+        self.model = AutoModelForImageTextToText.from_pretrained(
+            cand.repo,
+            revision=cand.revision,
+            dtype=torch.float16,
+            quantization_config=quant,
+            device_map={"": device},
+        ).eval()
+        tok = self.processor.tokenizer
+        self.yes = sorted({tok.encode(w, add_special_tokens=False)[0] for w in YES})
+        self.no = sorted({tok.encode(w, add_special_tokens=False)[0] for w in NO})
+
+    def _inputs(self, frames_bgr: list[np.ndarray], prompt: str):  # noqa: ANN202 (BatchFeature)
+        from PIL import Image
+
+        images = [Image.fromarray(cv2.cvtColor(f, cv2.COLOR_BGR2RGB)) for f in frames_bgr]
+        content = [{"type": "image", "image": im} for im in images]
+        content.append({"type": "text", "text": prompt})
+        return self.processor.apply_chat_template(
+            [{"role": "user", "content": content}],
+            add_generation_prompt=True,
+            tokenize=True,
+            return_dict=True,
+            return_tensors="pt",
+            enable_thinking=False,
+        ).to(self.device)
+
+    def score(self, frames_bgr: list[np.ndarray]) -> float:
+        """P("yes") vs P("no") for the first answer token."""
+        torch = self._torch
+        if not frames_bgr:
+            return 0.0
+        inputs = self._inputs(frames_bgr, self.cfg.prompt)
+        with torch.inference_mode():
+            logits = self.model(**inputs).logits[0, -1].float()
+        lse_yes = torch.logsumexp(logits[self.yes], 0)
+        lse_no = torch.logsumexp(logits[self.no], 0)
+        return float(1.0 / (1.0 + math.exp(float(lse_no - lse_yes))))
+
+    def describe(self, frames_bgr: list[np.ndarray]) -> str:
+        torch = self._torch
+        inputs = self._inputs(frames_bgr, self.cfg.describe_prompt)
+        with torch.inference_mode():
+            ids = self.model.generate(**inputs, max_new_tokens=DESCRIBE_TOKENS, do_sample=False)
+        new = ids[0, inputs["input_ids"].shape[1] :]
+        return self.processor.tokenizer.decode(new, skip_special_tokens=True).strip()
+
+
+def load_verifier(name: str, cfg: VerifierConfig, device: str = "cuda:0") -> HfVerifier:
+    cand = cfg.candidates[name]
+    t0 = time.perf_counter()
+    verifier = HfVerifier(cand, cfg, device)
+    log.info("verifier %s loaded in %.1f s", name, time.perf_counter() - t0)
+    return verifier

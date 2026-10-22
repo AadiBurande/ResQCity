@@ -1,17 +1,21 @@
 """Metric functions for the accident detector (pure numpy/pandas; unit-tested on toy inputs)."""
 
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
 
-from resqcity.vision.alarm import alarm_times
+from resqcity.vision.alarm import alarm_times, verified_alarm_times
 from resqcity.vision.config import AlarmConfig
 
 SECONDS_PER_HOUR = 3600.0
 # An alarm counts as a detection if it falls in [onset, offset + DETECTION_GRACE_S]. Fixed before
 # the v3 evaluation (D-025): covers the 3 s window plus up to four windows of alarm persistence.
 DETECTION_GRACE_S = 10.0
+# ACCIDENT clips (evaluation v5, pre-registered in docs/plans/phase-3b.md): only the impact time t*
+# is annotated, so detection = an alarm in [t* - ACCIDENT_PRE_TOLERANCE_S, t* + DETECTION_GRACE_S].
+ACCIDENT_PRE_TOLERANCE_S = 1.0
 BOOTSTRAP_REPS = 2000
 BOOTSTRAP_SEED = 20261020
 
@@ -75,6 +79,20 @@ def reliability(y: np.ndarray, p: np.ndarray, bins: int = 10) -> pd.DataFrame:
     return table
 
 
+def _alarms(
+    w: pd.DataFrame,
+    score_col: str,
+    cfg: AlarmConfig,
+    threshold: float,
+    video_id: str,
+    verify: Callable[[str, float], bool] | None,
+) -> list[float]:
+    times, scores = w["end_s"].tolist(), w[score_col].tolist()
+    if verify is None:
+        return alarm_times(times, scores, cfg, threshold)
+    return verified_alarm_times(times, scores, cfg, threshold, lambda t: verify(video_id, t))
+
+
 def video_alarm_summary(
     windows: pd.DataFrame,
     videos: pd.DataFrame,
@@ -82,8 +100,10 @@ def video_alarm_summary(
     cfg: AlarmConfig,
     threshold: float,
     grace_s: float = DETECTION_GRACE_S,
+    verify: Callable[[str, float], bool] | None = None,
 ) -> pd.DataFrame:
     """Per video: alarms classified by WHEN they fire (alarms are timestamped at window end).
+    ``verify(video_id, t)`` (optional, D-027) is a second-stage check of every candidate alarm.
 
     - accident video with annotated onset: detection = an alarm in [onset, offset + grace_s];
       alarms before onset are false alarms on ROAD footage (``road_hours`` = onset);
@@ -95,7 +115,7 @@ def video_alarm_summary(
     rows = []
     for _, v in videos.iterrows():
         w = windows[windows["video_id"] == v["video_id"]].sort_values("end_s")
-        alarms = alarm_times(w["end_s"].tolist(), w[score_col].tolist(), cfg, threshold)
+        alarms = _alarms(w, score_col, cfg, threshold, v["video_id"], verify)
         has_onset = bool(v.get("has_onset", False))
         row = {
             "video_id": v["video_id"],
@@ -179,6 +199,52 @@ def _rate_block(name: str, counts: pd.Series, hours: pd.Series) -> dict[str, flo
         **_ci(f"{name}_fa_poisson", poisson_rate_interval(total, total_h)),
         **_ci(f"{name}_fa_cluster", cluster_bootstrap_rate(counts.to_numpy(), hours.to_numpy())),
     }
+
+
+def accident_alarm_summary(
+    windows: pd.DataFrame,
+    videos: pd.DataFrame,
+    score_col: str,
+    cfg: AlarmConfig,
+    threshold: float,
+    window_s: float,
+    stride_s: float,
+    grace_s: float = DETECTION_GRACE_S,
+    pre_s: float = ACCIDENT_PRE_TOLERANCE_S,
+    verify: Callable[[str, float], bool] | None = None,
+) -> pd.DataFrame:
+    """Evaluation-v5 rule for ACCIDENT clips (``accident_onset_s`` = impact time t*):
+    detection = first alarm in [t* - pre_s, t* + grace_s]; false alarm = alarm before t* - pre_s;
+    road footage = max(0, t* - pre_s - warm-up), where warm-up = window_s + (k - 1) * stride_s is
+    the earliest time an alarm can fire; later alarms are ``late_alarms``. Same columns as
+    :func:`video_alarm_summary`, so :func:`summarise_alarms` applies."""
+    warm_up = window_s + (cfg.consecutive_windows - 1) * stride_s
+    rows = []
+    for _, v in videos.iterrows():
+        w = windows[windows["video_id"] == v["video_id"]].sort_values("end_s")
+        alarms = _alarms(w, score_col, cfg, threshold, v["video_id"], verify)
+        start = float(v["accident_onset_s"]) - pre_s
+        end = float(v["accident_onset_s"]) + grace_s
+        hits = [a for a in alarms if start <= a <= end]
+        rows.append(
+            {
+                "video_id": v["video_id"],
+                "source": v["source"],
+                "label": "accident",
+                "has_onset": True,
+                "threshold": threshold,
+                "n_alarms": len(alarms),
+                "any_alarm": bool(alarms),
+                "detected": bool(hits),
+                "delay_s": (hits[0] - float(v["accident_onset_s"])) if hits else None,
+                "road_false_alarms": sum(a < start for a in alarms),
+                "road_hours": max(0.0, start - warm_up) / SECONDS_PER_HOUR,
+                "nonroad_false_alarms": 0,
+                "nonroad_hours": 0.0,
+                "late_alarms": sum(a > end for a in alarms),
+            }
+        )
+    return pd.DataFrame(rows)
 
 
 def summarise_alarms(per_video: pd.DataFrame) -> dict[str, float]:

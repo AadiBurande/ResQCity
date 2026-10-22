@@ -9,6 +9,11 @@ Outputs:
 - ``results/vision/<run_id>/config.yaml`` (hyper-parameters), ``train_log.csv``,
   ``windows.parquet`` (classifier logit/probability for every window of every video, all splits).
 Seeds are fixed; splits are by video (``data/processed/vision/annotations.parquet``).
+
+Phase 3b options (``clip_classifier``, D-027): ``sources`` = datasets that get windows and scores
+(validation = fit-split windows of all of them, official labels only); ``train_sources`` = whose
+train-split windows fit the head; ``labels: interval`` gives UCF TRAIN videos without official
+onsets the UCA interval (``uca_intervals.parquet``) instead of a MIL bag.
 """
 
 import argparse
@@ -30,6 +35,7 @@ from resqcity.vision.clip_classifier import (
     FrameEncoder,
     Window,
     build_head,
+    feature_tag,
     fit_temperature,
     is_video_backbone,
     make_windows,
@@ -52,14 +58,18 @@ PATIENCE = 8
 
 
 def build_windows(
-    ann: pd.DataFrame, cfg: VisionConfig, cache: Path
+    ann: pd.DataFrame, cfg: VisionConfig, cache: Path, intervals: pd.DataFrame | None = None
 ) -> tuple[pd.DataFrame, np.ndarray]:
-    """One row per window (all videos) + the matching feature matrix."""
+    """One row per window (all videos) + the matching feature matrix. ``intervals`` (UCA) label
+    TRAIN-split accident videos that have no official onset; evaluation labels are untouched."""
     cc = cfg.clip_classifier
+    uca: dict[str, tuple[float, float]] = {}
+    if intervals is not None:
+        uca = {r.video_id: (r.train_onset_s, r.train_offset_s) for r in intervals.itertuples()}
     video = is_video_backbone(cc.backbone)
     rows, feats = [], []
     for _, v in ann.iterrows():
-        path = feature_path(cache, cc.backbone, v["video_id"])
+        path = feature_path(cache, feature_tag(cc), v["video_id"])
         if video:
             starts, ends, wf = load_window_features(path)
             windows = [
@@ -71,11 +81,18 @@ def build_windows(
             windows = make_windows(times, cc.window_s, cc.stride_s)
         onset = v["accident_onset_s"] if v["has_onset"] else None
         offset = v["accident_offset_s"] if v["has_onset"] else None
+        train_interval = (
+            uca.get(v["video_id"])
+            if v["split"] == "train" and not v["has_onset"] and v["label"] == "accident"
+            else None
+        )
         for w in windows:
             if v["label"] == "normal":
                 label = 0.0
             elif v["has_onset"]:
                 label = window_label(w, onset, offset)
+            elif train_interval is not None:
+                label = window_label(w, *train_interval)  # UCA training label (D-027)
             else:
                 label = None  # weak (MIL) bag member
             rows.append(
@@ -110,7 +127,7 @@ def train(
     head = build_head(cc, x.shape[1]).to(device)
     opt = torch.optim.AdamW(head.parameters(), lr=cc.lr, weight_decay=cc.weight_decay)
 
-    tr = windows["split"].eq("train")
+    tr = windows["split"].eq("train") & windows["source"].isin(cc.train_sources)
     sup = (tr & windows["label"].notna()).to_numpy()
     y_sup = windows.loc[sup, "label"].to_numpy(np.float32)
     pos_weight = torch.tensor([(y_sup == 0).sum() / max(1, (y_sup == 1).sum())], device=device)
@@ -208,6 +225,12 @@ def main(argv: list[str] | None = None) -> int:
     raw = base.paths.resolve("data_raw") / "vision"
     cache = base.paths.resolve("data_processed") / "vision"
     ann = pd.read_parquet(cache / "annotations.parquet")
+    ann = ann[ann["source"].isin(cfg.clip_classifier.sources)].reset_index(drop=True)
+    intervals = (
+        pd.read_parquet(cache / "uca_intervals.parquet")
+        if cfg.clip_classifier.labels == "interval"
+        else None
+    )
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
     video = is_video_backbone(cfg.clip_classifier.backbone)
@@ -220,7 +243,7 @@ def main(argv: list[str] | None = None) -> int:
         if i % 20 == 0:
             log.info("features: %d/%d videos", i, len(ann))
 
-    windows, x = build_windows(ann, cfg, cache)
+    windows, x = build_windows(ann, cfg, cache, intervals)
     head, train_log = train(windows, x, cfg, device, args.fit_split)
     with torch.inference_mode():
         logits = head(torch.from_numpy(x).to(device)).squeeze(1).cpu().numpy()

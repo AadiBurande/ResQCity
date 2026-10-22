@@ -5,6 +5,7 @@ windows in a row; afterwards the camera is silent for ``cooldown_s`` (one incide
 fusion in phase 4 handles later updates).
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from resqcity.vision.config import AlarmConfig
@@ -54,3 +55,23 @@ def alarm_times(
 ) -> list[float]:
     alarm = Alarm(cfg, threshold)
     return [t for t, c in zip(times, confidences, strict=True) if alarm.update(t, c)]
+
+
+def verified_alarm_times(
+    times: list[float],
+    confidences: list[float],
+    cfg: AlarmConfig,
+    threshold: float,
+    verify: Callable[[float], bool],
+) -> list[float]:
+    """Alarms that a second-stage verifier accepts (D-027). A rejected alarm raises no Event and
+    starts no cooldown, so the camera can alarm again once the persistence condition holds."""
+    alarm = Alarm(cfg, threshold)
+    out = []
+    for t, c in zip(times, confidences, strict=True):
+        if alarm.update(t, c):
+            if verify(t):
+                out.append(t)
+            else:
+                alarm.state.last_alarm_t = None
+    return out

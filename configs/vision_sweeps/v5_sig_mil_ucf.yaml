@@ -1,0 +1,9 @@
+# Evaluation v5 stage-A candidate (pre-registered, docs/plans/phase-3b.md; D-027).
+# Validation for every candidate: fit-split windows of UCF-Crime AND ACCIDENT, official labels.
+clip_classifier:
+  backbone: siglip2_base
+  labels: mil
+  sources: [ucf_crime, accident]
+  train_sources: [ucf_crime]
+  mil_sparsity: 0.3   # v4 fold-A choice (s03_t1), fixed for all v5 candidates
+  mil_smoothness: 1.0

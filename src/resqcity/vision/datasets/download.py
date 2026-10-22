@@ -1,12 +1,16 @@
-"""Download the public vision datasets (no account or sign-up needed), within a size cap.
+"""Download the public vision datasets within a size cap.
 
-    uv run python -m resqcity.vision.datasets.download [--only ucf_crime cadp dfire]
+    uv run python -m resqcity.vision.datasets.download [--only ucf_crime cadp dfire accident uca]
 
 - UCF-Crime: only the ``RoadAccidents`` videos and a seeded subset of normal test videos are
   extracted from the large zips, using HTTP range reads (no full-zip download), plus the official
   split and temporal-annotation files.
 - CADP: annotation JSON + the extracted-frames archive (Google Drive).
 - D-Fire: parquet shards of the Hugging Face mirror (converted to YOLO format by ``prepare``).
+- ACCIDENT (D-027): real CCTV clips + metadata from Kaggle, one file at a time (the synthetic
+  subset is skipped). The only source that needs an account: a Kaggle API token in
+  ``~/.kaggle/access_token``.
+- UCA (D-027): UCF-Crime event timestamps from GitHub, pinned to one commit.
 
 Everything lands in ``data/raw/vision/`` (gitignored). Licences: see docs/data-sources.md.
 A manifest with sizes and SHA-256 per file is written to ``data/raw/vision/manifest.json``.
@@ -19,6 +23,7 @@ import json
 import logging
 import random
 import shutil
+import urllib.parse
 import urllib.request
 import zipfile
 import zlib
@@ -239,7 +244,80 @@ def download_dfire(cfg: VisionConfig, root: Path, budget: Budget) -> None:
         fetch(url, root / "dfire" / Path(f["path"]).name, budget)
 
 
-DOWNLOADERS = {"ucf_crime": download_ucf_crime, "cadp": download_cadp, "dfire": download_dfire}
+def _kaggle_files(api: object, dataset: str) -> list[tuple[str, int]]:
+    import time
+
+    files, token = [], None
+    while True:
+        for attempt in range(5):  # the listing endpoint occasionally drops connections
+            try:
+                resp = api.dataset_list_files(dataset, page_token=token, page_size=200)  # type: ignore[attr-defined]
+                break
+            except Exception as exc:
+                log.warning("listing %s: %s (attempt %d)", dataset, exc, attempt + 1)
+                time.sleep(2**attempt)
+        else:
+            raise ConnectionError(f"could not list {dataset}")
+        files += [(f.name, int(f.total_bytes)) for f in resp.files]
+        token = resp.next_page_token
+        if not token:
+            return files
+
+
+def download_accident(cfg: VisionConfig, root: Path, budget: Budget) -> None:
+    """The dataset archive in ONE request (Kaggle rate-limits per-file downloads, HTTP 429), then
+    only the real clips and metadata are extracted and the archive (incl. the 15 GB synthetic
+    subset) is deleted. Files already present with the right size are kept, so reruns resume."""
+    from kaggle.api.kaggle_api_extended import KaggleApi
+
+    a = cfg.datasets.accident
+    out = root / "accident"
+    api = KaggleApi()
+    api.authenticate()
+    listed = _kaggle_files(api, a.kaggle_dataset)
+    wanted = [(n, s) for n, s in listed if n in a.metadata or n.startswith(a.files_prefix)]
+    todo = [(n, s) for n, s in wanted if not ((out / n).exists() and (out / n).stat().st_size == s)]
+    if not todo:
+        log.info("ACCIDENT: all %d files present", len(wanted))
+        return
+    budget.reserve(sum(s for _, s in todo), f"ACCIDENT ({len(todo)} files)")
+    archive_bytes = sum(s for _, s in listed)  # upper bound of the zip size
+    out.mkdir(parents=True, exist_ok=True)
+    if shutil.disk_usage(out).free < archive_bytes + sum(s for _, s in todo):
+        raise SizeCapExceededError(f"not enough disk for the {archive_bytes / GB:.1f} GB archive")
+    tmp = out / "_archive"
+    log.info(
+        "ACCIDENT: downloading the %.1f GB archive (extracting %d files)",
+        archive_bytes / GB,
+        len(todo),
+    )
+    api.dataset_download_files(a.kaggle_dataset, path=str(tmp), unzip=False, quiet=False)
+    try:
+        with zipfile.ZipFile(next(tmp.glob("*.zip"))) as zf:
+            for name, _ in todo:
+                zf.extract(name, out)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    bad = [n for n, s in wanted if not ((out / n).exists() and (out / n).stat().st_size == s)]
+    if bad:
+        raise RuntimeError(f"{len(bad)} ACCIDENT files missing after extraction, e.g. {bad[:3]}")
+    log.info("ACCIDENT: %d files present", len(wanted))
+
+
+def download_uca(cfg: VisionConfig, root: Path, budget: Budget) -> None:
+    u = cfg.datasets.uca
+    for name in u.files:
+        url = f"https://raw.githubusercontent.com/{u.repo}/{u.commit}/" + urllib.parse.quote(name)
+        fetch(url, root / "uca" / Path(name).name, budget)
+
+
+DOWNLOADERS = {
+    "ucf_crime": download_ucf_crime,
+    "cadp": download_cadp,
+    "dfire": download_dfire,
+    "accident": download_accident,
+    "uca": download_uca,
+}
 
 
 def write_manifest(root: Path) -> Path:

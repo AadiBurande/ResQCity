@@ -17,6 +17,16 @@ detector:
   vehicle_classes: [car, motorcycle, bus, truck, bicycle]
   person_class: person
   # COCO has no auto-rickshaw class; three-wheelers are usually detected as car/motorcycle.
+  # Phase 3b stage C (D-027): vehicles from the UVH-26 YOLO11-S model (IISc, Bengaluru traffic
+  # CCTV, Apache-2.0), people still from the COCO model above. UVH-26 names -> our vocabulary.
+  uvh26:
+    repo: iisc-aim/UVH-26
+    revision: 4a22412775adb6f97f22735647afee976b4638a0
+    weights_file: weights/YOLOv11-S/UVH-26-MV-YOLOv11-S.pt
+    class_map: {Hatchback: car, Sedan: car, SUV: car, MUV: car, Van: car, Bus: bus,
+                Mini-bus: bus, Tempo-traveller: bus, Truck: truck, LCV: truck,
+                Three-wheeler: auto_rickshaw, Two-wheeler: motorcycle, Bicycle: bicycle,
+                Others: other_vehicle}
 
 privacy:
   face_model_url: https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx
@@ -52,7 +62,24 @@ heuristics:                    # stage 1 (explainable). Speeds are in box-height
   weights: {deceleration: 0.25, collision: 0.45, orientation: 0.15, person_down: 0.15}
 
 clip_classifier:               # stage 2 (learned)
-  backbone: mobilenet_v3_small # torchvision, frozen: mobilenet_v3_small (ImageNet) | r2plus1d_18 (Kinetics-400)
+  # frozen backbone: mobilenet_v3_small (ImageNet) | r2plus1d_18 (Kinetics-400) |
+  # siglip2_base (image-text, Apache-2.0; phase 3b, D-027)
+  backbone: mobilenet_v3_small
+  siglip2: {repo: google/siglip2-base-patch16-224, revision: 75de2d55ec2d0b4efc50b3e9ad70dba96a7b2fa2}
+  # siglip2_base only: per-frame cosine similarity to these prompts is appended to the embedding.
+  # Fixed before any phase-3b result (docs/plans/phase-3b.md).
+  text_prompts:
+    - a CCTV image of a traffic accident
+    - a car crash on a road
+    - vehicles colliding at an intersection
+    - an overturned vehicle lying on the road
+    - a motorcycle accident on the road
+    - a pedestrian hit by a vehicle
+    - normal traffic on a road
+    - an empty road seen from a traffic camera
+  labels: mil                  # mil = v4 (weak video labels) | interval = UCA intervals for UCF train videos
+  sources: [ucf_crime]         # videos that get features, windows and scores; validation = fit split of these
+  train_sources: [ucf_crime]   # whose TRAIN-split windows fit the head
   input_size: 224              # image side (image backbone) or crop side (video backbone: 112)
   clip_frames: 16              # frames per window clip (video backbones only)
   window_s: 3.0
@@ -67,6 +94,23 @@ clip_classifier:               # stage 2 (learned)
   mil_weight: 0.5              # weight of the MIL (weak accident video) term
   mil_sparsity: 0.3            # Sultani et al. 2018: accident windows are rare within a video
   mil_smoothness: 1.0          # ...and scores change smoothly over time
+
+verifier:                      # phase 3b stage B (D-027): an offline VLM checks every candidate alarm
+  # Pre-registered prompt (docs/plans/phase-3b.md); the yes-probability of the first answer token
+  # is the verifier score. The model only sees anonymised frames and never leaves the machine.
+  prompt: "Does this CCTV clip show a traffic accident (a collision involving a vehicle, or a vehicle overturning)? Answer yes or no."
+  describe_prompt: "Describe what happens in this CCTV clip in one sentence."
+  frames: 8                    # frames sampled evenly from the last span_s seconds before the alarm
+  span_s: 4.0
+  frame_long_side: 448         # frames are resized to this long side before the processor
+  min_detection_retention: 0.9 # keep >= 90 % of validation detections (pre-registered)
+  max_latency_s: 3.0           # median seconds per check on the RTX 4050 (pre-registered)
+  thresholds: [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95]
+  candidates:                  # 4-bit NF4 weights (fit in ~4.5 GB VRAM next to the detector)
+    qwen3_5_2b: {repo: Qwen/Qwen3.5-2B, revision: 15852e8c16360a2fea060d615a32b45270f8a8fc, quantization: 4bit}
+    qwen3_vl_2b: {repo: Qwen/Qwen3-VL-2B-Instruct, revision: 89644892e4d85e24eaac8bacfd4f463576704203, quantization: 4bit}
+    gemma4_e2b: {repo: google/gemma-4-E2B-it, revision: 3e22461f65e89153144f8adb70e3b8c2cc9845a7, quantization: 4bit}
+    holmesvau_2b: {repo: ppxin321/HolmesVAU-2B, revision: 4ddd79211b9f144faa8fed08afc070f8b7c0db06, quantization: 4bit}
 
 fire_smoke:
   base_weights: yolo11n.pt
@@ -83,7 +127,7 @@ alarm:
   cooldown_s: 60.0
 
 datasets:
-  cap_gb: 10.0                 # hard cap on downloads (D-019)
+  cap_gb: 20.0                 # hard cap on downloads (D-019; raised to 20 GB by the user, D-027)
   split: {train: 0.6, val: 0.2, test: 0.2, seed: 1303}
   ucf_crime:
     base_url: https://huggingface.co/datasets/jinmang2/ucf_crime/resolve/main
@@ -97,6 +141,31 @@ datasets:
     annotations_url: https://filedn.com/lQfYylUHSWEYAyORS7PdIKH/annotations_CADP.json
     frames_gdrive_id: 1PDsYAsOEwZTcFVVt444wvhOTfjqwqTaY
     licence: "CADP: non-commercial research use (Shah et al., 2018)"
+  accident:                    # phase 3b (D-027): never-seen CCTV evaluation footage
+    kaggle_dataset: picekl/accident
+    files_prefix: real_videos/   # the 15 GB synthetic subset is not downloaded
+    metadata: [metadata-real.csv, annotation_classes.yaml]
+    # Our use of the OFFICIAL in-distribution split: its test clips are held out until the single
+    # final run (labels kept in a separate file); its train clips are split train/val here,
+    # grouped by source video (file-name prefix). Sources with clips on both sides are excluded.
+    val_fraction: 0.2
+    split_seed: 2710
+    offset_after_impact_s: 2.0   # ASSUMPTION: collision dynamics last ~2 s after first contact (window labels only)
+    licence: "ACCIDENT (Picek et al., 2026), Kaggle picekl/accident, CC BY-NC-SA 4.0; needs a Kaggle API token in ~/.kaggle/access_token (never in the repo)"
+  uca:                         # UCF-Crime Annotation (Yuan et al., CVPR 2024): event timestamps
+    repo: Xuange923/Surveillance-Video-Understanding
+    commit: e478cb5b2277c6b7cf6a1dc4691021592003e216
+    files:
+      - UCF Annotation/txt/UCFCrime_Train.txt
+      - UCF Annotation/txt/UCFCrime_Val.txt
+      - UCF Annotation/txt/UCFCrime_Test.txt
+    licence: "UCA: Apache-2.0, academic research only"
+    # The accident sentence of a video is the earliest one matching any of these (regex, whole word,
+    # case-insensitive). Fixed before use (2026-10-21); see results/vision/uca_label_check.json.
+    accident_keywords: ['hit', 'hits', 'collid\w*', 'crash\w*', 'knock\w*', 'overturn\w*', 'rolled over',
+                        'ran over', 'run over', 'bump\w*', 'smash\w*', 'struck', 'slamm?\w*',
+                        'rear-end\w*', 'flipped', 'accident', 'fell', 'fall', 'crush\w*', 'ran into',
+                        'rammed', 'toppl\w*']
   dfire:
     hf_repo: badsaarow/d-fire
     licence: "D-Fire (Venâncio et al., 2022), HF mirror badsaarow/d-fire; original gaiasd/DFireDataset"
