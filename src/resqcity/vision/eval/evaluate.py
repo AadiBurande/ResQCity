@@ -30,6 +30,7 @@ import yaml
 from resqcity.common.config import CONFIG_DIR, PROJECT_ROOT, load_base_config
 from resqcity.common.provenance import write_meta
 from resqcity.vision.config import AlarmConfig, VisionConfig, load_vision_config
+from resqcity.vision.datasets.annotations import pre_v5
 from resqcity.vision.eval.metrics import (
     DETECTION_GRACE_S,
     binary_metrics,
@@ -104,7 +105,7 @@ def main(argv: list[str] | None = None) -> int:
     out = base.paths.resolve("results") / "vision" / args.run_id
     out.mkdir(parents=True, exist_ok=True)
 
-    ann = pd.read_parquet(cache / "annotations.parquet")
+    ann = pre_v5(pd.read_parquet(cache / "annotations.parquet"))
     windows = pd.read_parquet(cache / f"windows_{args.run_id}.parquet")
     evald = ann[ann["split"].isin(["val", "test"])]
     for i, (_, row) in enumerate(evald.iterrows(), start=1):

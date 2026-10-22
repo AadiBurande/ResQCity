@@ -107,3 +107,18 @@ def test_predicted_impact_is_the_best_window_centre_or_midpoint():
     )
     videos = pd.DataFrame({"video_id": ["a", "b"], "duration_s": [30.0, 8.0]})
     assert predicted_impact(w, videos, "p").tolist() == [2.5, 4.0]
+
+
+def test_make_vision_trains_exactly_the_preregistered_candidates():
+    from resqcity.tools.tasks import V5_RUNS
+    from resqcity.vision.eval.select_v5 import STAGE_A, SWEEPS
+
+    assert list(V5_RUNS) == STAGE_A and len(STAGE_A) == 8
+    assert all((SWEEPS / f"{r}.yaml").exists() for r in STAGE_A)
+
+
+def test_pre_v5_scope_drops_accident_clips():
+    from resqcity.vision.datasets.annotations import pre_v5
+
+    ann = pd.DataFrame({"source": ["ucf_crime", "accident", "cadp"], "split": "val"})
+    assert pre_v5(ann)["source"].tolist() == ["ucf_crime", "cadp"]

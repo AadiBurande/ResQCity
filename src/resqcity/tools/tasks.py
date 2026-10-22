@@ -83,9 +83,19 @@ def streams(_: argparse.Namespace) -> int:
 CLIP_SETTINGS = ("s0_t0", "s03_t1", "s1_t1")
 
 
+V5_RUNS = tuple(
+    f"v5_{bb}_{lab}_{data}"
+    for bb in ("mnet", "sig")
+    for lab in ("mil", "int")
+    for data in ("ucf", "all")
+)
+
+
 def vision(_: argparse.Namespace) -> int:
-    """Vision pipeline: data, annotations, cross-fitted accident detector (evaluation v4),
-    fire/smoke detector, demo clips. GPU recommended (hours); every step resumes from its cache."""
+    """Vision pipeline: data (ACCIDENT needs a Kaggle token), annotations, UCA intervals,
+    evaluation v4 (cross-fitting), evaluation v5 (phase 3b: extraction, 8 candidates, selection
+    stages A, C, B, one final run on the ACCIDENT holdout), fire/smoke detector, demo clips.
+    GPU recommended (hours); every step resumes from its cache."""
     train = []
     for s in CLIP_SETTINGS:
         for fit, img_run, vid_run in (
@@ -114,11 +124,26 @@ def vision(_: argparse.Namespace) -> int:
                     fit,
                 )
             )
+    v5 = [
+        _py(
+            "resqcity.vision.train_clip",
+            "--run-id",
+            r,
+            "--overlay",
+            f"configs/vision_sweeps/{r}.yaml",
+        )
+        for r in V5_RUNS
+    ]
     return _run(
         _py("resqcity.vision.datasets.download"),
         _py("resqcity.vision.datasets.annotations"),
+        _py("resqcity.vision.datasets.uca"),
         *train,
         _py("resqcity.vision.eval.crossfit"),
+        _py("resqcity.vision.extract"),
+        *v5,
+        *(_py("resqcity.vision.eval.select_v5", "--stage", s) for s in ("a", "c", "b")),
+        _py("resqcity.vision.eval.final_v5"),
         _py("resqcity.vision.datasets.prepare_dfire"),
         _py("resqcity.vision.train_fire", "--run-id", "fire_main"),
         _py("resqcity.streams.prepare_videos"),

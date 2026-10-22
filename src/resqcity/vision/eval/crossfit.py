@@ -27,6 +27,7 @@ import yaml
 from resqcity.common.config import CONFIG_DIR, PROJECT_ROOT, load_base_config
 from resqcity.common.provenance import write_meta
 from resqcity.vision.config import load_vision_config
+from resqcity.vision.datasets.annotations import pre_v5
 from resqcity.vision.eval.evaluate import (
     CONSECUTIVE,
     SCORES,
@@ -119,7 +120,7 @@ def main(argv: list[str] | None = None) -> int:
     results = base.paths.resolve("results") / "vision"
     out = results / "crossfit_v4"
     out.mkdir(parents=True, exist_ok=True)
-    ann = pd.read_parquet(cache / "annotations.parquet")
+    ann = pre_v5(pd.read_parquet(cache / "annotations.parquet"))
 
     folds, per_video, windows = {}, [], []
     for fold in FOLDS:

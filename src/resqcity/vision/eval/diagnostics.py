@@ -17,6 +17,7 @@ import pandas as pd
 
 from resqcity.common.config import CONFIG_DIR, load_base_config
 from resqcity.common.provenance import write_meta
+from resqcity.vision.datasets.annotations import pre_v5
 from resqcity.vision.eval.metrics import auroc
 from resqcity.vision.offline import heuristics_path
 
@@ -83,7 +84,7 @@ def main(argv: list[str] | None = None) -> int:
     argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args(argv)
     base = load_base_config()
     cache = base.paths.resolve("data_processed") / "vision"
-    ann = pd.read_parquet(cache / "annotations.parquet")
+    ann = pre_v5(pd.read_parquet(cache / "annotations.parquet"))
     out = base.paths.resolve("results") / "vision" / "diagnostics.json"
     report = {
         "classifier_runs": classifier_rows(cache, RUNS),

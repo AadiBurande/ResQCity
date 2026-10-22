@@ -41,6 +41,7 @@ COLUMNS = [
     "has_onset",
 ]
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png"}
+PRE_V5_SOURCES = ("ucf_crime", "cadp")  # the scope of evaluations v1-v4 (ACCIDENT came in v5)
 CADP_FPS = 30.0  # ASSUMPTION: CADP releases frames, not fps; YouTube traffic clips are ~30 fps
 
 
@@ -208,6 +209,12 @@ def assign_splits(df: pd.DataFrame, cfg: SplitConfig) -> pd.Series:
         split.loc[idx[:n_test]] = "test"
         split.loc[idx[n_test : n_test + n_val]] = "val"
     return split
+
+
+def pre_v5(ann: pd.DataFrame) -> pd.DataFrame:
+    """Videos within the scope of evaluations v1-v4 (keeps them reproducible after ACCIDENT was
+    added: its validation clips share the split name ``val``)."""
+    return ann[ann["source"].isin(PRE_V5_SOURCES)].reset_index(drop=True)
 
 
 def build_annotations(root: Path, cfg: VisionConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
