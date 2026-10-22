@@ -164,6 +164,9 @@ datasets:
     accident_prefix: RoadAccidents
     normal_zip: Testing_Normal_Videos.zip
     normal_max_videos: 60      # subset of normal test videos for false-alarm measurement
+    # Unreadable when the v1-v4 splits were fixed; readable with a later decoder. Kept out so the
+    # seeded splits stay identical (D-027).
+    exclude_videos: [Normal_Videos_924_x264]
     temporal_annotations: UCF_Crimes-Train-Test-Split/Temporal_Anomaly_Annotation_for_Testing_Videos.txt
     licence: "UCF-Crime: research use (CRCV, UCF); HF mirror jinmang2/ucf_crime"
   cadp:

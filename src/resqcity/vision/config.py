@@ -190,6 +190,7 @@ class UcfCrimeConfig(ConfigModel):
     accident_prefix: str
     normal_zip: str
     normal_max_videos: int = Field(ge=0)
+    exclude_videos: list[str] = Field(default_factory=list)
     temporal_annotations: str
     licence: str
 

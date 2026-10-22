@@ -89,6 +89,8 @@ def ucf_records(root: Path, cfg: VisionConfig) -> list[VideoRecord]:
         ("normal", "Normal"),
     ):
         for path in sorted((base / folder).glob("*.mp4")):
+            if path.stem in cfg.datasets.ucf_crime.exclude_videos:
+                continue
             fps, n = probe_video(path)
             if n <= 0:
                 log.warning("skip unreadable %s", path.name)
