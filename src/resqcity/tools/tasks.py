@@ -85,7 +85,7 @@ CLIP_SETTINGS = ("s0_t0", "s03_t1", "s1_t1")
 
 V5_RUNS = tuple(
     f"v5_{bb}_{lab}_{data}"
-    for bb in ("mnet", "sig")
+    for bb in ("mnet", "sig", "vjepa")
     for lab in ("mil", "int")
     for data in ("ucf", "all")
 )
@@ -93,7 +93,7 @@ V5_RUNS = tuple(
 
 def vision(_: argparse.Namespace) -> int:
     """Vision pipeline: data (ACCIDENT needs a Kaggle token), annotations, UCA intervals,
-    evaluation v4 (cross-fitting), evaluation v5 (phase 3b: extraction, 8 candidates, selection
+    evaluation v4 (cross-fitting), evaluation v5 (phase 3b: extraction, 12 candidates, selection
     stages A, C, B, one final run on the ACCIDENT holdout), fire/smoke detector, demo clips.
     GPU recommended (hours); every step resumes from its cache."""
     train = []

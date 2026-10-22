@@ -4,8 +4,10 @@ Two kinds of frozen backbone (``clip_classifier.backbone``):
 - image: ``mobilenet_v3_small`` (ImageNet, 576-d) or ``siglip2_base`` (image-text, D-027: 768-d
   normalised embedding + cosine similarity to each of ``text_prompts``), cached per sampled frame;
   window feature = [mean, max, mean |diff|] over the window's frames;
-- video (``r2plus1d_18``, Kinetics-400): the window's frames are resampled to ``clip_frames``,
-  resized to ``input_size`` and embedded as ONE clip (512-d), so motion is modelled directly.
+- video: the window's frames are resampled to ``clip_frames``, centre-cropped to ``input_size``
+  and embedded as ONE clip, so motion is modelled directly: ``r2plus1d_18`` (Kinetics-400, 512-d)
+  or ``vjepa2_vitl`` (V-JEPA 2 ViT-L with its Something-Something-v2 attentive pooler, 1024-d;
+  phase-3b amendment 1).
 Head: 2-layer MLP.
 
 Training signal:
@@ -31,7 +33,10 @@ FEATURE_DIM = 576  # mobilenet_v3_small final channels
 IMAGE_BACKBONES = {"mobilenet_v3_small": FEATURE_DIM, "siglip2_base": 768}
 TEXT_BACKBONES = {"siglip2_base"}  # image-text models: prompt similarities are appended
 SIGLIP_TEXT_LENGTH = 64  # SigLIP2 text inputs are padded to this length (model card)
-VIDEO_BACKBONES = {"r2plus1d_18": 512}  # backbone -> clip embedding size
+VIDEO_BACKBONES = {"r2plus1d_18": 512, "vjepa2_vitl": 1024}  # backbone -> clip embedding size
+VJEPA_RESIZE_SHORT = 292  # V-JEPA 2 video processor: shortest edge 292, centre crop 256
+IMAGENET_MEAN = (0.485, 0.456, 0.406)
+IMAGENET_STD = (0.229, 0.224, 0.225)
 MIL_TOP_K = 3
 KINETICS_MEAN = (0.43216, 0.394666, 0.37645)
 KINETICS_STD = (0.22803, 0.22145, 0.216989)
@@ -111,6 +116,50 @@ def make_windows(times: np.ndarray, window_s: float, stride_s: float) -> list[Wi
             out.append(Window(float(end - window_s), float(end), first, last))
         end += stride_s
     return out
+
+
+class WindowStream:
+    """Incremental :func:`make_windows`: push (time, item) in time order and receive each window
+    (start, end, items) as soon as it is complete; ``finish`` flushes the last ones. Produces
+    exactly the windows of ``make_windows`` (same float accumulation; tested), with memory
+    bounded by one window, so long videos can be embedded without holding all frames."""
+
+    def __init__(self, window_s: float, stride_s: float) -> None:
+        from collections import deque
+
+        self.window_s, self.stride_s = window_s, stride_s
+        self.buf: deque[tuple[float, object]] = deque()
+        self.end: float | None = None
+        self.last_t: float | None = None
+
+    def _emit(self) -> tuple[float, float, list] | None:
+        assert self.end is not None
+        items = [x for t, x in self.buf if self.end - self.window_s <= t <= self.end]
+        window = (self.end - self.window_s, self.end, items) if len(items) >= 2 else None
+        self.end += self.stride_s
+        while self.buf and self.buf[0][0] < self.end - self.window_s:
+            self.buf.popleft()
+        return window
+
+    def push(self, t: float, item: object) -> list[tuple[float, float, list]]:
+        out = []
+        if self.end is None:
+            self.end = t + self.window_s
+        while t > self.end:  # every frame at or before ``end`` has arrived
+            w = self._emit()
+            if w is not None:
+                out.append(w)
+        self.buf.append((t, item))
+        self.last_t = t
+        return out
+
+    def finish(self) -> list[tuple[float, float, list]]:
+        out = []
+        while self.end is not None and self.last_t is not None and self.end <= self.last_t + 1e-9:
+            w = self._emit()
+            if w is not None:
+                out.append(w)
+        return out
 
 
 def window_label(w: Window, onset_s: float | None, offset_s: float | None) -> float | None:
@@ -225,6 +274,26 @@ class ClipEncoder:
 
     def __init__(self, cfg: ClipClassifierConfig, device: str = "cpu") -> None:
         import torch
+
+        self.device = device
+        self.crop = cfg.input_size
+        self.k = cfg.clip_frames
+        self.backbone = cfg.backbone
+        self._torch = torch
+        if cfg.backbone == "vjepa2_vitl":
+            from transformers import VJEPA2ForVideoClassification
+
+            if cfg.vjepa2 is None:
+                raise ValueError("vjepa2_vitl needs clip_classifier.vjepa2")
+            self.dtype = torch.float16 if device.startswith("cuda") else torch.float32
+            model = VJEPA2ForVideoClassification.from_pretrained(
+                cfg.vjepa2.repo, revision=cfg.vjepa2.revision, dtype=self.dtype
+            )
+            self.net = model.eval().to(device)
+            self.short = VJEPA_RESIZE_SHORT
+            self.mean = torch.tensor(IMAGENET_MEAN, device=device).view(1, 1, 3, 1, 1)
+            self.std = torch.tensor(IMAGENET_STD, device=device).view(1, 1, 3, 1, 1)
+            return
         from torchvision.models.video import R2Plus1D_18_Weights, r2plus1d_18
 
         if cfg.backbone != "r2plus1d_18":
@@ -232,12 +301,9 @@ class ClipEncoder:
         model = r2plus1d_18(weights=R2Plus1D_18_Weights.KINETICS400_V1)
         model.fc = torch.nn.Identity()
         self.net = model.eval().to(device)
-        self.device = device
-        self.crop = cfg.input_size
-        self.k = cfg.clip_frames
+        self.short = VIDEO_RESIZE_SHORT
         self.mean = torch.tensor(KINETICS_MEAN, device=device).view(1, 3, 1, 1, 1)
         self.std = torch.tensor(KINETICS_STD, device=device).view(1, 3, 1, 1, 1)
-        self._torch = torch
 
     def _clip_array(self, frames_bgr: Sequence[np.ndarray]) -> np.ndarray:
         import cv2
@@ -245,8 +311,8 @@ class ClipEncoder:
         chosen = [frames_bgr[i] for i in sample_indices(len(frames_bgr), self.k)]
         out = []
         for im in chosen:
-            if min(im.shape[:2]) != VIDEO_RESIZE_SHORT:
-                im = resize_short(im)
+            if min(im.shape[:2]) != self.short:
+                im = resize_short(im, self.short)
             h, w = im.shape[:2]
             y0, x0 = (h - self.crop) // 2, (w - self.crop) // 2
             crop = im[y0 : y0 + self.crop, x0 : x0 + self.crop]
@@ -258,11 +324,20 @@ class ClipEncoder:
         feats = []
         for i in range(0, len(clips), batch):
             arr = np.stack([self._clip_array(c) for c in clips[i : i + batch]])  # (B,T,H,W,3)
-            x = torch.from_numpy(arr).to(self.device).permute(0, 4, 1, 2, 3).float() / 255.0
+            x = torch.from_numpy(arr).to(self.device)
+            if self.backbone == "vjepa2_vitl":  # (B, T, C, H, W), pooled by the SSv2 probe
+                x = (x.permute(0, 1, 4, 2, 3).float() / 255.0 - self.mean) / self.std
+                with torch.inference_mode():
+                    hidden = self.net.vjepa2(
+                        pixel_values_videos=x.to(self.dtype), skip_predictor=True
+                    ).last_hidden_state
+                    feats.append(self.net.pooler(hidden).float().cpu().numpy())
+                continue
+            x = x.permute(0, 4, 1, 2, 3).float() / 255.0
             x = (x - self.mean) / self.std
             with torch.inference_mode():
                 feats.append(self.net(x).float().cpu().numpy())
-        dim = VIDEO_BACKBONES["r2plus1d_18"]
+        dim = VIDEO_BACKBONES[self.backbone]
         return np.concatenate(feats) if feats else np.zeros((0, dim), np.float32)
 
 
@@ -327,8 +402,8 @@ class ClipClassifier:
 
     def observe(self, t: float, image_bgr: np.ndarray) -> None:
         """Add one sampled frame (stored resized for video backbones, as features otherwise)."""
-        if self.video:  # noqa: SIM108 (ClipEncoder has no per-frame encode)
-            item = resize_short(image_bgr)
+        if self.video:
+            item = resize_short(image_bgr, self.encoder.short)  # type: ignore[union-attr]
         else:
             item = self.encoder.encode([image_bgr])[0]  # type: ignore[union-attr]
         self.buffer.append((t, item))

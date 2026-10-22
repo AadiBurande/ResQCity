@@ -113,7 +113,7 @@ def test_make_vision_trains_exactly_the_preregistered_candidates():
     from resqcity.tools.tasks import V5_RUNS
     from resqcity.vision.eval.select_v5 import STAGE_A, SWEEPS
 
-    assert list(V5_RUNS) == STAGE_A and len(STAGE_A) == 8
+    assert list(V5_RUNS) == STAGE_A and len(STAGE_A) == 12
     assert all((SWEEPS / f"{r}.yaml").exists() for r in STAGE_A)
 
 
@@ -122,3 +122,20 @@ def test_pre_v5_scope_drops_accident_clips():
 
     ann = pd.DataFrame({"source": ["ucf_crime", "accident", "cadp"], "split": "val"})
     assert pre_v5(ann)["source"].tolist() == ["ucf_crime", "cadp"]
+
+
+def test_window_stream_reproduces_make_windows():
+    from resqcity.vision.clip_classifier import WindowStream, make_windows
+
+    rng = np.random.default_rng(3)
+    for _ in range(20):  # irregular (variable-frame-rate) sampling
+        times = np.cumsum(rng.uniform(0.05, 0.6, size=int(rng.integers(2, 80))))
+        expected = [
+            (w.start_s, w.end_s, list(range(w.first, w.last)))
+            for w in make_windows(times, 3.0, 1.0)
+        ]
+        stream, got = WindowStream(3.0, 1.0), []
+        for i, t in enumerate(times):
+            got += stream.push(float(t), i)
+        got += stream.finish()
+        assert got == expected

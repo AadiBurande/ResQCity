@@ -94,7 +94,7 @@ def extract_window_features(
     times, frames = [], []
     for frame in video_frames(raw_root, row, cfg):
         times.append(frame.t)
-        frames.append(resize_short(frame.image))  # small copies: a long video fits in memory
+        frames.append(resize_short(frame.image, encoder.short))  # small copies fit in memory
     t = np.asarray(times, np.float64)
     windows = make_windows(t, cc.window_s, cc.stride_s)
     feats = encoder.encode_clips([frames[w.first : w.last] for w in windows])

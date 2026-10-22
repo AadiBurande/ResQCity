@@ -3,7 +3,7 @@ docs/plans/phase-3b.md).
 
     uv run python -m resqcity.vision.eval.select_v5 --stage a
 
-Stage A: the 8 candidates of ``configs/vision_sweeps/v5_*.yaml`` (backbone x labels x training
+Stage A: the 12 candidates of ``configs/vision_sweeps/v5_*.yaml`` (backbone x labels x training
 data), each trained with ``train_clip --run-id <name>``. For each candidate, on the validation
 videos of UCF-Crime and ACCIDENT: heuristics joined (COCO detector), a stacker fitted on the
 labelled validation windows, and the operating point chosen by Youden's J over the v4
@@ -55,7 +55,7 @@ log = logging.getLogger(__name__)
 SWEEPS = CONFIG_DIR / "vision_sweeps"
 STAGE_A = [
     f"v5_{bb}_{lab}_{data}"
-    for bb in ("mnet", "sig")
+    for bb in ("mnet", "sig", "vjepa")
     for lab in ("mil", "int")
     for data in ("ucf", "all")
 ]

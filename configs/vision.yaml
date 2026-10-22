@@ -66,6 +66,8 @@ clip_classifier:               # stage 2 (learned)
   # siglip2_base (image-text, Apache-2.0; phase 3b, D-027)
   backbone: mobilenet_v3_small
   siglip2: {repo: google/siglip2-base-patch16-224, revision: 75de2d55ec2d0b4efc50b3e9ad70dba96a7b2fa2}
+  # vjepa2_vitl (video, MIT; phase-3b amendment 1): SSv2-trained attentive-pooler output per window
+  vjepa2: {repo: facebook/vjepa2-vitl-fpc16-256-ssv2, revision: 4aa02df83918538fc21cfaf576382fa20e489a80}
   # siglip2_base only: per-frame cosine similarity to these prompts is appended to the embedding.
   # Fixed before any phase-3b result (docs/plans/phase-3b.md).
   text_prompts:
@@ -111,6 +113,33 @@ verifier:                      # phase 3b stage B (D-027): an offline VLM checks
     qwen3_vl_2b: {repo: Qwen/Qwen3-VL-2B-Instruct, revision: 89644892e4d85e24eaac8bacfd4f463576704203, quantization: 4bit}
     gemma4_e2b: {repo: google/gemma-4-E2B-it, revision: 3e22461f65e89153144f8adb70e3b8c2cc9845a7, quantization: 4bit}
     holmesvau_2b: {repo: ppxin321/HolmesVAU-2B, revision: 4ddd79211b9f144faa8fed08afc070f8b7c0db06, quantization: 4bit}
+    # Amendment 1: Molmo2-4B (remote code) and TAU-R1-Classifier with its own published prompt
+    # (github.com/siri-rouser/TAU-R1, evaluation/QA_pair_database.py, category_ABC_sys_prompt_4cat);
+    # score = P(C) among the first-token labels A-D.
+    molmo2_4b: {repo: allenai/Molmo2-4B, revision: 042abfa7a38879a376cec03d949eff0aefaa0600, quantization: 4bit, remote_code: true}
+    tau_r1_classifier:
+      repo: yl4300/TAU-R1-Classifier
+      revision: f89be2811abc99ae1bb61e14af8c97b7dcbe6f52
+      quantization: 4bit
+      prompt: "Can you classify the anomaly into a specific category?"
+      positive: [C]
+      negative: [A, B, D]
+      system_prompt: |
+        You are a video classification system that identifies anomalous driving behavior in traffic videos.
+
+        You must assign exactly one label token from the set {A, B, C, D} based on all visible road users across the entire video. Choose the single best label using the definitions below. If multiple anomalies occur, output only the most severe and more relevant one.
+
+        Labels (output exactly one token):
+
+        - A: No anomaly. All visible road users behave normally.
+        - B: Direction or maneuver violation, including wrong-way driving, illegal or unsafe turns, and illegal or unsafe lane changes.
+        - C: Near-collision or collision event, including cut-offs that force hard braking or evasive action, near-misses, and crashes.
+        - D: Abnormal road use, including stopping in an active lane or mid-road (breakdown, yielding to emergency vehicles, letting pedestrians cross) and driving or parking in non-vehicle areas (sidewalk, shoulder, etc.).
+
+        When you answer, you MUST:
+        1. Watch the entire video before deciding.
+        2. Output exactly one label token only: A or B or C or D.
+        3. Output nothing else: no words, no punctuation, no extra whitespace, no newlines.
 
 fire_smoke:
   base_weights: yolo11n.pt

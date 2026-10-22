@@ -6,7 +6,8 @@ probability of "yes" against "no" for the first answer token (thinking disabled)
 has to be parsed. ``describe`` returns a one-sentence description for the operator (optional
 ``Event`` metadata). Everything runs locally; frames never leave ``vision/``.
 
-Backends: Hugging Face image-text-to-text models (Qwen3.5, Qwen3-VL, Gemma 4) loaded in 4/8-bit.
+Backends: Hugging Face image-text-to-text models (Qwen3.5, Qwen3-VL, Gemma 4, TAU-R1, and
+Molmo2 with its own code) loaded in 4/8-bit; a candidate may bring its own prompts and answers.
 """
 
 import logging
@@ -22,7 +23,6 @@ from resqcity.vision.privacy import Anonymizer
 from resqcity.vision.types import FramePacket
 
 log = logging.getLogger(__name__)
-YES, NO = ("yes", "Yes", " yes", " Yes", "YES"), ("no", "No", " no", " No", "NO")
 DESCRIBE_TOKENS = 48
 
 
@@ -72,6 +72,7 @@ class HfVerifier:
         from transformers import AutoModelForImageTextToText, AutoProcessor, BitsAndBytesConfig
 
         self.cfg, self.device, self._torch = cfg, device, torch
+        self.cand = cand
         quant = None
         if cand.quantization == "4bit":
             quant = BitsAndBytesConfig(
@@ -79,17 +80,19 @@ class HfVerifier:
             )
         elif cand.quantization == "8bit":
             quant = BitsAndBytesConfig(load_in_8bit=True)
-        self.processor = AutoProcessor.from_pretrained(cand.repo, revision=cand.revision)
+        remote = {"trust_remote_code": True} if cand.remote_code else {}
+        self.processor = AutoProcessor.from_pretrained(cand.repo, revision=cand.revision, **remote)
         self.model = AutoModelForImageTextToText.from_pretrained(
             cand.repo,
             revision=cand.revision,
             dtype=torch.float16,
             quantization_config=quant,
             device_map={"": device},
+            **remote,
         ).eval()
         tok = self.processor.tokenizer
-        self.yes = sorted({tok.encode(w, add_special_tokens=False)[0] for w in YES})
-        self.no = sorted({tok.encode(w, add_special_tokens=False)[0] for w in NO})
+        self.yes = sorted({tok.encode(w, add_special_tokens=False)[0] for w in cand.positive})
+        self.no = sorted({tok.encode(w, add_special_tokens=False)[0] for w in cand.negative})
 
     def _inputs(self, frames_bgr: list[np.ndarray], prompt: str):  # noqa: ANN202 (BatchFeature)
         from PIL import Image
@@ -97,8 +100,12 @@ class HfVerifier:
         images = [Image.fromarray(cv2.cvtColor(f, cv2.COLOR_BGR2RGB)) for f in frames_bgr]
         content = [{"type": "image", "image": im} for im in images]
         content.append({"type": "text", "text": prompt})
+        messages = [{"role": "user", "content": content}]
+        if self.cand.system_prompt:
+            system = [{"type": "text", "text": self.cand.system_prompt}]
+            messages.insert(0, {"role": "system", "content": system})
         return self.processor.apply_chat_template(
-            [{"role": "user", "content": content}],
+            messages,
             add_generation_prompt=True,
             tokenize=True,
             return_dict=True,
@@ -107,11 +114,12 @@ class HfVerifier:
         ).to(self.device)
 
     def score(self, frames_bgr: list[np.ndarray]) -> float:
-        """P("yes") vs P("no") for the first answer token."""
+        """P(positive answer) vs P(negative answers) for the first answer token (default yes/no;
+        TAU-R1: label C vs A, B, D)."""
         torch = self._torch
         if not frames_bgr:
             return 0.0
-        inputs = self._inputs(frames_bgr, self.cfg.prompt)
+        inputs = self._inputs(frames_bgr, self.cand.prompt or self.cfg.prompt)
         with torch.inference_mode():
             logits = self.model(**inputs).logits[0, -1].float()
         lse_yes = torch.logsumexp(logits[self.yes], 0)

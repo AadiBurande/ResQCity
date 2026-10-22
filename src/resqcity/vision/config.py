@@ -110,6 +110,7 @@ class HeuristicsConfig(ConfigModel):
 class ClipClassifierConfig(ConfigModel):
     backbone: str
     siglip2: HfWeights | None = None
+    vjepa2: HfWeights | None = None
     text_prompts: list[str] = Field(default_factory=list)
     labels: Literal["mil", "interval"] = "mil"
     sources: list[str] = Field(default_factory=lambda: ["ucf_crime"], min_length=1)
@@ -132,6 +133,11 @@ class ClipClassifierConfig(ConfigModel):
 
 class VerifierCandidate(HfWeights):
     quantization: Literal["4bit", "8bit", "none"]
+    remote_code: bool = False  # model code shipped with the weights (trust_remote_code)
+    system_prompt: str | None = None  # candidate-specific prompts (default: verifier.prompt)
+    prompt: str | None = None
+    positive: list[str] = Field(default_factory=lambda: ["yes", "Yes", " yes", " Yes", "YES"])
+    negative: list[str] = Field(default_factory=lambda: ["no", "No", " no", " No", "NO"])
 
 
 class VerifierConfig(ConfigModel):
