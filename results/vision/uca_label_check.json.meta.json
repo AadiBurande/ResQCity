@@ -1,0 +1,27 @@
+{
+  "file": "results/vision/uca_label_check.json",
+  "generated_at_utc": "2026-10-22T13:20:43+00:00",
+  "command": "uca.py",
+  "synthetic": false,
+  "git": {
+    "commit": "304efadcc76df983c7b2b2a8b3abc6e7a515b192",
+    "dirty": false
+  },
+  "configs_sha256": {
+    "configs/vision.yaml": "75014517637ceafd950991d7316f236a35f9da688fdd399eb27d84b3e73056d0"
+  },
+  "seeds": {},
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  }
+}

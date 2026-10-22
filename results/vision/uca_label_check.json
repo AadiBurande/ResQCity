@@ -1,0 +1,19 @@
+{
+  "source": "UCA Xuange923/Surveillance-Video-Understanding@e478cb5b2277 (UCA: Apache-2.0, academic research only)",
+  "rule": "earliest sentence matching datasets.uca.accident_keywords",
+  "uca_sentences": 20507,
+  "uca_roadaccident_videos": 148,
+  "roadaccident_videos_with_interval": 143,
+  "check_against_official_onsets": {
+    "official_onset_videos": 23,
+    "with_uca_interval": 23,
+    "uca_interval_overlaps_official": 23,
+    "uca_interval_contains_official_onset": 19,
+    "uca_start_minus_official_onset_s": {
+      "median": -1.833333333333333,
+      "q25": -3.85,
+      "q75": -0.4166666666666665,
+      "within_3s": 15
+    }
+  }
+}
