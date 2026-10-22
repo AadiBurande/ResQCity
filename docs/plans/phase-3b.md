@@ -141,3 +141,28 @@ Acceptance: all endpoints reported with intervals, tests and lint pass, `make vi
 v5, and `research-auditor` reviews before closing. Stop rule: if stage A and B do not improve
 validation J over v4, skip further tuning, run the test once with the best validation candidate,
 and move to phase 4.
+
+## Amendment 1 (2026-10-22, before ANY v5 result — validation or test — was computed)
+Requested by the user ("research good vision models for detecting accidents"); resources checked
+on 2026-10-22 at the source.
+- **Stage A, third backbone: V-JEPA 2 ViT-L, SSv2 head** ([HF](https://huggingface.co/facebook/vjepa2-vitl-fpc16-256-ssv2),
+  MIT, 375M params, 1.5 GB). A video model trained for motion (Something-Something-v2); clip
+  embedding = its attentive-pooler output (1024-d) for 16 frames at 256 px per window. Adds the
+  same four label/data variants (`v5_vjepa_*`), so stage A has 12 candidates.
+- **Stage B, two more verifiers:**
+  - TAU-R1-Classifier ([HF](https://huggingface.co/yl4300/TAU-R1-Classifier), MIT; Qwen3-VL-2B
+    fine-tuned on 342 roundabout-camera clips from Carmel, Indiana; arXiv 2603.19098). Not trained
+    on UCF-Crime, ACCIDENT, TAD or CADP. Used with its own published 4-class prompt
+    (github.com/siri-rouser/TAU-R1, `category_ABC_sys_prompt_4cat`); score = P(label C, "near-collision
+    or collision") among the first-token labels A-D.
+  - Molmo2-4B ([HF](https://huggingface.co/allenai/Molmo2-4B), Apache-2.0; its model family is the
+    best zero-shot VLM in the ACCIDENT paper). Its remote code targets transformers 4.57.1; if it
+    cannot run on this laptop (separate environment allowed) within the latency limit, it is
+    excluded as infeasible, as for every stage-B candidate.
+- **Execution order:** stage C runs before stage B (the verifier threshold must be tuned on the
+  alarms of the final base detector); criteria unchanged.
+- **Checked and not used:** CrashChat (VideoLLaMA3, 193 GB of checkpoints, 7B class: does not fit
+  6 GB), SafePLUG (no weights released), TAU-R1 Summarizer (Qwen3-VL-8B), TABot (no weights found),
+  zero-shot pipelines built on cloud APIs (Gemini, Qwen3-VL-Plus: not offline), VideoMAE-v2
+  (CC BY-NC, remote code; same role as V-JEPA 2), community YOLO / VideoMAE "accident" fine-tunes
+  (unknown training data, possible overlap with evaluation videos).
