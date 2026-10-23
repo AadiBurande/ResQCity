@@ -183,3 +183,22 @@ fixed by validation; nothing below changes selection.
   footage and UA-DETRAC (both never-seen road CCTV), with E2 and E2b also reported separately.
 - **E3b (secondary): median delay on clips whose impact leaves at least the warm-up + 1 s of lead
   time**, because on earlier impacts the delay mostly measures the warm-up.
+
+## Amendment 3 (2026-10-23, after the first stage-B results on validation, before ANY holdout result)
+Observed on validation (post hoc, disclosed): zero-shot verifiers reject many real crashes; at the
+most permissive threshold Qwen3.5-2B keeps 44/69 and Qwen3-VL-2B 48/69 validation detections
+(the rule needs >= 90 %). Applies only if no original stage-B candidate passes.
+- **One fine-tuned verifier candidate, one attempt, no hyperparameter search.** Base
+  Qwen3-VL-2B-Instruct (fastest, best zero-shot retention); QLoRA: 4-bit NF4 base, LoRA rank 16,
+  alpha 32, dropout 0.05 on the language model's attention and MLP projections, vision encoder
+  frozen; learning rate 1e-4, 2 epochs, batch 1 with 8-step gradient accumulation, gradient
+  checkpointing, seed 20261023.
+- **Input identical to inference:** 8 anonymised frames over the 4 s before the alarm time, long
+  side 448, the pre-registered prompt; loss on the single answer token ("yes"/"no").
+- **Training data: TRAIN split only** (never validation, holdout or UA-DETRAC):
+  positives = end times uniform in [t* + 0.5 s, t* + 8 s] (ACCIDENT impact t*; UCF UCA interval
+  onset); negatives = end times before t* - 1 s, normal-video segments, and the deployed
+  stage-A/C detector's own false alarms on training videos (hard negatives); classes balanced
+  1:1 by sampling, at most 2 positives per clip.
+- **Selection:** exactly the stage-B rule on validation (>= 90 % detections kept, median latency
+  <= 3 s). If it fails, the deployed pipeline has no verifier.
