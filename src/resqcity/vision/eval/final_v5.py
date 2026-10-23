@@ -34,6 +34,7 @@ from resqcity.vision.datasets.annotations import FA_EVAL
 from resqcity.vision.eval.evaluate import add_scores, alarm_cfg, sha16
 from resqcity.vision.eval.metrics import (
     ACCIDENT_PRE_TOLERANCE_S,
+    BOOTSTRAP_SEED,
     DETECTION_GRACE_S,
     accident_alarm_summary,
     normal_road_summary,
@@ -95,8 +96,13 @@ def main(argv: list[str] | None = None) -> int:
         export(results, out, report, run, tag)
         configs = [CONFIG_DIR / "vision.yaml", SWEEPS / f"{run}.yaml"]
         extra = {"evaluation_version": 5, "export_only": True}
-        write_meta(results / "sim_inputs.yaml", configs=configs, synthetic=False, extra=extra)
-        write_meta(results / "deployed_detector.json", configs=configs, synthetic=False)
+        seeds = {"bootstrap": BOOTSTRAP_SEED}
+        write_meta(
+            results / "sim_inputs.yaml", configs=configs, synthetic=False, seeds=seeds, extra=extra
+        )
+        write_meta(
+            results / "deployed_detector.json", configs=configs, synthetic=False, extra=extra
+        )
         return 0
     th, k = b["operating_point"]["threshold"], b["operating_point"]["consecutive_windows"]
     cfg = run_config(run)
@@ -221,8 +227,9 @@ def main(argv: list[str] | None = None) -> int:
 def export(results, out, report: dict, run: str, tag: str) -> None:  # noqa: ANN001
     """``sim_inputs.yaml`` v5 (never-seen ACCIDENT estimates) and the deployed live detector.
 
-    The simulator's false-alarm model comes from ``exploratory.json`` (rate while armed plus the
-    cooldown, D-027 audit) when present; the per-camera-hour rates are kept for reference only.
+    When ``exploratory.json`` exists, its ``simulator_defaults`` (detection when the camera is
+    armed, false alarms per armed hour plus the cooldown; D-027 re-audit) lead the file and the
+    pre-registered estimates below them are kept for the record only.
     """
     p = report["accident_holdout"]
     road = report["road_false_alarms_pooled"] or p  # amendment 2: pooled never-seen road footage
@@ -230,17 +237,25 @@ def export(results, out, report: dict, run: str, tag: str) -> None:  # noqa: ANN
     explore = (
         json.loads(explore_path.read_text(encoding="utf-8")) if explore_path.exists() else None
     )
-    doc = {
+    regions = report["by_region"]
+    n_non_us = int(regions["non_us"]["onset_videos"])
+    n_all = n_non_us + int(regions["us"]["onset_videos"])
+    doc: dict[str, object] = {}
+    if explore is not None:
+        doc["simulator_defaults"] = explore["simulator_defaults"]
+    doc |= {
         "source": "measured: results/vision/v5 (detection on the ACCIDENT IID test clips; road "
         "false alarms on their pre-impact footage plus UA-DETRAC normal road CCTV; none used for "
         "training or selection; evaluation v5, protocol pre-registered before the holdout and "
         "amended after validation, amendment 2)",
         "evaluation_version": 5,
         "detection_rule": report["detection_rule"],
-        "caveat": "Public CCTV clips (mostly US, ~20 % elsewhere), trimmed around a crash; "
-        "detection is markedly lower on non-US clips. False alarms per camera-hour below are "
-        "capped by the 60 s cooldown and mix two very different sources (pre-impact footage vs "
-        "normal traffic); the simulator should use false_alarm_model. Not Pune cameras.",
+        "caveat": f"Public CCTV clips ({n_non_us}/{n_all} = {n_non_us / n_all:.1%} outside "
+        "the US), trimmed around a crash; detection is markedly lower on non-US clips. The "
+        "pre-registered fields below are kept for the record: the detection rate mostly reflects "
+        "clip trimming (a content-free alarm at the warm-up end scores higher) and the false "
+        "alarms per camera-hour are capped by the 60 s cooldown and mix two very different "
+        "sources. The simulator uses simulator_defaults. Not Pune cameras.",
         "synthetic": False,
         "deployed": report["deployed"],
         "onset_detected": int(p["onset_detected"]),
@@ -274,30 +289,26 @@ def export(results, out, report: dict, run: str, tag: str) -> None:  # noqa: ANN
     }
     if explore is not None:
         armed = explore["false_alarms_armed"]
-        ranges = explore["suggested_phase10_ranges"]
         doc["false_alarm_model"] = {
             "status": "exploratory re-expression of the final run (exploratory.json); not "
             "pre-registered",
             "definition": armed["definition"],
+            "default": "ua_detrac_normal_traffic",
             "cooldown_s": run_config(run).alarm.cooldown_s,
             "rate_per_armed_hour": {
                 src: {
                     "rate": _num(armed[src]["rate_per_armed_hour"]),
-                    "poisson_ci95": [_num(x) for x in armed[src]["poisson_ci95"]],
+                    "cluster_bootstrap_ci95": [
+                        _num(x) for x in armed[src]["cluster_bootstrap_ci95"]
+                    ],
                 }
-                for src in ("accident_pre_impact", "ua_detrac_normal_traffic", "pooled")
+                for src in ("accident_pre_impact", "ua_detrac_normal_traffic")
             },
+            "accident_pre_impact_reading": armed["accident_pre_impact_reading"],
         }
         doc["detection_rate_cluster_ci95"] = [
             _num(x) for x in explore["detection_clustered"]["cluster_bootstrap_ci95"]
         ]
-        doc["suggested_phase10_ranges"] = {
-            "detection_rate": [_num(x) for x in ranges["detection_rate"]],
-            "false_alarm_rate_per_armed_hour": [
-                _num(x) for x in ranges["false_alarm_rate_per_armed_hour"]
-            ],
-            "basis": f"{ranges['detection_rate_basis']}; {ranges['false_alarm_basis']}",
-        }
     (results / "sim_inputs.yaml").write_text(
         yaml.safe_dump(doc, sort_keys=False), encoding="utf-8", newline="\n"
     )

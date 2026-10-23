@@ -13,7 +13,8 @@ import time
 import pandas as pd
 import torch
 
-from resqcity.common.config import PROJECT_ROOT
+from resqcity.common.config import CONFIG_DIR, PROJECT_ROOT
+from resqcity.common.provenance import write_meta
 from resqcity.vision.config import load_vision_config
 from resqcity.vision.detect_track import YoloTracker
 from resqcity.vision.privacy import Anonymizer
@@ -55,6 +56,7 @@ record = {
     "video": row.video_id,
 }
 out.write_text(json.dumps(record, indent=2), encoding="utf-8", newline="\n")
+write_meta(out, configs=[CONFIG_DIR / "vision.yaml"], synthetic=False)
 print(
     f"RESULT {name}: load {load_s:.0f} s | latency median {sorted(lat)[1]:.2f} s | "
     f"peak VRAM {torch.cuda.max_memory_allocated() / 1e9:.2f} GB | p(crash) {p_crash:.3f} "
