@@ -136,10 +136,28 @@ class VerifierCandidate(HfWeights):
     remote_code: bool = False  # model code shipped with the weights (trust_remote_code)
     processor: HfWeights | None = None  # load the processor from another repo (default: repo)
     cpu_modules: list[str] = Field(default_factory=list)  # kept in system RAM (e.g. embeddings)
+    adapter: str | None = None  # LoRA adapter folder (project-relative), amendment 3
     system_prompt: str | None = None  # candidate-specific prompts (default: verifier.prompt)
     prompt: str | None = None
     positive: list[str] = Field(default_factory=lambda: ["yes", "Yes", " yes", " Yes", "YES"])
     negative: list[str] = Field(default_factory=lambda: ["no", "No", " no", " No", "NO"])
+
+
+class VerifierFinetune(ConfigModel):
+    name: str
+    base: str
+    lora_rank: int = Field(ge=1)
+    lora_alpha: int = Field(ge=1)
+    lora_dropout: float = Field(ge=0, lt=1)
+    target_modules: str
+    lr: float = Field(gt=0)
+    epochs: int = Field(ge=1)
+    grad_accum: int = Field(ge=1)
+    seed: int = Field(ge=0)
+    positive_span_s: tuple[float, float]
+    negative_margin_s: float = Field(ge=0)
+    max_positives_per_clip: int = Field(ge=1)
+    normal_negatives_per_video: int = Field(ge=1)
 
 
 class VerifierConfig(ConfigModel):
@@ -151,6 +169,7 @@ class VerifierConfig(ConfigModel):
     min_detection_retention: float = Field(gt=0, le=1)
     max_latency_s: float = Field(gt=0)
     thresholds: list[float] = Field(min_length=1)
+    finetune: VerifierFinetune | None = None
     candidates: dict[str, VerifierCandidate] = Field(min_length=1)
 
 

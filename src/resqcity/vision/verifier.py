@@ -108,6 +108,12 @@ class HfVerifier:
             device_map={**{m: "cpu" for m in cand.cpu_modules}, "": device},
             **remote,
         ).eval()
+        if cand.adapter:  # fine-tuned LoRA adapter (amendment 3)
+            from peft import PeftModel
+
+            from resqcity.common.config import PROJECT_ROOT
+
+            self.model = PeftModel.from_pretrained(self.model, PROJECT_ROOT / cand.adapter).eval()
         tok = self.processor.tokenizer
         self.yes = sorted({tok.encode(w, add_special_tokens=False)[0] for w in cand.positive})
         self.no = sorted({tok.encode(w, add_special_tokens=False)[0] for w in cand.negative})

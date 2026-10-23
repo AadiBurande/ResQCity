@@ -108,6 +108,22 @@ verifier:                      # phase 3b stage B (D-027): an offline VLM checks
   min_detection_retention: 0.9 # keep >= 90 % of validation detections (pre-registered)
   max_latency_s: 3.0           # median seconds per check on the RTX 4050 (pre-registered)
   thresholds: [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95]
+  # Amendment 3: one fine-tuned candidate, all settings fixed in advance (resqcity.vision.train_verifier)
+  finetune:
+    name: qwen3_vl_2b_ft
+    base: qwen3_vl_2b
+    lora_rank: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    target_modules: '.*language_model.*\.(q_proj|k_proj|v_proj|o_proj|gate_proj|up_proj|down_proj)'
+    lr: 1.0e-4
+    epochs: 2
+    grad_accum: 8
+    seed: 20261023
+    positive_span_s: [0.5, 8.0]   # positives: alarm-time end in [t* + 0.5, t* + 8]
+    negative_margin_s: 1.0        # negatives: end at least this long before t*
+    max_positives_per_clip: 2
+    normal_negatives_per_video: 4
   candidates:                  # 4-bit NF4 weights (fit in ~4.5 GB VRAM next to the detector)
     qwen3_5_2b: {repo: Qwen/Qwen3.5-2B, revision: 15852e8c16360a2fea060d615a32b45270f8a8fc, quantization: 4bit}
     qwen3_vl_2b: {repo: Qwen/Qwen3-VL-2B-Instruct, revision: 89644892e4d85e24eaac8bacfd4f463576704203, quantization: 4bit}
@@ -121,6 +137,7 @@ verifier:                      # phase 3b stage B (D-027): an offline VLM checks
     # (github.com/siri-rouser/TAU-R1, evaluation/QA_pair_database.py, category_ABC_sys_prompt_4cat);
     # score = P(C) among the first-token labels A-D.
     molmo2_4b: {repo: allenai/Molmo2-4B, revision: 042abfa7a38879a376cec03d949eff0aefaa0600, quantization: 4bit}  # native transformers molmo2 (its remote code targets transformers 4.57)
+    qwen3_vl_2b_ft: {repo: Qwen/Qwen3-VL-2B-Instruct, revision: 89644892e4d85e24eaac8bacfd4f463576704203, quantization: 4bit, adapter: data/models/verifier/qwen3_vl_2b_ft}
     tau_r1_classifier:
       repo: yl4300/TAU-R1-Classifier
       revision: f89be2811abc99ae1bb61e14af8c97b7dcbe6f52
