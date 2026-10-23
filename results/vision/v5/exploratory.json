@@ -1,0 +1,29 @@
+{
+  "status": "exploratory (not pre-registered), analyses of the final v5 run",
+  "warm_up_s": 6.0,
+  "lead_time": {
+    "with_lead_time": {
+      "clips": 281,
+      "detected": 81,
+      "clips_with_pre_impact_alarm": 143,
+      "detected_among_them": 0,
+      "clips_without_pre_impact_alarm": 138,
+      "detected_without_pre_impact_alarm": 81
+    },
+    "short_lead_time": {
+      "clips": 1239,
+      "detected": 844,
+      "clips_with_pre_impact_alarm": 37,
+      "detected_among_them": 0,
+      "clips_without_pre_impact_alarm": 1202,
+      "detected_without_pre_impact_alarm": 844
+    }
+  },
+  "pre_impact_alarm_timing": {
+    "pre_impact_alarms": 180,
+    "seconds_before_impact_median": 3.4299999999999997,
+    "share_within_3s": 0.42777777777777776,
+    "share_within_5s": 0.6611111111111111,
+    "share_over_10s": 0.08333333333333333
+  }
+}
