@@ -260,80 +260,108 @@ def accepts(scorer: "CachedVerifier", tau: float) -> Callable[[str, float], bool
     return lambda video_id, t: scorer(video_id, t) >= tau
 
 
-def stage_b(cache: Path, ann: pd.DataFrame, out: Path) -> dict[str, object]:
-    import torch
-
+def _stage_b_setup(cache: Path, ann: pd.DataFrame, out: Path) -> dict[str, object]:
     c = json.loads((out / "stage_c.json").read_text(encoding="utf-8"))
     run, tag = c["chosen_run"], c["detector_tag"]
     cfg = run_config(run)
-    v = cfg.verifier
-    if v is None:
+    if cfg.verifier is None:
         raise ValueError("configs/vision.yaml has no verifier section")
     summary, w, _ = validate(run, cache, ann, cfg, tag)
     th, k = summary["threshold"], summary["consecutive_windows"]
     videos = ann[ann["video_id"].isin(w["video_id"].unique())]
     base = summarise_alarms(per_video(w, videos, "combined_p", cfg, th, k))
-    need = math.ceil(v.min_detection_retention * base["onset_detected"])
-    rows = [
-        {
-            "verifier": "none",
-            "tau": None,
-            "onset_detected": base["onset_detected"],
-            "false_alarms": false_alarms(base),
-            "fa_reduction": 0.0,
-            "median_latency_s": 0.0,
-            "eligible": True,
-            "note": "",
-        }
-    ]
+    need = math.ceil(cfg.verifier.min_detection_retention * base["onset_detected"])
+    return {"run": run, "tag": tag, "cfg": cfg, "w": w, "videos": videos, "th": th, "k": k,
+            "base": base, "need": need}  # fmt: skip
+
+
+def score_candidate(name: str, cache: Path, ann: pd.DataFrame, out: Path) -> pd.DataFrame:
+    """One verifier candidate (run in its own process: GPU memory left behind by a previous
+    model would slow the next one down and corrupt its latency)."""
+    import torch
+
+    st = _stage_b_setup(cache, ann, out)
+    cfg, v, base = st["cfg"], st["cfg"].verifier, st["base"]
+    run, tag, w, videos, th, k = st["run"], st["tag"], st["w"], st["videos"], st["th"], st["k"]
     raw = load_base_config().paths.resolve("data_raw") / "vision"
-    for name in v.candidates:
+    rows: list[dict] = []
+    try:
+        scorer = CachedVerifier(
+            name, cfg, videos, raw, cache / "verifier" / name / f"{run}_{tag or 'coco'}.parquet"
+        )
+    except Exception as exc:  # infeasible on this machine/software: excluded, not judged
+        log.error("verifier %s excluded: %s: %s", name, type(exc).__name__, exc)
+        return pd.DataFrame(
+            [{"verifier": name, "eligible": False, "note": f"cannot run: {exc}"[:300]}]
+        )
+    for tau in v.thresholds:
         try:
-            scorer = CachedVerifier(
-                name, cfg, videos, raw, cache / "verifier" / name / f"{run}_{tag or 'coco'}.parquet"
+            s = summarise_alarms(
+                per_video(w, videos, "combined_p", cfg, th, k, verify=accepts(scorer, tau))
             )
-        except Exception as exc:  # infeasible on this machine/software: excluded, not judged
-            log.error("verifier %s excluded: %s: %s", name, type(exc).__name__, exc)
-            rows.append({"verifier": name, "eligible": False, "note": f"cannot run: {exc}"[:300]})
-            continue
-        for tau in v.thresholds:
-            try:
-                s = summarise_alarms(
-                    per_video(w, videos, "combined_p", cfg, th, k, verify=accepts(scorer, tau))
-                )
-            except TooSlowError as exc:
-                log.info("%s: %s; stopping", name, exc)
-                rows.append({"verifier": name, "eligible": False, "note": f"too slow ({exc})"})
-                break
-            fa = false_alarms(s)
-            rows.append(
+        except TooSlowError as exc:
+            log.info("%s: %s; stopping", name, exc)
+            rows.append({"verifier": name, "eligible": False, "note": f"too slow ({exc})"})
+            break
+        fa = false_alarms(s)
+        rows.append(
+            {
+                "verifier": name,
+                "tau": tau,
+                "onset_detected": s["onset_detected"],
+                "false_alarms": fa,
+                "fa_reduction": 1 - fa / max(1, false_alarms(base)),
+                "median_latency_s": None,
+                "eligible": s["onset_detected"] >= st["need"],
+                "note": "",
+            }
+        )
+        log.info("%s tau %.2f: detected %d, false alarms %d", name, tau, s["onset_detected"], fa)
+        if scorer.median_latency() > v.max_latency_s:  # same criterion, checked early
+            log.info("%s: median latency above %.1f s; stopping", name, v.max_latency_s)
+            break
+    scorer.save()
+    latency = scorer.median_latency()
+    for r in rows:
+        if r.get("tau") is not None:
+            r["median_latency_s"] = latency
+            if latency > v.max_latency_s:
+                r["eligible"], r["note"] = False, "too slow"
+    scorer.release()
+    torch.cuda.empty_cache()
+    return pd.DataFrame(rows)
+
+
+def stage_b(cache: Path, ann: pd.DataFrame, out: Path) -> dict[str, object]:
+    """Each candidate is scored in a fresh process (``--candidate``), then the rule is applied."""
+    import subprocess
+    import sys
+
+    st = _stage_b_setup(cache, ann, out)
+    v, base = st["cfg"].verifier, st["base"]
+    rows_dir = out / "stage_b_rows"
+    rows_dir.mkdir(exist_ok=True)
+    parts = [
+        pd.DataFrame(
+            [
                 {
-                    "verifier": name,
-                    "tau": tau,
-                    "onset_detected": s["onset_detected"],
-                    "false_alarms": fa,
-                    "fa_reduction": 1 - fa / max(1, false_alarms(base)),
-                    "median_latency_s": None,
-                    "eligible": s["onset_detected"] >= need,
+                    "verifier": "none",
+                    "tau": None,
+                    "onset_detected": base["onset_detected"],
+                    "false_alarms": false_alarms(base),
+                    "fa_reduction": 0.0,
+                    "median_latency_s": 0.0,
+                    "eligible": True,
                     "note": "",
                 }
-            )
-            log.info(
-                "%s tau %.2f: detected %d, false alarms %d", name, tau, s["onset_detected"], fa
-            )
-            if scorer.median_latency() > v.max_latency_s:  # same criterion, checked early
-                log.info("%s: median latency above %.1f s; stopping", name, v.max_latency_s)
-                break
-        scorer.save()
-        latency = scorer.median_latency()
-        for r in rows:
-            if r["verifier"] == name and r.get("tau") is not None:
-                r["median_latency_s"] = latency
-                if latency > v.max_latency_s:
-                    r["eligible"], r["note"] = False, "too slow"
-        scorer.release()
-        torch.cuda.empty_cache()
-    table = pd.DataFrame(rows)
+            ]
+        )
+    ]
+    for name in v.candidates:
+        cmd = [sys.executable, "-m", "resqcity.vision.eval.select_v5", "--stage", "b"]
+        subprocess.run([*cmd, "--candidate", name], check=True)
+        parts.append(pd.read_csv(rows_dir / f"{name}.csv"))
+    table = pd.concat(parts, ignore_index=True)
     table.to_csv(out / "stage_b.csv", index=False, lineterminator="\n")
     ok = table[table["eligible"].fillna(False).astype(bool)]
     best = ok.sort_values(
@@ -346,9 +374,9 @@ def stage_b(cache: Path, ann: pd.DataFrame, out: Path) -> dict[str, object]:
         "stage": "B",
         "rule": "largest validation false-alarm reduction keeping >= "
         f"{v.min_detection_retention:.0%} of detections, median latency <= {v.max_latency_s} s",
-        "chosen_run": run,
-        "detector_tag": tag,
-        "operating_point": {"threshold": th, "consecutive_windows": k},
+        "chosen_run": st["run"],
+        "detector_tag": st["tag"],
+        "operating_point": {"threshold": st["th"], "consecutive_windows": st["k"]},
         "verifier": chosen["verifier"],
         "tau": None if pd.isna(chosen["tau"]) else float(chosen["tau"]),
         "baseline_detections": int(base["onset_detected"]),
@@ -364,6 +392,7 @@ STAGES = {"a": stage_a, "c": stage_c, "b": stage_b}
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--stage", choices=sorted(STAGES), required=True)
+    parser.add_argument("--candidate", default=None, help="stage b: score one verifier only")
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     base = load_base_config()
@@ -371,6 +400,12 @@ def main(argv: list[str] | None = None) -> int:
     out = base.paths.resolve("results") / "vision" / "v5"
     out.mkdir(parents=True, exist_ok=True)
     ann = pd.read_parquet(cache / "annotations.parquet")
+    if args.candidate:
+        rows = score_candidate(args.candidate, cache, ann, out)
+        rows.to_csv(
+            out / "stage_b_rows" / f"{args.candidate}.csv", index=False, lineterminator="\n"
+        )
+        return 0
     choice = STAGES[args.stage](cache, ann, out)
     configs = [CONFIG_DIR / "vision.yaml", *(SWEEPS / f"{r}.yaml" for r in STAGE_A)]
     for f in (out / f"stage_{args.stage}.csv", out / f"stage_{args.stage}.json"):
