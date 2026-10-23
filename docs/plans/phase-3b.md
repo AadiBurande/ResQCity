@@ -1,6 +1,6 @@
 # Phase 3b — Detector upgrade with never-seen evaluation footage
 
-Status: DONE (final run 2026-10-23, results in D-027). Pre-registration written before any ACCIDENT
+Status: final run done 2026-10-23; awaiting the closing research audit (results and audit responses in D-027). Pre-registration written before any ACCIDENT
 clip or label was downloaded · Date: 2026-10-21 · Skill: `vision-eval` · Follows D-026
 
 ## 1. Decision: do this now, before phase 4

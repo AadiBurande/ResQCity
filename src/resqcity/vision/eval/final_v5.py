@@ -214,7 +214,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     export(results, out, report, run, tag)
     configs = [CONFIG_DIR / "vision.yaml", SWEEPS / f"{run}.yaml"]
-    for f in (out / "report.json", out / "per_clip.csv", results / "sim_inputs.yaml"):
+    outputs = ("report.json", "per_clip.csv", "per_sequence_ua_detrac.csv")
+    for f in (*(out / n for n in outputs), results / "sim_inputs.yaml"):
         if not f.exists():
             continue
         write_meta(f, configs=configs, synthetic=False, extra={"evaluation_version": 5})

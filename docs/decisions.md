@@ -533,7 +533,9 @@ were written AFTER seeing validation results (disclosed in each). All numbers be
    0.30 × 4 windows. ACCIDENT training data raised J for every backbone and label type. UCA
    interval labels were below MIL for MobileNet and V-JEPA 2; for SigLIP2 they tied (0.350, UCF
    only) or were marginally higher (0.460 vs 0.450, UCF + ACCIDENT). With 111 validation clips,
-   differences of a few hundredths are indicative only.
+   differences of a few hundredths are indicative only. Three UCF-only runs (MobileNet MIL,
+   SigLIP2 MIL, SigLIP2 intervals) reach the same J, 56/111 detections and false-positive video
+   rate, so J does not separate them; the SigLIP2 UCF-only "tie" says nothing about label type.
 3. **Stage C (run before B, criteria unchanged):** COCO and UVH-26 (Indian vehicle classes) tie
    at J 0.548; COCO kept by the tie rule. The Indian detector made no measurable difference here.
 4. **Stage B (verifier):** zero-shot Qwen3.5-2B and Qwen3-VL-2B cannot keep 90 % of validation
@@ -542,16 +544,22 @@ were written AFTER seeing validation results (disclosed in each). All numbers be
    **TAU-R1-Classifier** (traffic-camera fine-tune) is chosen at τ = 0.2: keeps 63/69, false
    alarms 13 → 10 (0.48 s). Amendment 3's fine-tuned Qwen3-VL-2B (1,108 train-split examples,
    one attempt) passes but is weaker (64/69, 13 → 11, 0.58 s). **Deviation:** amendment 3 was to
-   apply only if no original candidate passed; TAU-R1 did pass, yet the fine-tuned candidate was
-   trained and scored anyway. It did not change the choice (TAU-R1 wins by the rule either way).
-   **Measurement fix:** in the first stage-B run all candidates were loaded one after another in
-   one process, and leftover GPU memory slowed the later ones (fine-tuned Qwen3-VL 10.2 s there
-   vs 0.40 s alone, `verifier_smoke/qwen3_vl_2b_ft.json`), so every candidate was re-scored in its
-   own process before the choice. The first run is kept, unused, in
-   `stage_b_first_run_contaminated/`.
+   apply only if no original candidate passed. When it was committed (12:11 IST), only the two
+   zero-shot Qwen models had validation results; TAU-R1, Molmo2 and Gemma 4 had not been scored.
+   The fine-tune was trained before they were; TAU-R1 then passed, so the condition was not met,
+   but the fine-tuned candidate stayed in the comparison. It did not change the choice (TAU-R1
+   wins by the rule either way). **Measurement fix:** in a later single-process run all
+   candidates were loaded one after another, and later ones were slowed, probably by GPU memory
+   left by earlier models (fine-tuned Qwen3-VL 10.2 s there vs 0.40 s alone,
+   `verifier_smoke/qwen3_vl_2b_ft.json`), so every candidate was re-scored in its own process
+   before the choice. That run and the timeline are in `stage_b_first_run_contaminated/`; the
+   earliest Qwen results that triggered amendment 3 survive only as the figures quoted in it.
 5. **Final run (once, ACCIDENT IID test + UA-DETRAC):**
    - Detection 925/1,520 = **0.61** (Wilson 0.58–0.63; bootstrap over 1,445 source videos
      0.584–0.631), median delay 2.8 s (v4: 0.26 on 23 UCF onsets). US clips 0.65, non-US 0.37.
+     **This rate mostly reflects how the clips are trimmed, not the detector** (re-audit, item
+     6): 542 of the 925 detections fire at 6.0 s, the first instant any alarm can fire, and a
+     content-free baseline that alarms at 6.0 s on every clip scores 1,052/1,520 = 0.69.
    - UCF test split 6/12 (v4 fold A 3/12). This split has been looked at in every evaluation
      (v1–v5; development-test set since D-025): a consistency check, not a clean estimate.
    - Road false alarms as pre-registered (per camera-hour after the warm-up): ACCIDENT pre-impact
@@ -561,30 +569,52 @@ were written AFTER seeing validation results (disclosed in each). All numbers be
      and the pooled figure mixes two very different sources. See item 6 for corrected units.
    - ACCIDENT temporal score T = 0.201 / 0.364 / 0.548 (σ 0.5 / 1 / 2 s). A constant guess (the
      median impact time of the train/val clips, 4.375 s) scores 0.194 / 0.369 / 0.604: **the
-     detector does not localise the impact better than a constant**, because the clips are
-     trimmed so the impact always comes early. No comparison with the paper's VLMs is claimed.
+     detector does not localise the impact better than a constant**: most clips are trimmed so
+     the impact comes early (holdout t* quartiles 3.3 / 4.8 / 6.9 s, 95th percentile 13.1 s).
+     No comparison with the paper's VLMs is claimed.
    - Verifier: 1,295 checks, median 0.54 s.
-6. **Exploratory (not pre-registered, `exploratory.json`):** every final-run alarm was
-   reconstructed and matched to `per_clip.csv` and `per_sequence_ua_detrac.csv` before analysis.
-   (The final run saved its verifier cache before scoring UA-DETRAC, so those 61 calls were
-   re-scored with the same verifier, using no labels; every per-sequence count matched. The
-   save order is fixed in `final_v5.py`.)
+6. **Exploratory (not pre-registered, `exploratory.json`; every alarm in `alarms_final.csv`):**
+   every final-run alarm was reconstructed and matched to `per_clip.csv` (counts, detection and
+   detection time) and `per_sequence_ua_detrac.csv` (counts; the final run stored no times there)
+   before analysis. The final run saved its verifier cache before scoring UA-DETRAC, so those 61
+   calls were re-scored with the same verifier, using no labels; every per-sequence count
+   matched. The save order is fixed in `final_v5.py`.
+   - **Clip-start firing** (found by the re-audit). The first alarm can fire at 6.0 s (3 s window
+     + 3 strides). 542 of 925 detections and 157 of 180 pre-impact alarms (87 %) fire at exactly
+     that instant. Detection therefore tracks the impact time: 0.58 / 0.74 / 0.78 for t* in
+     (0, 3] / (3, 5] / (5, 7] s, but 0.35 / 0.29 / 0.15 for (7, 9] / (9, 15] / above 15 s. A
+     content-free alarm at 6.0 s on every clip at least 6 s long would score 0.69 (US 0.72,
+     non-US 0.53; 103 clips are shorter than 6 s); it would of course alarm on every normal
+     camera too.
    - A pre-impact alarm hides the counted detection by construction (60 s cooldown): on the 281
      clips with enough lead time, 0 of 143 clips with such an alarm count as detected, against
-     81 of 138 without.
-   - Timing: 43 % of pre-impact alarms fire within 3 s of the impact and 66 % within 5 s (median
-     3.4 s), but a uniform hazard over each clip's short armed interval would give 67 % and
-     85 %. So there is **no evidence that these alarms anticipate the crash**; the earlier
-     reading ("mostly early alarms on an unfolding crash") is withdrawn.
-   - Rates per ARMED hour (warm-up and cooldowns excluded): ACCIDENT pre-impact 792/h (681–917),
-     UA-DETRAC normal traffic **55/h (41–73)**, pooled 203/h. Pre-impact footage alarms ~14× more
-     often than normal traffic, so it is not a stand-in for normal traffic.
+     81 of 138 without. **Detection when the camera is armed at the impact** (lead time and no
+     earlier alarm) is 81/138 = 0.59 (Wilson 0.50–0.67), non-US 11/31 = 0.35, median delay
+     2.9 s. This is the closest estimate to a live camera, where there is no clip start.
+   - Timing of pre-impact alarms: 43 % within 3 s of the impact and 66 % within 5 s, against
+     67 % and 85 % under a uniform alarm-time null over each clip's armed interval. The alarms
+     come EARLY (most at the first instant), not near the impact: there is no evidence that they
+     anticipate the crash, and the earlier reading is withdrawn.
+   - Rates per ARMED hour (warm-up and cooldowns excluded; clustered bootstrap by clip /
+     sequence): UA-DETRAC normal traffic **55/h (39–77)**; 45 of 100 sequences alarm, 5 more than
+     once, and 16 at the first instant, so some cameras trigger persistently. The ACCIDENT
+     pre-impact figure (792/h) is not a hazard rate: it is about half of the 365 clips with
+     pre-impact footage alarming at their first instant, spread over very short armed time. A
+     camera that alarmed at every opportunity would give 60 alarms per camera-hour with the
+     cooldown; the detector's long-run rate in normal traffic is 29.
 7. **For phase 4 onwards:** `sim_inputs.yaml` (v5, re-exported with `final_v5 --export-only`, no
-   labels read) keeps the pre-registered fields and adds `false_alarm_model`: Poisson alarms at
-   λ per armed hour, then a 60 s cooldown. Defaults for the simulator: **false alarms λ = 55 per
-   armed camera-hour (UA-DETRAC, normal traffic)**; detection 0.61 with delay 2.8 s. Phase 10
-   sensitivity ranges (`suggested_phase10_ranges`): λ 41–917 per armed hour (UA-DETRAC lower
-   bound to ACCIDENT pre-impact upper bound) and detection 0.30–0.63 (non-US Wilson lower bound
-   to overall Wilson upper bound); Pune is outside the US, so the non-US 0.37 is a pre-specified
-   pessimistic scenario. These replace the earlier, untraceable "36–433/h, 0.29–0.70". Fusion
-   uses these rates as likelihoods, not the window confidence.
+   labels read) now starts with `simulator_defaults` (exploratory, from `exploratory.json`);
+   the pre-registered fields below it are kept for the record only:
+   - detection probability when the camera is armed **0.59** (0.50–0.67), median delay 2.9 s;
+     masking by the cooldown is produced by the simulator's own false-alarm process;
+   - false alarms **λ = 55 per armed camera-hour** (UA-DETRAC), then a 60 s cooldown;
+   - phase 10 ranges: detection 0.24–0.67 (lower: lead-time clips counting masked crashes as
+     misses; upper: armed clips), λ 39–77 per armed hour, a stress case of one alarm per
+     cooldown (60 per camera-hour), and a varied share of persistently triggering cameras.
+     Pune is outside the US and the non-US armed estimate is 0.35 on 31 clips, so a low
+     detection scenario is part of the base design, not an afterthought.
+   These replace the earlier "0.61 / 127 per hour" inputs and the "36–433/h, 0.29–0.70" ranges.
+   Fusion uses these rates as likelihoods, not the window confidence.
+   **Overall reading:** on short trimmed public clips the detector is only modestly better than
+   a content-free alarm, and in normal traffic it alarms about every two minutes per camera.
+   The simulator results for CCTV-triggered policies must be read with that in mind.
