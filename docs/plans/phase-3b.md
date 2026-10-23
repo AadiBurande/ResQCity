@@ -1,7 +1,7 @@
 # Phase 3b — Detector upgrade with never-seen evaluation footage
 
-Status: PLAN (draft pre-registration, written before any ACCIDENT clip or label was downloaded)
-· Date: 2026-10-21 · Skill: `vision-eval` · Follows D-026 · Awaiting user inputs (section 9)
+Status: DONE (final run 2026-10-23, results in D-027). Pre-registration written before any ACCIDENT
+clip or label was downloaded · Date: 2026-10-21 · Skill: `vision-eval` · Follows D-026
 
 ## 1. Decision: do this now, before phase 4
 Later phases cannot fix the detector. Fusion with 112 calls (phase 4) and confidence-aware dispatch

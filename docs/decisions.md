@@ -514,3 +514,48 @@ videos (chose "blur faces + plates only" and "no blurring at all") and a stronge
    - Fire hour profile flagged UNVERIFIED (item 2); privacy guard tightened and moved into
      `CameraPipeline` (item 4); Wilson upper bound corrected to 0.46; the million-plus severity
      figure is now extracted, not hand-computed.
+
+## D-027 Phase 3b: detector upgrade, evaluated once on never-seen footage  (2026-10-21…23)
+Plan and pre-registration: `docs/plans/phase-3b.md` (committed f7202d8 before any ACCIDENT data
+was downloaded; amendments 1–3 committed before any holdout result). All numbers below are from
+`results/vision/v5/` (`stage_a.csv`, `stage_c.csv`, `stage_b.csv`, `report.json`,
+`exploratory.json`) and `results/vision/uca_label_check.json`.
+1. **Data.** ACCIDENT (Picek et al., 2026): 2,027 real CCTV crash clips, official IID split; the
+   1,520 test clips were sealed (labels in a separate file, read once by the final run:
+   `holdout_access.log`). UCA timestamps gave training intervals for 143 UCF-Crime accident
+   videos. UA-DETRAC (100 sequences, 1.56 h of normal road CCTV) was added for false alarms
+   (amendment 2). A UCF normal video that became readable was excluded so the v1–v4 splits stay
+   identical; v4 reproduces bit-for-bit.
+2. **Stage A (validation):** 12 candidates (MobileNetV3 / SigLIP2 / V-JEPA 2 × MIL / UCA
+   intervals × UCF / UCF + ACCIDENT training). Chosen: **V-JEPA 2 + MIL + UCF + ACCIDENT**,
+   validation J 0.548 (best MobileNet 0.487, best SigLIP2 0.460); operating point 0.30 × 4
+   windows. ACCIDENT training data helped every backbone; **UCA interval labels did not help**
+   (below MIL for every backbone).
+3. **Stage C (run before B, criteria unchanged):** COCO and UVH-26 (Indian vehicle classes) tie
+   at J 0.548; COCO kept by the tie rule. The Indian detector made no measurable difference here.
+4. **Stage B (verifier):** zero-shot Qwen3.5-2B and Qwen3-VL-2B cannot keep 90 % of validation
+   detections (44 and 48 of 69 at the most permissive threshold); Gemma-4-E2B (3.45 s) and
+   Molmo2-4B (3.26 s) exceed the 3 s latency limit; HolmesVAU-2B cannot run on transformers 5.
+   **TAU-R1-Classifier** (traffic-camera fine-tune) is chosen at τ = 0.2: keeps 63/69, false
+   alarms 13 → 10. Amendment 3's fine-tuned Qwen3-VL-2B (1,108 train-split examples, one
+   attempt) passes but is weaker (64/69, 13 → 11). Measurement fix disclosed: candidates loaded
+   in one process slowed later ones through leftover GPU memory (10.2 s vs 0.41 s alone), so
+   every candidate was re-scored in its own process before the choice.
+5. **Final run (once, ACCIDENT IID test + UA-DETRAC):**
+   - Detection 925/1,520 = **0.61** (Wilson 0.58–0.63), median delay 2.8 s (v4: 0.26 on 23 UCF
+     onsets); UCF test split 6/12 (v4 fold A 3/12). US clips 0.65, non-US 0.37.
+   - Road false alarms: ACCIDENT pre-impact footage 180 in 0.42 h = 433/h (372–501); UA-DETRAC
+     normal traffic 50 in 1.39 h = **36/h (27–47)**; pooled (pre-registered export) 127/h (111–145).
+   - ACCIDENT temporal score T = 0.201 / 0.364 / 0.548 (σ 0.5 / 1 / 2 s), in the range of the
+     paper's best zero-shot 7B VLM; splits and settings differ, so this is not a leaderboard claim.
+   - Verifier: 1,295 checks, median 0.54 s.
+6. **Exploratory (not pre-registered):** 66 % of the pre-impact "false alarms" fire within 5 s
+   before the impact (median 3.4 s): mostly early alarms on a crash that is already unfolding.
+   They also hide the counted detection through the 60 s cooldown: on the 281 clips with enough
+   lead time, 0 of 143 clips with such an alarm count as detected, against 81 of 138 without.
+   So the pre-registered E1/E2 understate early detection on ACCIDENT and overstate false alarms
+   in normal traffic; UA-DETRAC's 36/h is the cleaner normal-traffic estimate.
+7. **For phase 4 onwards:** `sim_inputs.yaml` (v5) is the measured input: detection 0.61, delay
+   2.8 s, road false alarms 127/h pooled, with E2 = 433/h and E2b = 36/h also exported. Phase 10
+   varies false alarms over at least 36–433/h and detection over 0.29–0.70 (the exploratory
+   range). Fusion uses these rates as likelihoods, not the window confidence.
