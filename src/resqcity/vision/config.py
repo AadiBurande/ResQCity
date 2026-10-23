@@ -224,6 +224,14 @@ class UcaConfig(ConfigModel):
     accident_keywords: list[str] = Field(min_length=1)
 
 
+class UaDetracConfig(ConfigModel):
+    hf_repo: str
+    zips: list[str] = Field(min_length=1)
+    source_fps: float = Field(gt=0)
+    keep_every: int = Field(ge=1)
+    licence: str
+
+
 class DatasetsConfig(ConfigModel):
     cap_gb: float = Field(gt=0)
     split: SplitConfig
@@ -231,6 +239,7 @@ class DatasetsConfig(ConfigModel):
     cadp: CadpConfig
     accident: AccidentConfig
     uca: UcaConfig
+    ua_detrac: UaDetracConfig | None = None
     dfire: DFireConfig
 
 

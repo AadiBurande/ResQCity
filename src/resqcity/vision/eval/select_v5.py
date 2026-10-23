@@ -197,6 +197,7 @@ class CachedVerifier:
 
         self.cfg, self.raw, self.path = cfg, raw, path
         self.paths = dict(zip(videos["video_id"], videos["path"], strict=True))
+        self.fps = dict(zip(videos["video_id"], videos["fps"], strict=True))
         self.model = load_verifier(name, cfg.verifier)  # type: ignore[arg-type]
         d = cfg.detector
         self.anonymizer = Anonymizer(cfg.privacy, d.vehicle_classes, d.person_class)
@@ -213,7 +214,12 @@ class CachedVerifier:
         if key not in self.scores:
             self.tracker.reset()
             frames = clip_frames(
-                self.raw / self.paths[video_id], t, self.cfg.verifier, self.anonymizer, self.tracker
+                self.raw / self.paths[video_id],
+                t,
+                self.cfg.verifier,
+                self.anonymizer,
+                self.tracker,
+                fps=float(self.fps[video_id]),
             )
             t0 = time.perf_counter()
             p = self.model.score(frames)

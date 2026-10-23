@@ -24,6 +24,7 @@ from resqcity.vision.types import FramePacket
 
 log = logging.getLogger(__name__)
 DESCRIBE_TOKENS = 48
+IMAGES = {".jpg", ".jpeg", ".png"}
 
 
 def resize_long(image: np.ndarray, long_side: int) -> np.ndarray:
@@ -40,15 +41,25 @@ def clip_frames(
     cfg: VerifierConfig,
     anonymizer: Anonymizer | None = None,
     tracker: object | None = None,
+    fps: float | None = None,
 ) -> list[np.ndarray]:
-    """``cfg.frames`` BGR frames evenly spaced in [t_end - span_s, t_end] of a video file,
-    anonymised (``tracker`` supplies the vehicle/person boxes the anonymiser needs)."""
-    cap = cv2.VideoCapture(str(path))
+    """``cfg.frames`` BGR frames evenly spaced in [t_end - span_s, t_end] of a video file or of
+    a folder of frames (``fps`` = rate of the stored frames), anonymised (``tracker`` supplies
+    the vehicle/person boxes the anonymiser needs)."""
+    folder = (
+        sorted(p for p in path.iterdir() if p.suffix.lower() in IMAGES) if path.is_dir() else []
+    )
+    cap = None if path.is_dir() else cv2.VideoCapture(str(path))
     out = []
     try:
         for t in np.linspace(max(0.0, t_end - cfg.span_s), t_end, cfg.frames):
-            cap.set(cv2.CAP_PROP_POS_MSEC, float(t) * 1000.0)
-            ok, image = cap.read()
+            if cap is None:
+                i = min(len(folder) - 1, round(float(t) * (fps or 1.0)))
+                image = cv2.imread(str(folder[i])) if folder else None
+                ok = image is not None
+            else:
+                cap.set(cv2.CAP_PROP_POS_MSEC, float(t) * 1000.0)
+                ok, image = cap.read()
             if not ok:
                 continue
             if anonymizer is not None:
@@ -58,7 +69,8 @@ def clip_frames(
                 image = anonymizer.apply(image, tracks)
             out.append(resize_long(image, cfg.frame_long_side))
     finally:
-        cap.release()
+        if cap is not None:
+            cap.release()
     return out
 
 

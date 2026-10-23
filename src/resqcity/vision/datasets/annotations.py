@@ -213,6 +213,44 @@ def assign_splits(df: pd.DataFrame, cfg: SplitConfig) -> pd.Series:
     return split
 
 
+FA_EVAL = "fa_eval"  # split of evaluation-only normal road footage (UA-DETRAC, amendment 2)
+
+
+def detrac_records(root: Path, cfg: VisionConfig) -> pd.DataFrame:
+    """UA-DETRAC sequences (stored at source_fps / keep_every): normal road CCTV, split
+    ``fa_eval`` (never used for training or selection)."""
+    u = cfg.datasets.ua_detrac
+    base = root / "ua_detrac"
+    if u is None or not base.exists():
+        return pd.DataFrame(columns=[*COLUMNS, "split"])
+    fps = u.source_fps / u.keep_every
+    rows = []
+    for d in sorted(p for p in base.iterdir() if p.is_dir()):
+        n = sum(1 for p in d.iterdir() if p.suffix.lower() in IMAGE_SUFFIXES)
+        if n:
+            rows.append(
+                {
+                    **asdict(
+                        VideoRecord(
+                            video_id=f"ua_{d.name}",
+                            source="ua_detrac",
+                            path=d.relative_to(root).as_posix(),
+                            kind="frames",
+                            fps=fps,
+                            n_frames=n,
+                            duration_s=n / fps,
+                            label="normal",
+                            accident_onset_s=None,
+                            accident_offset_s=None,
+                            has_onset=False,
+                        )
+                    ),
+                    "split": FA_EVAL,
+                }
+            )
+    return pd.DataFrame(rows, columns=[*COLUMNS, "split"])
+
+
 def pre_v5(ann: pd.DataFrame) -> pd.DataFrame:
     """Videos within the scope of evaluations v1-v4 (keeps them reproducible after ACCIDENT was
     added: its validation clips share the split name ``val``)."""
@@ -232,6 +270,9 @@ def build_annotations(root: Path, cfg: VisionConfig) -> tuple[pd.DataFrame, pd.D
     if (root / "accident" / "metadata-real.csv").exists():
         acc, holdout = accident_records(root, cfg.datasets.accident)
         df = pd.concat([df, acc], ignore_index=True)
+    detrac = detrac_records(root, cfg)
+    if not detrac.empty:
+        df = pd.concat([df, detrac], ignore_index=True)
     return df.sort_values("video_id", ignore_index=True), holdout
 
 

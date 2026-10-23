@@ -198,6 +198,12 @@ datasets:
                         'ran over', 'run over', 'bump\w*', 'smash\w*', 'struck', 'slamm?\w*',
                         'rear-end\w*', 'flipped', 'accident', 'fell', 'fall', 'crush\w*', 'ran into',
                         'rammed', 'toppl\w*']
+  ua_detrac:                   # amendment 2 (D-027): normal road CCTV for false alarms (evaluation only)
+    hf_repo: abhineet123/ua_detrac
+    zips: [ua_detrac_training_set.zip, ua_detrac_test_set.zip]
+    source_fps: 25.0
+    keep_every: 5                # only the frames the 5 fps pipeline samples (frame 0, 5, 10, ...)
+    licence: "UA-DETRAC (Wen et al., 2020), HF mirror abhineet123/ua_detrac; research use (original terms non-commercial)"
   dfire:
     hf_repo: badsaarow/d-fire
     licence: "D-Fire (Venâncio et al., 2022), HF mirror badsaarow/d-fire; original gaiasd/DFireDataset"

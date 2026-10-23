@@ -139,3 +139,31 @@ def test_window_stream_reproduces_make_windows():
             got += stream.push(float(t), i)
         got += stream.finish()
         assert got == expected
+
+
+def test_ua_detrac_records_and_normal_road_false_alarms(tmp_path):
+    import cv2
+
+    from resqcity.vision.datasets.annotations import FA_EVAL, detrac_records
+    from resqcity.vision.eval.metrics import SECONDS_PER_HOUR, normal_road_summary
+
+    seq = tmp_path / "ua_detrac" / "detrac_1_MVI_20011"
+    seq.mkdir(parents=True)
+    for i in range(50):  # 50 stored frames at 25 / 5 = 5 fps -> 10 s
+        cv2.imwrite(str(seq / f"img{1 + 5 * i:05d}.jpg"), np.zeros((8, 8, 3), np.uint8))
+    rec = detrac_records(tmp_path, CFG)
+    assert rec.iloc[0][["fps", "duration_s", "split", "label", "kind"]].tolist() == [
+        5.0,
+        10.0,
+        FA_EVAL,
+        "normal",
+        "frames",
+    ]
+    assert rec.iloc[0]["video_id"] == "ua_detrac_1_MVI_20011"
+    w = pd.DataFrame(
+        {"video_id": "ua_detrac_1_MVI_20011", "end_s": [3.0, 4.0, 5.0, 9.0], "p": [0.9] * 4}
+    )
+    alarm = CFG.alarm.model_copy(update={"consecutive_windows": 2, "cooldown_s": 3.0})
+    row = normal_road_summary(w, rec, "p", alarm, 0.5, 3.0, 1.0).iloc[0]
+    assert row["road_false_alarms"] == 1  # at 4 s; after the cooldown only one window (9 s) is high
+    assert row["road_hours"] == (10.0 - 4.0) / SECONDS_PER_HOUR

@@ -304,6 +304,31 @@ def download_accident(cfg: VisionConfig, root: Path, budget: Budget) -> None:
     log.info("ACCIDENT: %d files present", len(wanted))
 
 
+def detrac_frame_index(name: str) -> int | None:
+    """1-based frame number of a UA-DETRAC jpg member (``.../img00001.jpg``), else None."""
+    stem = Path(name).stem
+    digits = "".join(ch for ch in stem if ch.isdigit())
+    return int(digits) if name.lower().endswith(".jpg") and digits else None
+
+
+def download_ua_detrac(cfg: VisionConfig, root: Path, budget: Budget) -> None:
+    """Only every ``keep_every``-th frame of each sequence (frames 0, 5, 10, ... 0-based), read
+    from the remote zips with range requests: exactly the frames the 5 fps pipeline samples."""
+    u = cfg.datasets.ua_detrac
+    if u is None:
+        raise ValueError("datasets.ua_detrac is not configured")
+    for zip_name in u.zips:
+        zf = remote_zip(f"https://huggingface.co/datasets/{u.hf_repo}/resolve/main/{zip_name}")
+        by_seq: dict[str, list[str]] = {}
+        for name in zf.namelist():
+            idx = detrac_frame_index(name)
+            if idx is not None and (idx - 1) % u.keep_every == 0 and "/" in name:
+                by_seq.setdefault(name.split("/")[0], []).append(name)
+        log.info("UA-DETRAC %s: %d sequences", zip_name, len(by_seq))
+        for seq, names in sorted(by_seq.items()):
+            extract_members(zf, sorted(names), root / "ua_detrac" / seq, budget)
+
+
 def download_uca(cfg: VisionConfig, root: Path, budget: Budget) -> None:
     u = cfg.datasets.uca
     for name in u.files:
@@ -317,6 +342,7 @@ DOWNLOADERS = {
     "dfire": download_dfire,
     "accident": download_accident,
     "uca": download_uca,
+    "ua_detrac": download_ua_detrac,
 }
 
 

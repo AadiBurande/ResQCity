@@ -189,7 +189,7 @@ def _ci(name: str, interval: tuple[float, float]) -> dict[str, float]:
     return {f"{name}_ci95_lo": interval[0], f"{name}_ci95_hi": interval[1]}
 
 
-def _rate_block(name: str, counts: pd.Series, hours: pd.Series) -> dict[str, float]:
+def rate_block(name: str, counts: pd.Series, hours: pd.Series) -> dict[str, float]:
     total_h = float(hours.sum())
     total = int(counts.sum())
     return {
@@ -247,6 +247,33 @@ def accident_alarm_summary(
     return pd.DataFrame(rows)
 
 
+def normal_road_summary(
+    windows: pd.DataFrame,
+    videos: pd.DataFrame,
+    score_col: str,
+    cfg: AlarmConfig,
+    threshold: float,
+    window_s: float,
+    stride_s: float,
+    verify: Callable[[str, float], bool] | None = None,
+) -> pd.DataFrame:
+    """Normal road CCTV without accidents (UA-DETRAC, amendment 2): every alarm is a false alarm;
+    footage counts after the warm-up (window_s + (k - 1) * stride_s)."""
+    warm_up = window_s + (cfg.consecutive_windows - 1) * stride_s
+    rows = []
+    for _, v in videos.iterrows():
+        w = windows[windows["video_id"] == v["video_id"]].sort_values("end_s")
+        alarms = _alarms(w, score_col, cfg, threshold, v["video_id"], verify)
+        rows.append(
+            {
+                "video_id": v["video_id"],
+                "road_false_alarms": len(alarms),
+                "road_hours": max(0.0, float(v["duration_s"]) - warm_up) / SECONDS_PER_HOUR,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
 def summarise_alarms(per_video: pd.DataFrame) -> dict[str, float]:
     """Headline metrics. ``onset_detection_rate`` (timing-checked) is the recall exported to the
     simulator; ``any_alarm_rate`` (accident videos without onsets) does NOT check timing."""
@@ -276,8 +303,8 @@ def summarise_alarms(per_video: pd.DataFrame) -> dict[str, float]:
         **_ci("any_alarm_rate", wilson_interval(int(weak["any_alarm"].sum()), len(weak))),
         "fp_video_rate": fpr,
         "youden_j": tpr - fpr if neg_videos and len(onset) else float("nan"),
-        **_rate_block("road", onset["road_false_alarms"], onset["road_hours"]),
-        **_rate_block("nonroad", normal["nonroad_false_alarms"], normal["nonroad_hours"]),
+        **rate_block("road", onset["road_false_alarms"], onset["road_hours"]),
+        **rate_block("nonroad", normal["nonroad_false_alarms"], normal["nonroad_hours"]),
     }
 
 

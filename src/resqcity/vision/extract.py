@@ -139,7 +139,7 @@ def detector_tag(name: str) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--sources", nargs="+", default=["ucf_crime", "accident"])
+    parser.add_argument("--sources", nargs="+", default=["ucf_crime", "accident", "ua_detrac"])
     parser.add_argument(
         "--splits", nargs="*", default=None, help="only these splits (e.g. train val first)"
     )

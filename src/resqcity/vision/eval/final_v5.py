@@ -12,6 +12,9 @@ Endpoints (pre-registered): E1 detection rate (Wilson 95 % CI), E2 road false al
 camera-hour (Poisson and clip-clustered bootstrap CIs), E3 median detection delay; the
 ACCIDENT temporal score T (sigma = 0.5, 1, 2 s; predicted impact = centre of the highest-scoring
 window); secondary: US vs non-US clips, the UCF-Crime test split (v4 rule), and verifier calls.
+Amendment 2: E2b false alarms on never-seen normal road CCTV (UA-DETRAC, split ``fa_eval``), the
+pooled road false-alarm rate (exported to the simulator) and E3b, the delay on clips with at least
+the warm-up + 1 s of lead time.
 Outputs ``results/vision/v5/`` (report.json, per_clip.csv, stacker.json) and re-exports
 ``results/vision/sim_inputs.yaml`` and ``results/vision/deployed_detector.json``.
 """
@@ -27,11 +30,14 @@ import yaml
 from resqcity.common.config import CONFIG_DIR, PROJECT_ROOT, load_base_config
 from resqcity.common.provenance import write_meta
 from resqcity.vision.datasets.accident import load_holdout_labels
+from resqcity.vision.datasets.annotations import FA_EVAL
 from resqcity.vision.eval.evaluate import add_scores, alarm_cfg, sha16
 from resqcity.vision.eval.metrics import (
     ACCIDENT_PRE_TOLERANCE_S,
     DETECTION_GRACE_S,
     accident_alarm_summary,
+    normal_road_summary,
+    rate_block,
     summarise_alarms,
 )
 from resqcity.vision.eval.select_v5 import (
@@ -91,13 +97,11 @@ def main(argv: list[str] | None = None) -> int:
     # 2) score the holdout clips (no labels involved); runs trained with --no-holdout never saw
     #    them, so they are scored here from cached features with the saved head
     windows = pd.read_parquet(cache / f"windows_{run}.parquet")
+    model_dir = PROJECT_ROOT / "data" / "models" / "clip" / run
     holdout = windows[windows["split"].eq("holdout")]
     if holdout.empty:
         holdout = score_videos(
-            PROJECT_ROOT / "data" / "models" / "clip" / run,
-            cfg,
-            cache,
-            ann[ann["split"].eq("holdout")].reset_index(drop=True),
+            model_dir, cfg, cache, ann[ann["split"].eq("holdout")].reset_index(drop=True)
         )
     w = add_scores(holdout, cache, tag)
     w["clf_logit"] = logit(w["clf_p"])
@@ -112,12 +116,13 @@ def main(argv: list[str] | None = None) -> int:
         ),
         on="video_id",
     )
+    detrac = ann[ann["split"].eq(FA_EVAL)].reset_index(drop=True)
     verify, scorer = None, None
     if b["verifier"] != "none":
         scorer = CachedVerifier(
             b["verifier"],
             cfg,
-            videos,
+            pd.concat([videos, detrac], ignore_index=True),
             base.paths.resolve("data_raw") / "vision",
             cache / "verifier" / b["verifier"] / f"{run}_{tag or 'coco'}_holdout.parquet",
         )
@@ -133,6 +138,21 @@ def main(argv: list[str] | None = None) -> int:
     pv.to_csv(out / "per_clip.csv", index=False, lineterminator="\n")
 
     primary = summarise_alarms(pv)
+    warm_up = cc.window_s + (k - 1) * cc.stride_s
+    lead_ok = pv["accident_onset_s"] - ACCIDENT_PRE_TOLERANCE_S >= warm_up + 1.0
+    e3b = pv.loc[lead_ok & pv["detected"].astype(bool), "delay_s"].astype(float)
+    e2b, pooled = None, None
+    if not detrac.empty:
+        wd = add_scores(score_videos(model_dir, cfg, cache, detrac), cache, tag)
+        wd["clf_logit"] = logit(wd["clf_p"])
+        wd["combined_p"] = stacker.proba(wd)
+        nd = normal_road_summary(
+            wd, detrac, "combined_p", alarm_cfg(cfg, k), th, cc.window_s, cc.stride_s, verify
+        )
+        nd.to_csv(out / "per_sequence_ua_detrac.csv", index=False, lineterminator="\n")
+        e2b = rate_block("road", nd["road_false_alarms"], nd["road_hours"])
+        both = pd.concat([pv[["road_false_alarms", "road_hours"]], nd], ignore_index=True)
+        pooled = rate_block("road", both["road_false_alarms"], both["road_hours"])
     truth, pred = pv["accident_onset_s"].to_numpy(float), pv["pred_impact_s"].to_numpy(float)
     ucf_test = ann[ann["source"].eq("ucf_crime") & ann["split"].eq("test")]
     wu = add_scores(windows[windows["video_id"].isin(ucf_test["video_id"])], cache, tag)
@@ -158,6 +178,13 @@ def main(argv: list[str] | None = None) -> int:
             "non_us": summarise_alarms(pv[~pv["us"]]),
         },
         "ucf_test_split_v4_rule_no_verifier": ucf,
+        "e2b_ua_detrac_normal_road": e2b,
+        "road_false_alarms_pooled": pooled,
+        "e3b_delay_with_lead_time": {
+            "clips_with_lead_time": int(lead_ok.sum()),
+            "detected_with_lead_time": len(e3b),
+            "delay_median_s": float(e3b.median()) if len(e3b) else None,
+        },
         "verifier_calls": None if scorer is None else len(scorer.scores),
         "verifier_median_latency_s": None if scorer is None else scorer.median_latency(),
     }
@@ -167,6 +194,8 @@ def main(argv: list[str] | None = None) -> int:
     export(results, out, report, run, tag)
     configs = [CONFIG_DIR / "vision.yaml", SWEEPS / f"{run}.yaml"]
     for f in (out / "report.json", out / "per_clip.csv", results / "sim_inputs.yaml"):
+        if not f.exists():
+            continue
         write_meta(f, configs=configs, synthetic=False, extra={"evaluation_version": 5})
     write_meta(results / "deployed_detector.json", configs=configs, synthetic=False)
     print(json.dumps({k: report[k] for k in ("deployed", "accident_temporal_score")}, indent=1))
@@ -177,6 +206,7 @@ def main(argv: list[str] | None = None) -> int:
 def export(results, out, report: dict, run: str, tag: str) -> None:  # noqa: ANN001
     """``sim_inputs.yaml`` v5 (never-seen ACCIDENT estimates) and the deployed live detector."""
     p = report["accident_holdout"]
+    road = report["road_false_alarms_pooled"] or p  # amendment 2: pooled never-seen road footage
     doc = {
         "source": "measured: results/vision/v5 (ACCIDENT IID test clips, never used for "
         "training or selection; evaluation v5, pre-registered)",
@@ -195,17 +225,25 @@ def export(results, out, report: dict, run: str, tag: str) -> None:  # noqa: ANN
         ],
         "n_delays": int(p["n_delays"]),
         "delay_median_s": _num(p["delay_median_s"]),
-        "road_false_alarms": int(p["road_false_alarms"]),
-        "road_hours": _num(p["road_hours"]),
-        "road_false_alarms_per_hour": _num(p["road_false_alarms_per_hour"]),
+        "road_false_alarms": int(road["road_false_alarms"]),
+        "road_hours": _num(road["road_hours"]),
+        "road_false_alarms_per_hour": _num(road["road_false_alarms_per_hour"]),
         "road_fa_poisson_ci95": [
-            _num(p["road_fa_poisson_ci95_lo"]),
-            _num(p["road_fa_poisson_ci95_hi"]),
+            _num(road["road_fa_poisson_ci95_lo"]),
+            _num(road["road_fa_poisson_ci95_hi"]),
         ],
         "road_fa_cluster_ci95": [
-            _num(p["road_fa_cluster_ci95_lo"]),
-            _num(p["road_fa_cluster_ci95_hi"]),
+            _num(road["road_fa_cluster_ci95_lo"]),
+            _num(road["road_fa_cluster_ci95_hi"]),
         ],
+        "road_fa_sources": "ACCIDENT pre-impact footage + UA-DETRAC normal road CCTV (amendment 2)"
+        if report["road_false_alarms_pooled"]
+        else "ACCIDENT pre-impact footage",
+        "road_fa_accident_preimpact_per_hour": _num(p["road_false_alarms_per_hour"]),
+        "road_fa_ua_detrac_per_hour": _num(
+            (report["e2b_ua_detrac_normal_road"] or {}).get("road_false_alarms_per_hour")
+        ),
+        "delay_median_with_lead_time_s": report["e3b_delay_with_lead_time"]["delay_median_s"],
     }
     (results / "sim_inputs.yaml").write_text(
         yaml.safe_dump(doc, sort_keys=False), encoding="utf-8", newline="\n"
