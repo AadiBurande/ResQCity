@@ -379,10 +379,34 @@ def clustered_detection(pc: pd.DataFrame) -> dict[str, object]:
     }
 
 
+def chance_detection(rate_per_hour: float) -> float:
+    """P(an armed camera alarming as a Poisson process at ``rate_per_hour`` fires at least once
+    in the detection interval [t* - 1 s, t* + grace]) - detection by chance alone."""
+    window_s = ACCIDENT_PRE_TOLERANCE_S + DETECTION_GRACE_S
+    return 1.0 - math.exp(-rate_per_hour * window_s / SECONDS_PER_HOUR)
+
+
+def chance_levels(units: pd.DataFrame, rates: dict) -> dict[str, object]:
+    """Chance detection for the armed-camera estimate (closing audit, D-027)."""
+    ua = rates["ua_detrac_normal_traffic"]
+    acc = units[units["source"].eq("accident_pre_impact")]
+    later = int(acc["alarms"].sum() - acc["alarm_at_warm_up"].sum())
+    later_rate = later / (float(acc["armed_s"].sum()) / SECONDS_PER_HOUR)
+    return {
+        "definition": "P(>= 1 Poisson alarm in the "
+        f"{ACCIDENT_PRE_TOLERANCE_S + DETECTION_GRACE_S:g} s detection interval)",
+        "at_ua_detrac_rate": chance_detection(ua["rate_per_armed_hour"]),
+        "at_ua_detrac_cluster_upper": chance_detection(ua["cluster_bootstrap_ci95"][1]),
+        "accident_pre_impact_rate_after_first_instant_per_hour": later_rate,
+        "at_accident_pre_impact_rate_after_first_instant": chance_detection(later_rate),
+    }
+
+
 def simulator_defaults(clip: dict, rates: dict, cooldown: float) -> dict[str, object]:
     armed = clip["detection_when_armed"]
     lead = clip["detection_with_lead_time_incl_masking"]
     ua = rates["ua_detrac_normal_traffic"]
+    low = min(lead["wilson_ci95"][0], armed["non_us"]["wilson_ci95"][0])
     return {
         "status": "exploratory (not pre-registered); replaces the pre-registered ACCIDENT "
         "detection rate, which mostly reflects clip trimming (content-free baseline above it)",
@@ -397,9 +421,11 @@ def simulator_defaults(clip: dict, rates: dict, cooldown: float) -> dict[str, ob
         "false_alarm_rate_ci95": ua["cluster_bootstrap_ci95"],
         "cooldown_s": cooldown,
         "phase10_ranges": {
-            "detection_probability": [lead["wilson_ci95"][0], armed["wilson_ci95"][1]],
-            "detection_basis": "lower: lead-time clips counting masked crashes as misses "
-            f"({lead['detected']}/{lead['clips']}, Wilson low); upper: armed clips (Wilson high)",
+            "detection_probability": [low, armed["wilson_ci95"][1]],
+            "detection_basis": "lower: the lower of the Wilson low of lead-time clips counting "
+            f"masked crashes as misses ({lead['detected']}/{lead['clips']}) and of non-US armed "
+            f"clips ({armed['non_us']['detected']}/{armed['non_us']['clips']}); upper: armed "
+            "clips (Wilson high)",
             "false_alarm_rate_per_armed_hour": ua["cluster_bootstrap_ci95"],
             "false_alarm_basis": "UA-DETRAC sequence-clustered bootstrap interval",
             "false_alarm_stress_per_camera_hour": rates["always_alarm_ceiling_per_camera_hour"],
@@ -434,6 +460,7 @@ def main(argv: list[str] | None = None) -> int:
         "warm_up_s": warm_up,
         "lead_time": lead_time_breakdown(pc, warm_up),
         "clip_start": clip,
+        "chance_detection_when_armed": chance_levels(units, rates),
         "pre_impact_alarm_timing": timing_vs_uniform_null(pc, alarms, warm_up),
         "false_alarms_armed": rates,
         "temporal_constant_guess": constant_guess_score(pc),

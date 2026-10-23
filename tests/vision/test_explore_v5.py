@@ -11,6 +11,7 @@ import yaml
 from resqcity.vision.eval import final_v5
 from resqcity.vision.eval.explore_v5 import (
     armed_time,
+    chance_detection,
     content_free_detected,
     detection_time,
     rate_summary,
@@ -160,3 +161,12 @@ def test_export_only_puts_simulator_defaults_first(
     assert doc["false_alarm_model"]["default"] == "ua_detrac_normal_traffic"
     assert "3/13 = 23.1% outside the US" in doc["caveat"]
     assert (tmp_path / "deployed_detector.json").exists()
+
+
+def test_chance_detection_by_simulation() -> None:
+    rng = np.random.default_rng(1)
+    rate = 55.0
+    window_h = (ACCIDENT_PRE_TOLERANCE_S + DETECTION_GRACE_S) / SECONDS_PER_HOUR
+    sim = np.mean(rng.poisson(rate * window_h, 200_000) > 0)
+    assert chance_detection(rate) == pytest.approx(sim, abs=0.005)
+    assert chance_detection(0.0) == 0.0
