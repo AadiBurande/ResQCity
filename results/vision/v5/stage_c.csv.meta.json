@@ -1,0 +1,40 @@
+{
+  "file": "results/vision/v5/stage_c.csv",
+  "generated_at_utc": "2026-10-23T05:55:17+00:00",
+  "command": "select_v5.py --stage c",
+  "synthetic": false,
+  "git": {
+    "commit": "d5a8385cc203808f6289bce07ba1622ba51abd05",
+    "dirty": false
+  },
+  "configs_sha256": {
+    "configs/vision.yaml": "70c4773893539744623a76ce4cfe45045f7c9b100efe31b164abe85acb7a5b16",
+    "configs/vision_sweeps/v5_mnet_mil_ucf.yaml": "bc4ffc7f6cbfdd743471da3ef7552cd05fc34822b33bb52d51733e8d64131128",
+    "configs/vision_sweeps/v5_mnet_mil_all.yaml": "002f1d39d91ee74fee042c004b81dc1fb11b34789244bf60256df1b82ce1e661",
+    "configs/vision_sweeps/v5_mnet_int_ucf.yaml": "6b0aad929a6cac25fbae5235417d31073f58bd992341b842a9567d4a39a74111",
+    "configs/vision_sweeps/v5_mnet_int_all.yaml": "870168ad2fc30da68d5e87995536fb2b7b6bb8bc1d45b9f556df339c3263709d",
+    "configs/vision_sweeps/v5_sig_mil_ucf.yaml": "c05d5dda81fe4b5e233677e1281c7d9b2ec826b69ebe4d0bc631cfb85b7a1070",
+    "configs/vision_sweeps/v5_sig_mil_all.yaml": "998cb0a8fbe452800a759b36c3b71b2b106a13c1335b20f5a90ac8065b164b91",
+    "configs/vision_sweeps/v5_sig_int_ucf.yaml": "1374040a49b0067fb3cf911b0b804e7ec437fb353a043ec28575ecc361a513cd",
+    "configs/vision_sweeps/v5_sig_int_all.yaml": "9b8d013da5298a431c8820407f022ab9f31dbe29148b7a05b41d257802273464",
+    "configs/vision_sweeps/v5_vjepa_mil_ucf.yaml": "b4b295549dc7ef59834cde8054cec71173a1c11b8d382f9c0f28c51f16d82d13",
+    "configs/vision_sweeps/v5_vjepa_mil_all.yaml": "3126bf838e4a404d1c6b63cf7d12e8b04bd25940e38e79681f1f18f17302cd51",
+    "configs/vision_sweeps/v5_vjepa_int_ucf.yaml": "ff33d9bdd4c20ef69a44b489803ad1e1ed39cb69d4645f89cb76f79e02766388",
+    "configs/vision_sweeps/v5_vjepa_int_all.yaml": "4e6265a1c4a1cc0912f6c2029d2e91d59c009d522ee643d415e1442ea78b7f69"
+  },
+  "seeds": {},
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  },
+  "evaluation_version": 5
+}
