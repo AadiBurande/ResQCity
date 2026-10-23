@@ -219,7 +219,11 @@ def train(ex: pd.DataFrame, cfg: VisionConfig, frames_dir: Path, adapter_dir: Pa
 
 
 def main(argv: list[str] | None = None) -> int:
-    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args(argv)
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "--prepare-only", action="store_true", help="build examples and cache frames, no training"
+    )
+    args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     base, cfg = load_base_config(), load_vision_config()
     ft = cfg.verifier.finetune  # type: ignore[union-attr]
@@ -231,6 +235,8 @@ def main(argv: list[str] | None = None) -> int:
     log.info("examples: %s", ex.groupby(["label", "origin"]).size().to_dict())
     frames_dir = cache / "verifier_train"
     cache_frames(ex, cfg, base.paths.resolve("data_raw") / "vision", frames_dir)
+    if args.prepare_only:
+        return 0
     adapter_dir = PROJECT_ROOT / cfg.verifier.candidates[ft.name].adapter  # type: ignore[union-attr,operator]
     log_df = train(ex, cfg, frames_dir, adapter_dir)
     log_df.to_csv(out / "train_log.csv", index=False, lineterminator="\n")
