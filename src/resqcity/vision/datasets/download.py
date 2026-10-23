@@ -312,21 +312,33 @@ def detrac_frame_index(name: str) -> int | None:
 
 
 def download_ua_detrac(cfg: VisionConfig, root: Path, budget: Budget) -> None:
-    """Only every ``keep_every``-th frame of each sequence (frames 0, 5, 10, ... 0-based), read
-    from the remote zips with range requests: exactly the frames the 5 fps pipeline samples."""
+    """Only every ``keep_every``-th frame of each sequence (frames 0, 5, 10, ... 0-based): exactly
+    the frames the 5 fps pipeline samples. Each zip is fetched in ONE request (per-frame range
+    requests get refused by the host after ~14k, HTTP 403) to a temporary folder outside the
+    size-capped tree, the selected frames are extracted, and the zip is deleted."""
     u = cfg.datasets.ua_detrac
     if u is None:
         raise ValueError("datasets.ua_detrac is not configured")
+    tmp_dir = root.parent.parent / "runtime" / "ua_detrac_zips"
     for zip_name in u.zips:
-        zf = remote_zip(f"https://huggingface.co/datasets/{u.hf_repo}/resolve/main/{zip_name}")
-        by_seq: dict[str, list[str]] = {}
-        for name in zf.namelist():
-            idx = detrac_frame_index(name)
-            if idx is not None and (idx - 1) % u.keep_every == 0 and "/" in name:
-                by_seq.setdefault(name.split("/")[0], []).append(name)
-        log.info("UA-DETRAC %s: %d sequences", zip_name, len(by_seq))
-        for seq, names in sorted(by_seq.items()):
-            extract_members(zf, sorted(names), root / "ua_detrac" / seq, budget)
+        url = f"https://huggingface.co/datasets/{u.hf_repo}/resolve/main/{zip_name}"
+        archive = fetch(url, tmp_dir / zip_name)  # not counted: deleted below
+        with zipfile.ZipFile(archive) as zf:
+            wanted = []
+            for name in zf.namelist():
+                idx = detrac_frame_index(name)
+                if idx is not None and (idx - 1) % u.keep_every == 0 and "/" in name:
+                    dest = root / "ua_detrac" / name.split("/")[0] / Path(name).name
+                    if not dest.exists():
+                        wanted.append((zf.getinfo(name), dest))
+            budget.reserve(sum(i.file_size for i, _ in wanted), f"UA-DETRAC {zip_name}")
+            for info, dest in wanted:
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                tmp = dest.with_suffix(dest.suffix + ".part")
+                tmp.write_bytes(zf.read(info))  # zipfile checks the CRC
+                tmp.replace(dest)
+            log.info("UA-DETRAC %s: %d frames extracted", zip_name, len(wanted))
+        archive.unlink()
 
 
 def download_uca(cfg: VisionConfig, root: Path, budget: Budget) -> None:
