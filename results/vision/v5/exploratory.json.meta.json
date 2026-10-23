@@ -1,10 +1,10 @@
 {
   "file": "results/vision/v5/exploratory.json",
-  "generated_at_utc": "2026-10-23T13:46:03+00:00",
+  "generated_at_utc": "2026-10-23T14:00:22+00:00",
   "command": "explore_v5.py",
   "synthetic": false,
   "git": {
-    "commit": "7698d688758153b8d486fc29b7b07c49c30a0a83",
+    "commit": "17bd48e1487617c3e59d0840cdb778ba5e0e95e0",
     "dirty": false
   },
   "configs_sha256": {

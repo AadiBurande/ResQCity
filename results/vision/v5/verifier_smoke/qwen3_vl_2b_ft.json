@@ -1,0 +1,9 @@
+{
+  "candidate": "qwen3_vl_2b_ft",
+  "load_s": 10.4630795000121,
+  "latency_median_s": 0.39862429999629967,
+  "peak_vram_gb": 2.089931264,
+  "p_crash": 0.020970035481626733,
+  "p_before": 0.0240627334716539,
+  "video": "ucf_RoadAccidents003_x264"
+}

@@ -1,0 +1,7 @@
+candidate,file,checks,latency_median_s
+gemma4_e2b,v5_vjepa_mil_all_coco.parquet,261,3.6473931999935303
+molmo2_4b,v5_vjepa_mil_all_coco.parquet,30,57.28289644999313
+qwen3_5_2b,v5_vjepa_mil_all_coco.parquet,270,0.5436370000097668
+qwen3_vl_2b,v5_vjepa_mil_all_coco.parquet,227,0.5111385999771301
+qwen3_vl_2b_ft,v5_vjepa_mil_all_coco.parquet,30,10.214609400005429
+tau_r1_classifier,v5_vjepa_mil_all_coco.parquet,256,1.4208577999961562
