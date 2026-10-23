@@ -75,7 +75,14 @@ def _num(x: object) -> float | None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args(argv)
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "--export-only",
+        action="store_true",
+        help="rewrite sim_inputs.yaml / deployed_detector.json from the saved report.json and "
+        "exploratory.json; reads no labels and scores nothing",
+    )
+    args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     base = load_base_config()
     cache = base.paths.resolve("data_processed") / "vision"
@@ -83,6 +90,14 @@ def main(argv: list[str] | None = None) -> int:
     out = results / "v5"
     b = json.loads((out / "stage_b.json").read_text(encoding="utf-8"))
     run, tag = b["chosen_run"], b["detector_tag"]
+    if args.export_only:
+        report = json.loads((out / "report.json").read_text(encoding="utf-8"))
+        export(results, out, report, run, tag)
+        configs = [CONFIG_DIR / "vision.yaml", SWEEPS / f"{run}.yaml"]
+        extra = {"evaluation_version": 5, "export_only": True}
+        write_meta(results / "sim_inputs.yaml", configs=configs, synthetic=False, extra=extra)
+        write_meta(results / "deployed_detector.json", configs=configs, synthetic=False)
+        return 0
     th, k = b["operating_point"]["threshold"], b["operating_point"]["consecutive_windows"]
     cfg = run_config(run)
     cc = cfg.clip_classifier
@@ -130,8 +145,6 @@ def main(argv: list[str] | None = None) -> int:
     pv = accident_alarm_summary(
         w, videos, "combined_p", alarm_cfg(cfg, k), th, cc.window_s, cc.stride_s, verify=verify
     )
-    if scorer is not None:
-        scorer.save()
     pv = pv.merge(videos[["video_id", "region", "accident_onset_s"]], on="video_id")
     pv["us"] = ~pv["region"].isin(NON_US_REGIONS)
     pv["pred_impact_s"] = predicted_impact(w, videos, "combined_p").to_numpy()
@@ -153,6 +166,8 @@ def main(argv: list[str] | None = None) -> int:
         e2b = rate_block("road", nd["road_false_alarms"], nd["road_hours"])
         both = pd.concat([pv[["road_false_alarms", "road_hours"]], nd], ignore_index=True)
         pooled = rate_block("road", both["road_false_alarms"], both["road_hours"])
+    if scorer is not None:
+        scorer.save()  # after UA-DETRAC too (the first final run saved before it, D-027)
     truth, pred = pv["accident_onset_s"].to_numpy(float), pv["pred_impact_s"].to_numpy(float)
     ucf_test = ann[ann["source"].eq("ucf_crime") & ann["split"].eq("test")]
     wu = add_scores(windows[windows["video_id"].isin(ucf_test["video_id"])], cache, tag)
@@ -204,16 +219,28 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def export(results, out, report: dict, run: str, tag: str) -> None:  # noqa: ANN001
-    """``sim_inputs.yaml`` v5 (never-seen ACCIDENT estimates) and the deployed live detector."""
+    """``sim_inputs.yaml`` v5 (never-seen ACCIDENT estimates) and the deployed live detector.
+
+    The simulator's false-alarm model comes from ``exploratory.json`` (rate while armed plus the
+    cooldown, D-027 audit) when present; the per-camera-hour rates are kept for reference only.
+    """
     p = report["accident_holdout"]
     road = report["road_false_alarms_pooled"] or p  # amendment 2: pooled never-seen road footage
+    explore_path = out / "exploratory.json"
+    explore = (
+        json.loads(explore_path.read_text(encoding="utf-8")) if explore_path.exists() else None
+    )
     doc = {
-        "source": "measured: results/vision/v5 (ACCIDENT IID test clips, never used for "
-        "training or selection; evaluation v5, pre-registered)",
+        "source": "measured: results/vision/v5 (detection on the ACCIDENT IID test clips; road "
+        "false alarms on their pre-impact footage plus UA-DETRAC normal road CCTV; none used for "
+        "training or selection; evaluation v5, protocol pre-registered before the holdout and "
+        "amended after validation, amendment 2)",
         "evaluation_version": 5,
         "detection_rule": report["detection_rule"],
-        "caveat": "Public CCTV clips (mostly US, ~20 % elsewhere), trimmed around a crash; road "
-        "false alarms are measured on the footage BEFORE each crash. Not Pune cameras.",
+        "caveat": "Public CCTV clips (mostly US, ~20 % elsewhere), trimmed around a crash; "
+        "detection is markedly lower on non-US clips. False alarms per camera-hour below are "
+        "capped by the 60 s cooldown and mix two very different sources (pre-impact footage vs "
+        "normal traffic); the simulator should use false_alarm_model. Not Pune cameras.",
         "synthetic": False,
         "deployed": report["deployed"],
         "onset_detected": int(p["onset_detected"]),
@@ -245,6 +272,32 @@ def export(results, out, report: dict, run: str, tag: str) -> None:  # noqa: ANN
         ),
         "delay_median_with_lead_time_s": report["e3b_delay_with_lead_time"]["delay_median_s"],
     }
+    if explore is not None:
+        armed = explore["false_alarms_armed"]
+        ranges = explore["suggested_phase10_ranges"]
+        doc["false_alarm_model"] = {
+            "status": "exploratory re-expression of the final run (exploratory.json); not "
+            "pre-registered",
+            "definition": armed["definition"],
+            "cooldown_s": run_config(run).alarm.cooldown_s,
+            "rate_per_armed_hour": {
+                src: {
+                    "rate": _num(armed[src]["rate_per_armed_hour"]),
+                    "poisson_ci95": [_num(x) for x in armed[src]["poisson_ci95"]],
+                }
+                for src in ("accident_pre_impact", "ua_detrac_normal_traffic", "pooled")
+            },
+        }
+        doc["detection_rate_cluster_ci95"] = [
+            _num(x) for x in explore["detection_clustered"]["cluster_bootstrap_ci95"]
+        ]
+        doc["suggested_phase10_ranges"] = {
+            "detection_rate": [_num(x) for x in ranges["detection_rate"]],
+            "false_alarm_rate_per_armed_hour": [
+                _num(x) for x in ranges["false_alarm_rate_per_armed_hour"]
+            ],
+            "basis": f"{ranges['detection_rate_basis']}; {ranges['false_alarm_basis']}",
+        }
     (results / "sim_inputs.yaml").write_text(
         yaml.safe_dump(doc, sort_keys=False), encoding="utf-8", newline="\n"
     )
