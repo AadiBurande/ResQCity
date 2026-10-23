@@ -1,44 +1,37 @@
-source: 'measured: results/vision/crossfit_v4 (UCF-Crime val+test, 2-fold cross-fitting)'
-evaluation_version: 4
-detection_rule: alarm in [onset, offset + 10 s]
-caveat: 'Public CCTV footage (UCF-Crime, 320x240), not Pune cameras. 23 onset-annotated
-  videos, ~4 minutes of road footage before onsets: intervals are very wide. The test
-  split was looked at during development (D-021..D-025); cross-fitting removes fit-on-eval
-  bias but these remain development estimates. Vary in sensitivity analysis.'
+source: 'measured: results/vision/v5 (ACCIDENT IID test clips, never used for training
+  or selection; evaluation v5, pre-registered)'
+evaluation_version: 5
+detection_rule: alarm in [t* - 1 s, t* + 10 s]; earlier alarms are road false alarms
+caveat: Public CCTV clips (mostly US, ~20 % elsewhere), trimmed around a crash; road
+  false alarms are measured on the footage BEFORE each crash. Not Pune cameras.
 synthetic: false
-operating_points:
-  A:
-    threshold: 0.45
+deployed:
+  run: v5_vjepa_mil_all
+  detector: coco
+  operating_point:
+    threshold: 0.3
     consecutive_windows: 4
-  B:
-    threshold: 0.4
-    consecutive_windows: 4
-onset_detected: 6
-onset_videos: 23
-onset_detection_rate: 0.2608695652173913
+  verifier: tau_r1_classifier
+  tau: 0.2
+onset_detected: 925
+onset_videos: 1520
+onset_detection_rate: 0.6085526315789473
 onset_detection_rate_ci95:
-- 0.12548615971944993
-- 0.46470005002993314
-n_delays: 6
-delay_median_s: 6.333333333333334
-road_false_alarms: 5
-road_hours: 0.07462962962962963
-road_false_alarms_per_hour: 66.99751861042184
+- 0.5837719305954645
+- 0.6327860309146942
+n_delays: 925
+delay_median_s: 2.829167
+road_false_alarms: 230
+road_hours: 1.8060831311111112
+road_false_alarms_per_hour: 127.34740502144155
 road_fa_poisson_ci95:
-- 21.75391192714509
-- 156.34985912740055
+- 111.42004281243227
+- 144.91272427793305
 road_fa_cluster_ci95:
-- 19.394273828978918
-- 143.28556333377358
-estimates_describe: the cross-fitted procedure (fold A and B may choose different
-  detectors); the deployed live detector's own fold-A estimates are under deployed_detector_fold_A
-deployed_detector_fold_A:
-  candidate: image_s03_t1
-  onset_detected: 3
-  onset_videos: 12
-  road_false_alarms: 4
-  road_hours: 0.03175925925925926
-  road_false_alarms_per_hour: 125.94752186588921
-  road_fa_poisson_ci95:
-  - 34.316460743919265
-  - 322.47567840921255
+- 109.4871467490789
+- 150.59347712604085
+road_fa_sources: ACCIDENT pre-impact footage + UA-DETRAC normal road CCTV (amendment
+  2)
+road_fa_accident_preimpact_per_hour: 433.12633869124693
+road_fa_ua_detrac_per_hour: 35.95828838547284
+delay_median_with_lead_time_s: 2.875

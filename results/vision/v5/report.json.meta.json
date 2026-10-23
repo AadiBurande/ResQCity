@@ -1,0 +1,29 @@
+{
+  "file": "results/vision/v5/report.json",
+  "generated_at_utc": "2026-10-23T13:44:16+00:00",
+  "command": "final_v5.py",
+  "synthetic": false,
+  "git": {
+    "commit": "6a2aa14a4e2adf1597daa932f8b93f374e8550cd",
+    "dirty": false
+  },
+  "configs_sha256": {
+    "configs/vision.yaml": "23dfa602528abb3b44aab93741eb09fa2e68e9fce56db3fbf5ef4d6e62d2e5b9",
+    "configs/vision_sweeps/v5_vjepa_mil_all.yaml": "3126bf838e4a404d1c6b63cf7d12e8b04bd25940e38e79681f1f18f17302cd51"
+  },
+  "seeds": {},
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  },
+  "evaluation_version": 5
+}

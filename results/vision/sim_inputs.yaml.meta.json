@@ -1,20 +1,15 @@
 {
   "file": "results/vision/sim_inputs.yaml",
-  "generated_at_utc": "2026-10-20T15:52:16+00:00",
-  "command": "crossfit.py",
+  "generated_at_utc": "2026-10-23T13:44:16+00:00",
+  "command": "final_v5.py",
   "synthetic": false,
   "git": {
-    "commit": "25f0354ca8a2d604c5e1dbafd0e56976c292be6e",
+    "commit": "6a2aa14a4e2adf1597daa932f8b93f374e8550cd",
     "dirty": false
   },
   "configs_sha256": {
-    "configs/vision.yaml": "a032ba7342c07d21425fabab974febbb90b7826f38ac819e84595abb19f03e0d",
-    "configs/vision_sweeps/clip_s03_t1.yaml": "32a6228ebb95737c468f825eb68cb2cbb81e7cff8975f3d008d30c30fb40c58d",
-    "configs/vision_sweeps/clip_s0_t0.yaml": "c3d59cebf19938c424da23be3b262161497b0a2d20b46ee7caaef0ce940fd065",
-    "configs/vision_sweeps/clip_s1_t1.yaml": "6909462d03fb889db97309e2b26946160d2fea822772c17eaef962910d098d9d",
-    "configs/vision_sweeps/video_s03_t1.yaml": "3e995a90c070134125a61d5a05381ffde3c32e6be118f2fba88cc05d6ee2e074",
-    "configs/vision_sweeps/video_s0_t0.yaml": "97279b374ec1fc29b434fa6814d0d613da44b6b361aa4ec0ad40b39edc5f4302",
-    "configs/vision_sweeps/video_s1_t1.yaml": "69990b22342db5b1e66c0d6bcd4748ea0b6ba631a31138320c2157d4373429f9"
+    "configs/vision.yaml": "23dfa602528abb3b44aab93741eb09fa2e68e9fce56db3fbf5ef4d6e62d2e5b9",
+    "configs/vision_sweeps/v5_vjepa_mil_all.yaml": "3126bf838e4a404d1c6b63cf7d12e8b04bd25940e38e79681f1f18f17302cd51"
   },
   "seeds": {},
   "versions": {
@@ -30,5 +25,5 @@
     "platform": "Windows-10-10.0.26200-SP0",
     "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
   },
-  "evaluation_version": 4
+  "evaluation_version": 5
 }

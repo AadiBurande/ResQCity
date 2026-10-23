@@ -1,14 +1,16 @@
 {
-  "evaluation": "crossfit_v4 fold A (fitted on val)",
-  "clip_run": "clip_s03_t1",
-  "candidate": "image_s03_t1",
-  "stacker": "results/vision/crossfit_v4/stacker_foldA.json",
+  "evaluation": "v5 (phase 3b): selected on validation, tested once on ACCIDENT holdout",
+  "clip_run": "v5_vjepa_mil_all",
+  "detector": "coco",
+  "stacker": "results/vision/v5/stacker.json",
   "operating_point": {
-    "threshold": 0.45,
+    "threshold": 0.3,
     "consecutive_windows": 4
   },
+  "verifier": "tau_r1_classifier",
+  "verifier_tau": 0.2,
   "models": {
-    "clip_weights_sha256_16": "40cd328b8bcea568",
-    "stacker_sha256_16": "1c83265c32c615f1"
+    "clip_weights_sha256_16": "2c67848783f44050",
+    "stacker_sha256_16": "4e8c50207a73bbc2"
   }
 }
