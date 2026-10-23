@@ -144,6 +144,9 @@ def main(argv: list[str] | None = None) -> int:
         "--splits", nargs="*", default=None, help="only these splits (e.g. train val first)"
     )
     parser.add_argument(
+        "--shard", default=None, help="i/n: every n-th video from i (parallel workers, disjoint)"
+    )
+    parser.add_argument(
         "--encoders", nargs="*", default=["mobilenet_v3_small", "siglip2_base", "vjepa2_vitl"]
     )
     parser.add_argument("--detectors", nargs="*", choices=DETECTORS, default=list(DETECTORS))
@@ -156,6 +159,9 @@ def main(argv: list[str] | None = None) -> int:
     ann = ann[ann["source"].isin(args.sources) & ann["kind"].eq("video")]
     if args.splits:
         ann = ann[ann["split"].isin(args.splits)]
+    if args.shard:
+        i, n = (int(x) for x in args.shard.split("/"))
+        ann = ann.sort_values("video_id").iloc[i::n]
     device = resolve_device(cfg.detector.device)
     encoders: dict[str, FrameEncoder | ClipEncoder] = {}
     for name in args.encoders:
