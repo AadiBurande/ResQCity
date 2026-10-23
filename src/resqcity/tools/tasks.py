@@ -131,6 +131,7 @@ def vision(_: argparse.Namespace) -> int:
             r,
             "--overlay",
             f"configs/vision_sweeps/{r}.yaml",
+            "--no-holdout",
         )
         for r in V5_RUNS
     ]

@@ -43,6 +43,7 @@ from resqcity.vision.eval.select_v5 import (
     validate,
 )
 from resqcity.vision.scoring import logit
+from resqcity.vision.train_clip import score_videos
 
 log = logging.getLogger(__name__)
 SIGMAS = (0.5, 1.0, 2.0)
@@ -87,9 +88,18 @@ def main(argv: list[str] | None = None) -> int:
         raise RuntimeError("validation no longer reproduces the selected operating point")
     stacker.save(out / "stacker.json")
 
-    # 2) score the holdout clips (no labels involved)
+    # 2) score the holdout clips (no labels involved); runs trained with --no-holdout never saw
+    #    them, so they are scored here from cached features with the saved head
     windows = pd.read_parquet(cache / f"windows_{run}.parquet")
-    w = add_scores(windows[windows["split"].eq("holdout")], cache, tag)
+    holdout = windows[windows["split"].eq("holdout")]
+    if holdout.empty:
+        holdout = score_videos(
+            PROJECT_ROOT / "data" / "models" / "clip" / run,
+            cfg,
+            cache,
+            ann[ann["split"].eq("holdout")].reset_index(drop=True),
+        )
+    w = add_scores(holdout, cache, tag)
     w["clf_logit"] = logit(w["clf_p"])
     w["combined_p"] = stacker.proba(w)
 

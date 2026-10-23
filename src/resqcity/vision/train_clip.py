@@ -208,6 +208,23 @@ def train(
     return head, pd.DataFrame(log_rows)
 
 
+def score_videos(run_dir: Path, cfg: VisionConfig, cache: Path, ann: pd.DataFrame) -> pd.DataFrame:
+    """Windows of ``ann`` scored by a trained run (same columns as ``windows_<run>.parquet``):
+    the saved head and temperature applied to cached features. Used by the final v5 run for the
+    holdout clips, which training never sees."""
+    import torch
+
+    meta = json.loads((run_dir / "clip_classifier.json").read_text(encoding="utf-8"))
+    head = build_head(cfg.clip_classifier)
+    head.load_state_dict(torch.load(run_dir / "clip_head.pt", map_location="cpu"))
+    windows, x = build_windows(ann, cfg, cache)
+    with torch.inference_mode():
+        logits = head.eval()(torch.from_numpy(x)).squeeze(1).numpy()
+    windows["clf_logit"] = logits
+    windows["clf_p"] = sigmoid(logits / float(meta["temperature"]))
+    return windows
+
+
 def main(argv: list[str] | None = None) -> int:
     import torch
 
@@ -217,6 +234,11 @@ def main(argv: list[str] | None = None) -> int:
         "--overlay", type=Path, default=None, help="YAML merged over configs/vision.yaml (sweeps)"
     )
     parser.add_argument("--fit-split", choices=["val", "test"], default="val")
+    parser.add_argument(
+        "--no-holdout",
+        action="store_true",
+        help="leave the ACCIDENT holdout out (the final v5 run scores it with score_videos)",
+    )
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     vision_paths = [CONFIG_DIR / "vision.yaml", *([args.overlay] if args.overlay else [])]
@@ -225,7 +247,9 @@ def main(argv: list[str] | None = None) -> int:
     raw = base.paths.resolve("data_raw") / "vision"
     cache = base.paths.resolve("data_processed") / "vision"
     ann = pd.read_parquet(cache / "annotations.parquet")
-    ann = ann[ann["source"].isin(cfg.clip_classifier.sources)].reset_index(drop=True)
+    ann = ann[ann["source"].isin(cfg.clip_classifier.sources)]
+    dropped = {"excluded", "holdout"} if args.no_holdout else {"excluded"}
+    ann = ann[~ann["split"].isin(dropped)].reset_index(drop=True)
     intervals = (
         pd.read_parquet(cache / "uca_intervals.parquet")
         if cfg.clip_classifier.labels == "interval"
@@ -234,14 +258,17 @@ def main(argv: list[str] | None = None) -> int:
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
     video = is_video_backbone(cfg.clip_classifier.backbone)
-    encoder = (ClipEncoder if video else FrameEncoder)(cfg.clip_classifier, device)
-    for i, (_, row) in enumerate(ann.iterrows(), start=1):
-        if video:
-            extract_window_features(raw, row, cfg, encoder, cache)  # type: ignore[arg-type]
-        else:
-            extract_features(raw, row, cfg, encoder, cache)  # type: ignore[arg-type]
-        if i % 20 == 0:
-            log.info("features: %d/%d videos", i, len(ann))
+    tag = feature_tag(cfg.clip_classifier)
+    missing = [r for _, r in ann.iterrows() if not feature_path(cache, tag, r["video_id"]).exists()]
+    if missing:  # the backbone is loaded only when features are missing (GPU memory)
+        encoder = (ClipEncoder if video else FrameEncoder)(cfg.clip_classifier, device)
+        for i, row in enumerate(missing, start=1):
+            if video:
+                extract_window_features(raw, row, cfg, encoder, cache)  # type: ignore[arg-type]
+            else:
+                extract_features(raw, row, cfg, encoder, cache)  # type: ignore[arg-type]
+            if i % 20 == 0:
+                log.info("features: %d/%d missing videos", i, len(missing))
 
     windows, x = build_windows(ann, cfg, cache, intervals)
     head, train_log = train(windows, x, cfg, device, args.fit_split)
