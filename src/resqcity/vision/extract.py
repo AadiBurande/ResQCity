@@ -156,7 +156,7 @@ def main(argv: list[str] | None = None) -> int:
     raw = base.paths.resolve("data_raw") / "vision"
     cache = base.paths.resolve("data_processed") / "vision"
     ann = pd.read_parquet(cache / "annotations.parquet")
-    ann = ann[ann["source"].isin(args.sources) & ann["kind"].eq("video")]
+    ann = ann[ann["source"].isin(args.sources)]  # video files and frame folders (UA-DETRAC)
     if args.splits:
         ann = ann[ann["split"].isin(args.splits)]
     if args.shard:
