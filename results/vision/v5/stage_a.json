@@ -1,0 +1,10 @@
+{
+  "stage": "A",
+  "rule": "max validation Youden J (ties: fewer road false alarms, then listed order)",
+  "chosen_run": "v5_vjepa_mil_all",
+  "operating_point": {
+    "threshold": 0.3,
+    "consecutive_windows": 4
+  },
+  "validation_youden_j": 0.5484508899143046
+}

@@ -1,0 +1,43 @@
+seed: 20261020
+run_id: v5_sig_int_ucf
+temperature: 3.3494771222097737
+weights_sha256_16: 6e6527eb6784d443
+device: cuda:0
+fit_split: val
+clip_classifier:
+  backbone: siglip2_base
+  siglip2:
+    repo: google/siglip2-base-patch16-224
+    revision: 75de2d55ec2d0b4efc50b3e9ad70dba96a7b2fa2
+  vjepa2:
+    repo: facebook/vjepa2-vitl-fpc16-256-ssv2
+    revision: 4aa02df83918538fc21cfaf576382fa20e489a80
+  text_prompts:
+  - a CCTV image of a traffic accident
+  - a car crash on a road
+  - vehicles colliding at an intersection
+  - an overturned vehicle lying on the road
+  - a motorcycle accident on the road
+  - a pedestrian hit by a vehicle
+  - normal traffic on a road
+  - an empty road seen from a traffic camera
+  labels: interval
+  sources:
+  - ucf_crime
+  - accident
+  train_sources:
+  - ucf_crime
+  input_size: 224
+  clip_frames: 16
+  window_s: 3.0
+  stride_s: 1.0
+  hidden: 128
+  dropout: 0.3
+  epochs: 40
+  batch_size: 64
+  lr: 0.001
+  weight_decay: 0.0001
+  calibration: temperature
+  mil_weight: 0.5
+  mil_sparsity: 0.3
+  mil_smoothness: 1.0

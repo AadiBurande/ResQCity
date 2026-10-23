@@ -1,0 +1,78 @@
+{
+  "file": "results/vision/v5_sig_mil_ucf/train_log.csv",
+  "generated_at_utc": "2026-10-23T05:44:28+00:00",
+  "command": "train_clip.py --run-id v5_sig_mil_ucf --overlay configs/vision_sweeps/v5_sig_mil_ucf.yaml --no-holdout",
+  "synthetic": false,
+  "git": {
+    "commit": "dcf64fcb4acfe1ef8fb5c46e5dd40c3224f5ff78",
+    "dirty": false
+  },
+  "configs_sha256": {
+    "configs/vision.yaml": "75014517637ceafd950991d7316f236a35f9da688fdd399eb27d84b3e73056d0",
+    "configs/vision_sweeps/v5_sig_mil_ucf.yaml": "c05d5dda81fe4b5e233677e1281c7d9b2ec826b69ebe4d0bc631cfb85b7a1070"
+  },
+  "seeds": {
+    "seed": 20261020
+  },
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  },
+  "run_id": "v5_sig_mil_ucf",
+  "temperature": 3.060894028588984,
+  "weights_sha256_16": "5887e0b45ac4f0c3",
+  "device": "cuda:0",
+  "fit_split": "val",
+  "clip_classifier": {
+    "backbone": "siglip2_base",
+    "siglip2": {
+      "repo": "google/siglip2-base-patch16-224",
+      "revision": "75de2d55ec2d0b4efc50b3e9ad70dba96a7b2fa2"
+    },
+    "vjepa2": {
+      "repo": "facebook/vjepa2-vitl-fpc16-256-ssv2",
+      "revision": "4aa02df83918538fc21cfaf576382fa20e489a80"
+    },
+    "text_prompts": [
+      "a CCTV image of a traffic accident",
+      "a car crash on a road",
+      "vehicles colliding at an intersection",
+      "an overturned vehicle lying on the road",
+      "a motorcycle accident on the road",
+      "a pedestrian hit by a vehicle",
+      "normal traffic on a road",
+      "an empty road seen from a traffic camera"
+    ],
+    "labels": "mil",
+    "sources": [
+      "ucf_crime",
+      "accident"
+    ],
+    "train_sources": [
+      "ucf_crime"
+    ],
+    "input_size": 224,
+    "clip_frames": 16,
+    "window_s": 3.0,
+    "stride_s": 1.0,
+    "hidden": 128,
+    "dropout": 0.3,
+    "epochs": 40,
+    "batch_size": 64,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "calibration": "temperature",
+    "mil_weight": 0.5,
+    "mil_sparsity": 0.3,
+    "mil_smoothness": 1.0
+  }
+}
