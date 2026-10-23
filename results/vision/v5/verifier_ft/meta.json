@@ -1,0 +1,26 @@
+{
+  "examples": 1108,
+  "by_origin": {
+    "crash": 554,
+    "hard_negative": 29,
+    "normal": 140,
+    "pre_crash": 385
+  },
+  "name": "qwen3_vl_2b_ft",
+  "base": "qwen3_vl_2b",
+  "lora_rank": 16,
+  "lora_alpha": 32,
+  "lora_dropout": 0.05,
+  "target_modules": ".*language_model.*\\.(q_proj|k_proj|v_proj|o_proj|gate_proj|up_proj|down_proj)",
+  "lr": 0.0001,
+  "epochs": 2,
+  "grad_accum": 8,
+  "seed": 20261023,
+  "positive_span_s": [
+    0.5,
+    8.0
+  ],
+  "negative_margin_s": 1.0,
+  "max_positives_per_clip": 2,
+  "normal_negatives_per_video": 4
+}

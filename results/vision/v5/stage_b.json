@@ -1,0 +1,14 @@
+{
+  "stage": "B",
+  "rule": "largest validation false-alarm reduction keeping >= 90% of detections, median latency <= 3.0 s",
+  "chosen_run": "v5_vjepa_mil_all",
+  "detector_tag": "",
+  "operating_point": {
+    "threshold": 0.3,
+    "consecutive_windows": 4
+  },
+  "verifier": "tau_r1_classifier",
+  "tau": 0.2,
+  "baseline_detections": 69,
+  "baseline_false_alarms": 13
+}
