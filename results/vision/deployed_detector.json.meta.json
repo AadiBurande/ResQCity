@@ -1,10 +1,10 @@
 {
   "file": "results/vision/deployed_detector.json",
-  "generated_at_utc": "2026-10-23T14:17:00+00:00",
+  "generated_at_utc": "2026-10-23T14:21:35+00:00",
   "command": "final_v5.py --export-only",
   "synthetic": false,
   "git": {
-    "commit": "07e51555214bf0862c7a598f55d7baf6b6824ae1",
+    "commit": "6dec67a9040380bdadd50ffc30297ed3d1bc2f63",
     "dirty": false
   },
   "configs_sha256": {

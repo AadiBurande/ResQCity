@@ -16,10 +16,11 @@ simulator_defaults:
   cooldown_s: 60.0
   phase10_ranges:
     detection_probability:
-    - 0.23843296627400418
+    - 0.2111665900314018
     - 0.6656659961276075
-    detection_basis: 'lower: lead-time clips counting masked crashes as misses (81/281,
-      Wilson low); upper: armed clips (Wilson high)'
+    detection_basis: 'lower: the lower of the Wilson low of lead-time clips counting
+      masked crashes as misses (81/281) and of non-US armed clips (11/31); upper:
+      armed clips (Wilson high)'
     false_alarm_rate_per_armed_hour:
     - 38.54342128734896
     - 77.1014226819353

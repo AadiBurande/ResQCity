@@ -138,6 +138,13 @@
       ]
     }
   },
+  "chance_detection_when_armed": {
+    "definition": "P(>= 1 Poisson alarm in the 11 s detection interval)",
+    "at_ua_detrac_rate": 0.1549944027486554,
+    "at_ua_detrac_cluster_upper": 0.20989361688555663,
+    "accident_pre_impact_rate_after_first_instant_per_hour": 101.25158861816561,
+    "at_accident_pre_impact_rate_after_first_instant": 0.2660980585970414
+  },
   "pre_impact_alarm_timing": {
     "clips_with_pre_impact_alarm": 180,
     "seconds_before_impact_median": 3.4299999999999997,
@@ -223,10 +230,10 @@
     "cooldown_s": 60.0,
     "phase10_ranges": {
       "detection_probability": [
-        0.23843296627400418,
+        0.2111665900314018,
         0.6656659961276075
       ],
-      "detection_basis": "lower: lead-time clips counting masked crashes as misses (81/281, Wilson low); upper: armed clips (Wilson high)",
+      "detection_basis": "lower: the lower of the Wilson low of lead-time clips counting masked crashes as misses (81/281) and of non-US armed clips (11/31); upper: armed clips (Wilson high)",
       "false_alarm_rate_per_armed_hour": [
         38.54342128734896,
         77.1014226819353

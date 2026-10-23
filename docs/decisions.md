@@ -520,7 +520,9 @@ Plan and pre-registration: `docs/plans/phase-3b.md` (committed f7202d8 before an
 was downloaded). Amendments 1–3 were committed before any holdout result, but amendments 2 and 3
 were written AFTER seeing validation results (disclosed in each). All numbers below are from
 `results/vision/v5/` (`stage_a.csv`, `stage_c.csv`, `stage_b.csv`, `report.json`,
-`exploratory.json`, `verifier_smoke/`) and `results/vision/uca_label_check.json`.
+`exploratory.json`, `alarms_final.csv`, `armed_time_per_unit.csv`, `verifier_smoke/`) and
+`results/vision/uca_label_check.json`. The stage-B timeline before 16:52 IST (item 4) rests on
+the working-session log, not on a committed file.
 1. **Data.** ACCIDENT (Picek et al., 2026): 2,027 real CCTV crash clips, official IID split; the
    1,520 test clips were sealed (labels in a separate file, read once by the final run:
    `holdout_access.log` has one entry). UCA timestamps gave training intervals for 143 UCF-Crime
@@ -590,7 +592,12 @@ were written AFTER seeing validation results (disclosed in each). All numbers be
      clips with enough lead time, 0 of 143 clips with such an alarm count as detected, against
      81 of 138 without. **Detection when the camera is armed at the impact** (lead time and no
      earlier alarm) is 81/138 = 0.59 (Wilson 0.50–0.67), non-US 11/31 = 0.35, median delay
-     2.9 s. This is the closest estimate to a live camera, where there is no clip start.
+     2.9 s. This is the closest estimate to a live camera, where there is no clip start. By
+     chance alone (an armed camera alarming as a Poisson process in the 11 s detection
+     interval) detection would be 0.15 at UA-DETRAC's 55 per armed hour, 0.21 at its upper
+     bound and 0.27 at the ACCIDENT pre-impact rate after the first instant (101 per hour), so
+     0.59 is well above chance. The armed subset is selected on "no earlier alarm" and may
+     differ systematically from all clips.
    - Timing of pre-impact alarms: 43 % within 3 s of the impact and 66 % within 5 s, against
      67 % and 85 % under a uniform alarm-time null over each clip's armed interval. The alarms
      come EARLY (most at the first instant), not near the impact: there is no evidence that they
@@ -608,13 +615,16 @@ were written AFTER seeing validation results (disclosed in each). All numbers be
    - detection probability when the camera is armed **0.59** (0.50–0.67), median delay 2.9 s;
      masking by the cooldown is produced by the simulator's own false-alarm process;
    - false alarms **λ = 55 per armed camera-hour** (UA-DETRAC), then a 60 s cooldown;
-   - phase 10 ranges: detection 0.24–0.67 (lower: lead-time clips counting masked crashes as
-     misses; upper: armed clips), λ 39–77 per armed hour, a stress case of one alarm per
+   - phase 10 ranges: detection 0.21–0.67 (lower: the non-US armed Wilson bound, below the
+     0.24 of lead-time clips counting masked crashes as misses; upper: armed clips), λ 39–77 per
+     armed hour, a stress case of one alarm per
      cooldown (60 per camera-hour), and a varied share of persistently triggering cameras.
      Pune is outside the US and the non-US armed estimate is 0.35 on 31 clips, so a low
      detection scenario is part of the base design, not an afterthought.
    These replace the earlier "0.61 / 127 per hour" inputs and the "36–433/h, 0.29–0.70" ranges.
    Fusion uses these rates as likelihoods, not the window confidence.
-   **Overall reading:** on short trimmed public clips the detector is only modestly better than
-   a content-free alarm, and in normal traffic it alarms about every two minutes per camera.
+   **Overall reading:** on trimmed clips the detector detects FEWER crashes than a content-free
+   alarm at clip start (0.61 vs 0.69) while alarming about half as often in normal traffic (29
+   vs 60 per camera-hour); on an armed camera it detects well above chance (0.59 vs 0.15–0.27).
+   In normal traffic it alarms about every two minutes per camera.
    The simulator results for CCTV-triggered policies must be read with that in mind.

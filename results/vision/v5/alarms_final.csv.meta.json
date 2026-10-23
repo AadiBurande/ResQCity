@@ -1,10 +1,10 @@
 {
   "file": "results/vision/v5/alarms_final.csv",
-  "generated_at_utc": "2026-10-23T14:16:34+00:00",
+  "generated_at_utc": "2026-10-23T14:21:33+00:00",
   "command": "explore_v5.py",
   "synthetic": false,
   "git": {
-    "commit": "07e51555214bf0862c7a598f55d7baf6b6824ae1",
+    "commit": "6dec67a9040380bdadd50ffc30297ed3d1bc2f63",
     "dirty": false
   },
   "configs_sha256": {
