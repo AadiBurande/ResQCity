@@ -304,6 +304,9 @@ def stage_b(cache: Path, ann: pd.DataFrame, out: Path) -> dict[str, object]:
             log.info(
                 "%s tau %.2f: detected %d, false alarms %d", name, tau, s["onset_detected"], fa
             )
+            if scorer.median_latency() > v.max_latency_s:  # same criterion, checked early
+                log.info("%s: median latency above %.1f s; stopping", name, v.max_latency_s)
+                break
         scorer.save()
         latency = scorer.median_latency()
         for r in rows:

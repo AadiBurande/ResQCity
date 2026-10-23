@@ -111,16 +111,23 @@ verifier:                      # phase 3b stage B (D-027): an offline VLM checks
   candidates:                  # 4-bit NF4 weights (fit in ~4.5 GB VRAM next to the detector)
     qwen3_5_2b: {repo: Qwen/Qwen3.5-2B, revision: 15852e8c16360a2fea060d615a32b45270f8a8fc, quantization: 4bit}
     qwen3_vl_2b: {repo: Qwen/Qwen3-VL-2B-Instruct, revision: 89644892e4d85e24eaac8bacfd4f463576704203, quantization: 4bit}
-    gemma4_e2b: {repo: google/gemma-4-E2B-it, revision: 3e22461f65e89153144f8adb70e3b8c2cc9845a7, quantization: 4bit}
+    gemma4_e2b:                # per-layer embeddings (2.35B params, not quantised) live in RAM, as designed
+      repo: google/gemma-4-E2B-it
+      revision: 3e22461f65e89153144f8adb70e3b8c2cc9845a7
+      quantization: 4bit
+      cpu_modules: [model.language_model.embed_tokens_per_layer, model.audio_tower]
     holmesvau_2b: {repo: ppxin321/HolmesVAU-2B, revision: 4ddd79211b9f144faa8fed08afc070f8b7c0db06, quantization: 4bit}
     # Amendment 1: Molmo2-4B (remote code) and TAU-R1-Classifier with its own published prompt
     # (github.com/siri-rouser/TAU-R1, evaluation/QA_pair_database.py, category_ABC_sys_prompt_4cat);
     # score = P(C) among the first-token labels A-D.
-    molmo2_4b: {repo: allenai/Molmo2-4B, revision: 042abfa7a38879a376cec03d949eff0aefaa0600, quantization: 4bit, remote_code: true}
+    molmo2_4b: {repo: allenai/Molmo2-4B, revision: 042abfa7a38879a376cec03d949eff0aefaa0600, quantization: 4bit}  # native transformers molmo2 (its remote code targets transformers 4.57)
     tau_r1_classifier:
       repo: yl4300/TAU-R1-Classifier
       revision: f89be2811abc99ae1bb61e14af8c97b7dcbe6f52
       quantization: 4bit
+      # Its saved processor disables resizing (the authors pre-resize with qwen-vl-utils); their
+      # eval script falls back to the base model's processor, which does the same smart resize.
+      processor: {repo: Qwen/Qwen3-VL-2B-Instruct, revision: 89644892e4d85e24eaac8bacfd4f463576704203}
       prompt: "Can you classify the anomaly into a specific category?"
       positive: [C]
       negative: [A, B, D]

@@ -56,6 +56,7 @@ vision = [
     "accelerate>=1.10",
     "bitsandbytes>=0.48",
     "kaggle>=2.0",
+    "einops>=0.8",
 ]
 
 [tool.uv]

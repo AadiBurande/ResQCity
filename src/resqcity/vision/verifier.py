@@ -88,18 +88,24 @@ class HfVerifier:
         quant = None
         if cand.quantization == "4bit":
             quant = BitsAndBytesConfig(
-                load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=torch.float16
+                load_in_4bit=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_compute_dtype=torch.float16,
+                llm_int8_enable_fp32_cpu_offload=bool(cand.cpu_modules),
             )
         elif cand.quantization == "8bit":
-            quant = BitsAndBytesConfig(load_in_8bit=True)
+            quant = BitsAndBytesConfig(
+                load_in_8bit=True, llm_int8_enable_fp32_cpu_offload=bool(cand.cpu_modules)
+            )
         remote = {"trust_remote_code": True} if cand.remote_code else {}
-        self.processor = AutoProcessor.from_pretrained(cand.repo, revision=cand.revision, **remote)
+        proc = cand.processor or cand
+        self.processor = AutoProcessor.from_pretrained(proc.repo, revision=proc.revision, **remote)
         self.model = AutoModelForImageTextToText.from_pretrained(
             cand.repo,
             revision=cand.revision,
             dtype=torch.float16,
             quantization_config=quant,
-            device_map={"": device},
+            device_map={**{m: "cpu" for m in cand.cpu_modules}, "": device},
             **remote,
         ).eval()
         tok = self.processor.tokenizer

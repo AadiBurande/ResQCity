@@ -134,6 +134,8 @@ class ClipClassifierConfig(ConfigModel):
 class VerifierCandidate(HfWeights):
     quantization: Literal["4bit", "8bit", "none"]
     remote_code: bool = False  # model code shipped with the weights (trust_remote_code)
+    processor: HfWeights | None = None  # load the processor from another repo (default: repo)
+    cpu_modules: list[str] = Field(default_factory=list)  # kept in system RAM (e.g. embeddings)
     system_prompt: str | None = None  # candidate-specific prompts (default: verifier.prompt)
     prompt: str | None = None
     positive: list[str] = Field(default_factory=lambda: ["yes", "Yes", " yes", " Yes", "YES"])
