@@ -1,13 +1,43 @@
+simulator_defaults:
+  status: exploratory (not pre-registered); replaces the pre-registered ACCIDENT detection
+    rate, which mostly reflects clip trimming (content-free baseline above it)
+  detection_probability_when_armed: 0.5869565217391305
+  detection_probability_ci95:
+  - 0.5035370012843488
+  - 0.6656659961276075
+  detection_basis: ACCIDENT holdout clips with lead time and no earlier alarm (81/138);
+    the simulator models masking by the cooldown itself through the false-alarm process
+  delay_median_s: 2.875
+  false_alarm_source: ua_detrac_normal_traffic
+  false_alarm_rate_per_armed_hour: 55.11666360462981
+  false_alarm_rate_ci95:
+  - 38.54342128734896
+  - 77.1014226819353
+  cooldown_s: 60.0
+  phase10_ranges:
+    detection_probability:
+    - 0.23843296627400418
+    - 0.6656659961276075
+    detection_basis: 'lower: lead-time clips counting masked crashes as misses (81/281,
+      Wilson low); upper: armed clips (Wilson high)'
+    false_alarm_rate_per_armed_hour:
+    - 38.54342128734896
+    - 77.1014226819353
+    false_alarm_basis: UA-DETRAC sequence-clustered bootstrap interval
+    false_alarm_stress_per_camera_hour: 60.0
+    stress_basis: a camera that alarms at every opportunity (one alarm per cooldown)
 source: 'measured: results/vision/v5 (detection on the ACCIDENT IID test clips; road
   false alarms on their pre-impact footage plus UA-DETRAC normal road CCTV; none used
   for training or selection; evaluation v5, protocol pre-registered before the holdout
   and amended after validation, amendment 2)'
 evaluation_version: 5
 detection_rule: alarm in [t* - 1 s, t* + 10 s]; earlier alarms are road false alarms
-caveat: Public CCTV clips (mostly US, ~20 % elsewhere), trimmed around a crash; detection
-  is markedly lower on non-US clips. False alarms per camera-hour below are capped
-  by the 60 s cooldown and mix two very different sources (pre-impact footage vs normal
-  traffic); the simulator should use false_alarm_model. Not Pune cameras.
+caveat: 'Public CCTV clips (216/1520 = 14.2% outside the US), trimmed around a crash;
+  detection is markedly lower on non-US clips. The pre-registered fields below are
+  kept for the record: the detection rate mostly reflects clip trimming (a content-free
+  alarm at the warm-up end scores higher) and the false alarms per camera-hour are
+  capped by the 60 s cooldown and mix two very different sources. The simulator uses
+  simulator_defaults. Not Pune cameras.'
 synthetic: false
 deployed:
   run: v5_vjepa_mil_all
@@ -42,34 +72,24 @@ delay_median_with_lead_time_s: 2.875
 false_alarm_model:
   status: exploratory re-expression of the final run (exploratory.json); not pre-registered
   definition: Poisson alarms at rate lambda while armed; after each alarm the camera
-    is silent for 60 s; long-run rate = lambda / (1 + lambda * cooldown)
+    is silent for 60 s; long-run rate = lambda / (1 + lambda * cooldown). Cluster
+    intervals resample clips / sequences (UA-DETRAC recording sites are not identified).
+  default: ua_detrac_normal_traffic
   cooldown_s: 60.0
   rate_per_armed_hour:
     accident_pre_impact:
-      rate: 792.403737011731
-      poisson_ci95:
-      - 680.868071300692
-      - 916.998777701869
+      rate: 792.4037370117309
+      cluster_bootstrap_ci95:
+      - 606.2259518135072
+      - 1037.5961239141322
     ua_detrac_normal_traffic:
-      rate: 55.116663604629814
-      poisson_ci95:
-      - 40.90865008722602
-      - 72.66444974940676
-    pooled:
-      rate: 202.7640090818911
-      poisson_ci95:
-      - 177.40427901864894
-      - 230.73171327382096
+      rate: 55.11666360462981
+      cluster_bootstrap_ci95:
+      - 38.54342128734896
+      - 77.1014226819353
+  accident_pre_impact_reading: 'not a hazard rate: about half of the clips with pre-impact
+    footage alarm at the first possible instant, so this mostly measures clip-start
+    firing on short trimmed clips (clip_start.pre_impact)'
 detection_rate_cluster_ci95:
 - 0.5843096806502562
 - 0.6313040939689517
-suggested_phase10_ranges:
-  detection_rate:
-  - 0.30437669578444737
-  - 0.6327860309146942
-  false_alarm_rate_per_armed_hour:
-  - 40.90865008722602
-  - 916.998777701869
-  basis: non-US Wilson lower bound to overall Wilson upper bound; overall 0.609 (0.584-0.633),
-    non-US 0.366 (0.304-0.432); UA-DETRAC lower bound to ACCIDENT pre-impact upper
-    bound, both per armed hour; the simulator applies the cooldown

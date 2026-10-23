@@ -1,0 +1,30 @@
+{
+  "file": "results/vision/v5/armed_time_per_unit.csv",
+  "generated_at_utc": "2026-10-23T14:16:34+00:00",
+  "command": "explore_v5.py",
+  "synthetic": false,
+  "git": {
+    "commit": "07e51555214bf0862c7a598f55d7baf6b6824ae1",
+    "dirty": false
+  },
+  "configs_sha256": {
+    "configs/vision.yaml": "23dfa602528abb3b44aab93741eb09fa2e68e9fce56db3fbf5ef4d6e62d2e5b9",
+    "configs/vision_sweeps/v5_vjepa_mil_all.yaml": "3126bf838e4a404d1c6b63cf7d12e8b04bd25940e38e79681f1f18f17302cd51"
+  },
+  "seeds": {
+    "bootstrap": 20261020
+  },
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  }
+}

@@ -1,6 +1,7 @@
 {
   "status": "exploratory (not pre-registered), analyses of the final v5 run",
   "reconstruction_matches_final_run": true,
+  "reconstruction_checks": "ACCIDENT: false-alarm count, detection and detection time per clip; UA-DETRAC: alarm count per sequence (no times were stored by the final run)",
   "ua_detrac_verifier_calls_rescored": 61,
   "rescore_reason": "the final run saved its verifier cache before scoring UA-DETRAC; those calls were re-scored with the same verifier (no labels) and every per-sequence alarm count matched the final run",
   "warm_up_s": 6.0,
@@ -24,6 +25,119 @@
       "detected_without_pre_impact_alarm": 844
     }
   },
+  "clip_start": {
+    "first_possible_alarm_s": 6.0,
+    "detections_at_first_possible_instant": 542,
+    "detections": 925,
+    "content_free_baseline": {
+      "rule": "one alarm at the warm-up end on every clip at least that long",
+      "overall": {
+        "detected": 1052,
+        "clips": 1520,
+        "rate": 0.6921052631578948,
+        "wilson_ci95": [
+          0.6684384882537986,
+          0.7148034799944827
+        ]
+      },
+      "us": {
+        "detected": 937,
+        "clips": 1304,
+        "rate": 0.718558282208589,
+        "wilson_ci95": [
+          0.6935356097813008,
+          0.742297033486919
+        ]
+      },
+      "non_us": {
+        "detected": 115,
+        "clips": 216,
+        "rate": 0.5324074074074074,
+        "wilson_ci95": [
+          0.4658834801994473,
+          0.5977987755099243
+        ]
+      },
+      "clips_shorter_than_warm_up": 103
+    },
+    "detector_overall": {
+      "detected": 925,
+      "clips": 1520,
+      "rate": 0.6085526315789473,
+      "wilson_ci95": [
+        0.5837719305954645,
+        0.6327860309146942
+      ]
+    },
+    "detection_by_impact_time_s": {
+      "(0.0, 3.0]": {
+        "clips": 333,
+        "detection_rate": 0.5765765765765766,
+        "content_free_rate": 0.7747747747747747
+      },
+      "(3.0, 5.0]": {
+        "clips": 474,
+        "detection_rate": 0.7447257383966245,
+        "content_free_rate": 0.9451476793248945
+      },
+      "(5.0, 7.0]": {
+        "clips": 348,
+        "detection_rate": 0.7816091954022989,
+        "content_free_rate": 0.9942528735632183
+      },
+      "(7.0, 9.0]": {
+        "clips": 153,
+        "detection_rate": 0.3464052287581699,
+        "content_free_rate": 0.0
+      },
+      "(9.0, 15.0]": {
+        "clips": 160,
+        "detection_rate": 0.29375,
+        "content_free_rate": 0.0
+      },
+      "(15.0, inf]": {
+        "clips": 52,
+        "detection_rate": 0.15384615384615385,
+        "content_free_rate": 0.0
+      }
+    },
+    "pre_impact": {
+      "clips_with_pre_impact_footage": 365,
+      "clips_with_pre_impact_alarm": 180,
+      "first_alarm_s_after_warm_up_mean": 0.4,
+      "first_alarm_s_after_warm_up_median": 0.0,
+      "share_at_first_possible_instant": 0.8722222222222222
+    },
+    "detection_when_armed": {
+      "definition": "clips with impact >= warm-up + 2 s and no alarm before t* - 1 s, so the camera is armed (no cooldown) when the crash happens and the first window cannot contain the impact",
+      "detected": 81,
+      "clips": 138,
+      "rate": 0.5869565217391305,
+      "wilson_ci95": [
+        0.5035370012843488,
+        0.6656659961276075
+      ],
+      "non_us": {
+        "detected": 11,
+        "clips": 31,
+        "rate": 0.3548387096774194,
+        "wilson_ci95": [
+          0.2111665900314018,
+          0.530520460712863
+        ]
+      },
+      "delay_median_s": 2.875
+    },
+    "detection_with_lead_time_incl_masking": {
+      "detected": 81,
+      "clips": 281,
+      "rate": 0.28825622775800713,
+      "wilson_ci95": [
+        0.23843296627400418,
+        0.3437907715646941
+      ]
+    }
+  },
   "pre_impact_alarm_timing": {
     "clips_with_pre_impact_alarm": 180,
     "seconds_before_impact_median": 3.4299999999999997,
@@ -31,40 +145,48 @@
     "share_within_5s": 0.6611111111111111,
     "uniform_null_expected_share_within_3s": 0.6693938117800368,
     "uniform_null_expected_share_within_5s": 0.8519930224802051,
-    "reading": "observed shares above the null would indicate alarms concentrating just before impact; shares near the null mean the short armed interval explains the timing"
+    "reading": "shares below the null mean the alarms come EARLY in the armed interval (see clip_start.pre_impact: most fire at the first possible instant), not near the impact"
   },
   "false_alarms_armed": {
-    "definition": "Poisson alarms at rate lambda while armed; after each alarm the camera is silent for 60 s; long-run rate = lambda / (1 + lambda * cooldown)",
+    "definition": "Poisson alarms at rate lambda while armed; after each alarm the camera is silent for 60 s; long-run rate = lambda / (1 + lambda * cooldown). Cluster intervals resample clips / sequences (UA-DETRAC recording sites are not identified).",
     "accident_pre_impact": {
+      "units": 1520,
+      "units_with_alarm": 180,
+      "units_with_2plus_alarms": 0,
+      "units_alarming_at_first_possible_instant": 157,
       "alarms": 180,
-      "armed_hours": 0.22715692972222218,
-      "rate_per_armed_hour": 792.403737011731,
+      "armed_hours": 0.2271569297222222,
+      "rate_per_armed_hour": 792.4037370117309,
       "poisson_ci95": [
-        680.868071300692,
-        916.998777701869
+        680.8680713006919,
+        916.9987777018689
       ],
-      "long_run_per_camera_hour_with_cooldown": 55.776649205433436
+      "cluster_bootstrap_ci95": [
+        606.2259518135072,
+        1037.5961239141322
+      ],
+      "long_run_per_camera_hour_with_cooldown": 55.77664920543344
     },
     "ua_detrac_normal_traffic": {
+      "units": 100,
+      "units_with_alarm": 45,
+      "units_with_2plus_alarms": 5,
+      "units_alarming_at_first_possible_instant": 16,
       "alarms": 50,
-      "armed_hours": 0.9071666666666665,
-      "rate_per_armed_hour": 55.116663604629814,
+      "armed_hours": 0.9071666666666666,
+      "rate_per_armed_hour": 55.11666360462981,
       "poisson_ci95": [
         40.90865008722602,
-        72.66444974940676
+        72.66444974940674
       ],
-      "long_run_per_camera_hour_with_cooldown": 28.727377190462516
+      "cluster_bootstrap_ci95": [
+        38.54342128734896,
+        77.1014226819353
+      ],
+      "long_run_per_camera_hour_with_cooldown": 28.727377190462512
     },
-    "pooled": {
-      "alarms": 230,
-      "armed_hours": 1.1343235963888887,
-      "rate_per_armed_hour": 202.7640090818911,
-      "poisson_ci95": [
-        177.40427901864894,
-        230.73171327382096
-      ],
-      "long_run_per_camera_hour_with_cooldown": 46.29949355477351
-    }
+    "always_alarm_ceiling_per_camera_hour": 60.0,
+    "accident_pre_impact_reading": "not a hazard rate: about half of the clips with pre-impact footage alarm at the first possible instant, so this mostly measures clip-start firing on short trimmed clips (clip_start.pre_impact)"
   },
   "temporal_constant_guess": {
     "constant_impact_time_s": 4.375,
@@ -83,16 +205,35 @@
       0.6313040939689517
     ]
   },
-  "suggested_phase10_ranges": {
-    "detection_rate": [
-      0.30437669578444737,
-      0.6327860309146942
+  "simulator_defaults": {
+    "status": "exploratory (not pre-registered); replaces the pre-registered ACCIDENT detection rate, which mostly reflects clip trimming (content-free baseline above it)",
+    "detection_probability_when_armed": 0.5869565217391305,
+    "detection_probability_ci95": [
+      0.5035370012843488,
+      0.6656659961276075
     ],
-    "detection_rate_basis": "non-US Wilson lower bound to overall Wilson upper bound; overall 0.609 (0.584-0.633), non-US 0.366 (0.304-0.432)",
-    "false_alarm_rate_per_armed_hour": [
-      40.90865008722602,
-      916.998777701869
+    "detection_basis": "ACCIDENT holdout clips with lead time and no earlier alarm (81/138); the simulator models masking by the cooldown itself through the false-alarm process",
+    "delay_median_s": 2.875,
+    "false_alarm_source": "ua_detrac_normal_traffic",
+    "false_alarm_rate_per_armed_hour": 55.11666360462981,
+    "false_alarm_rate_ci95": [
+      38.54342128734896,
+      77.1014226819353
     ],
-    "false_alarm_basis": "UA-DETRAC lower bound to ACCIDENT pre-impact upper bound, both per armed hour; the simulator applies the cooldown"
+    "cooldown_s": 60.0,
+    "phase10_ranges": {
+      "detection_probability": [
+        0.23843296627400418,
+        0.6656659961276075
+      ],
+      "detection_basis": "lower: lead-time clips counting masked crashes as misses (81/281, Wilson low); upper: armed clips (Wilson high)",
+      "false_alarm_rate_per_armed_hour": [
+        38.54342128734896,
+        77.1014226819353
+      ],
+      "false_alarm_basis": "UA-DETRAC sequence-clustered bootstrap interval",
+      "false_alarm_stress_per_camera_hour": 60.0,
+      "stress_basis": "a camera that alarms at every opportunity (one alarm per cooldown)"
+    }
   }
 }

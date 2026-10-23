@@ -1,10 +1,10 @@
 {
   "file": "results/vision/deployed_detector.json",
-  "generated_at_utc": "2026-10-23T14:00:47+00:00",
+  "generated_at_utc": "2026-10-23T14:17:00+00:00",
   "command": "final_v5.py --export-only",
   "synthetic": false,
   "git": {
-    "commit": "17bd48e1487617c3e59d0840cdb778ba5e0e95e0",
+    "commit": "07e51555214bf0862c7a598f55d7baf6b6824ae1",
     "dirty": false
   },
   "configs_sha256": {
@@ -24,5 +24,7 @@
   "machine": {
     "platform": "Windows-10-10.0.26200-SP0",
     "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
-  }
+  },
+  "evaluation_version": 5,
+  "export_only": true
 }
