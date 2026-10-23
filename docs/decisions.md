@@ -517,45 +517,74 @@ videos (chose "blur faces + plates only" and "no blurring at all") and a stronge
 
 ## D-027 Phase 3b: detector upgrade, evaluated once on never-seen footage  (2026-10-21…23)
 Plan and pre-registration: `docs/plans/phase-3b.md` (committed f7202d8 before any ACCIDENT data
-was downloaded; amendments 1–3 committed before any holdout result). All numbers below are from
+was downloaded). Amendments 1–3 were committed before any holdout result, but amendments 2 and 3
+were written AFTER seeing validation results (disclosed in each). All numbers below are from
 `results/vision/v5/` (`stage_a.csv`, `stage_c.csv`, `stage_b.csv`, `report.json`,
-`exploratory.json`) and `results/vision/uca_label_check.json`.
+`exploratory.json`, `verifier_smoke/`) and `results/vision/uca_label_check.json`.
 1. **Data.** ACCIDENT (Picek et al., 2026): 2,027 real CCTV crash clips, official IID split; the
    1,520 test clips were sealed (labels in a separate file, read once by the final run:
-   `holdout_access.log`). UCA timestamps gave training intervals for 143 UCF-Crime accident
-   videos. UA-DETRAC (100 sequences, 1.56 h of normal road CCTV) was added for false alarms
-   (amendment 2). A UCF normal video that became readable was excluded so the v1–v4 splits stay
-   identical; v4 reproduces bit-for-bit.
-2. **Stage A (validation):** 12 candidates (MobileNetV3 / SigLIP2 / V-JEPA 2 × MIL / UCA
-   intervals × UCF / UCF + ACCIDENT training). Chosen: **V-JEPA 2 + MIL + UCF + ACCIDENT**,
-   validation J 0.548 (best MobileNet 0.487, best SigLIP2 0.460); operating point 0.30 × 4
-   windows. ACCIDENT training data helped every backbone; **UCA interval labels did not help**
-   (below MIL for every backbone).
+   `holdout_access.log` has one entry). UCA timestamps gave training intervals for 143 UCF-Crime
+   accident videos. UA-DETRAC (100 sequences, 1.56 h of normal road CCTV) was added for false
+   alarms (amendment 2). A UCF normal video that became readable was excluded so the v1–v4 splits
+   stay identical; v4 reproduces bit-for-bit.
+2. **Stage A (validation, 111 onset clips):** 12 candidates (MobileNetV3 / SigLIP2 / V-JEPA 2 ×
+   MIL / UCA intervals × UCF / UCF + ACCIDENT training). Chosen: **V-JEPA 2 + MIL + UCF +
+   ACCIDENT**, validation J 0.548 (best MobileNet 0.487, best SigLIP2 0.460); operating point
+   0.30 × 4 windows. ACCIDENT training data raised J for every backbone and label type. UCA
+   interval labels were below MIL for MobileNet and V-JEPA 2; for SigLIP2 they tied (0.350, UCF
+   only) or were marginally higher (0.460 vs 0.450, UCF + ACCIDENT). With 111 validation clips,
+   differences of a few hundredths are indicative only.
 3. **Stage C (run before B, criteria unchanged):** COCO and UVH-26 (Indian vehicle classes) tie
    at J 0.548; COCO kept by the tie rule. The Indian detector made no measurable difference here.
 4. **Stage B (verifier):** zero-shot Qwen3.5-2B and Qwen3-VL-2B cannot keep 90 % of validation
    detections (44 and 48 of 69 at the most permissive threshold); Gemma-4-E2B (3.45 s) and
    Molmo2-4B (3.26 s) exceed the 3 s latency limit; HolmesVAU-2B cannot run on transformers 5.
    **TAU-R1-Classifier** (traffic-camera fine-tune) is chosen at τ = 0.2: keeps 63/69, false
-   alarms 13 → 10. Amendment 3's fine-tuned Qwen3-VL-2B (1,108 train-split examples, one
-   attempt) passes but is weaker (64/69, 13 → 11). Measurement fix disclosed: candidates loaded
-   in one process slowed later ones through leftover GPU memory (10.2 s vs 0.41 s alone), so
-   every candidate was re-scored in its own process before the choice.
+   alarms 13 → 10 (0.48 s). Amendment 3's fine-tuned Qwen3-VL-2B (1,108 train-split examples,
+   one attempt) passes but is weaker (64/69, 13 → 11, 0.58 s). **Deviation:** amendment 3 was to
+   apply only if no original candidate passed; TAU-R1 did pass, yet the fine-tuned candidate was
+   trained and scored anyway. It did not change the choice (TAU-R1 wins by the rule either way).
+   **Measurement fix:** in the first stage-B run all candidates were loaded one after another in
+   one process, and leftover GPU memory slowed the later ones (fine-tuned Qwen3-VL 10.2 s there
+   vs 0.40 s alone, `verifier_smoke/qwen3_vl_2b_ft.json`), so every candidate was re-scored in its
+   own process before the choice. The first run is kept, unused, in
+   `stage_b_first_run_contaminated/`.
 5. **Final run (once, ACCIDENT IID test + UA-DETRAC):**
-   - Detection 925/1,520 = **0.61** (Wilson 0.58–0.63), median delay 2.8 s (v4: 0.26 on 23 UCF
-     onsets); UCF test split 6/12 (v4 fold A 3/12). US clips 0.65, non-US 0.37.
-   - Road false alarms: ACCIDENT pre-impact footage 180 in 0.42 h = 433/h (372–501); UA-DETRAC
-     normal traffic 50 in 1.39 h = **36/h (27–47)**; pooled (pre-registered export) 127/h (111–145).
-   - ACCIDENT temporal score T = 0.201 / 0.364 / 0.548 (σ 0.5 / 1 / 2 s), in the range of the
-     paper's best zero-shot 7B VLM; splits and settings differ, so this is not a leaderboard claim.
+   - Detection 925/1,520 = **0.61** (Wilson 0.58–0.63; bootstrap over 1,445 source videos
+     0.584–0.631), median delay 2.8 s (v4: 0.26 on 23 UCF onsets). US clips 0.65, non-US 0.37.
+   - UCF test split 6/12 (v4 fold A 3/12). This split has been looked at in every evaluation
+     (v1–v5; development-test set since D-025): a consistency check, not a clean estimate.
+   - Road false alarms as pre-registered (per camera-hour after the warm-up): ACCIDENT pre-impact
+     footage 180 in 0.42 h = 433/h; UA-DETRAC normal traffic 50 in 1.39 h = 36/h (27–47); pooled
+     127/h (111–145). **These units are flawed** (audit): each alarm is followed by a 60 s
+     cooldown, so the rate per camera-hour is capped by the cooldown and depends on clip length,
+     and the pooled figure mixes two very different sources. See item 6 for corrected units.
+   - ACCIDENT temporal score T = 0.201 / 0.364 / 0.548 (σ 0.5 / 1 / 2 s). A constant guess (the
+     median impact time of the train/val clips, 4.375 s) scores 0.194 / 0.369 / 0.604: **the
+     detector does not localise the impact better than a constant**, because the clips are
+     trimmed so the impact always comes early. No comparison with the paper's VLMs is claimed.
    - Verifier: 1,295 checks, median 0.54 s.
-6. **Exploratory (not pre-registered):** 66 % of the pre-impact "false alarms" fire within 5 s
-   before the impact (median 3.4 s): mostly early alarms on a crash that is already unfolding.
-   They also hide the counted detection through the 60 s cooldown: on the 281 clips with enough
-   lead time, 0 of 143 clips with such an alarm count as detected, against 81 of 138 without.
-   So the pre-registered E1/E2 understate early detection on ACCIDENT and overstate false alarms
-   in normal traffic; UA-DETRAC's 36/h is the cleaner normal-traffic estimate.
-7. **For phase 4 onwards:** `sim_inputs.yaml` (v5) is the measured input: detection 0.61, delay
-   2.8 s, road false alarms 127/h pooled, with E2 = 433/h and E2b = 36/h also exported. Phase 10
-   varies false alarms over at least 36–433/h and detection over 0.29–0.70 (the exploratory
-   range). Fusion uses these rates as likelihoods, not the window confidence.
+6. **Exploratory (not pre-registered, `exploratory.json`):** every final-run alarm was
+   reconstructed and matched to `per_clip.csv` and `per_sequence_ua_detrac.csv` before analysis.
+   (The final run saved its verifier cache before scoring UA-DETRAC, so those 61 calls were
+   re-scored with the same verifier, using no labels; every per-sequence count matched. The
+   save order is fixed in `final_v5.py`.)
+   - A pre-impact alarm hides the counted detection by construction (60 s cooldown): on the 281
+     clips with enough lead time, 0 of 143 clips with such an alarm count as detected, against
+     81 of 138 without.
+   - Timing: 43 % of pre-impact alarms fire within 3 s of the impact and 66 % within 5 s (median
+     3.4 s), but a uniform hazard over each clip's short armed interval would give 67 % and
+     85 %. So there is **no evidence that these alarms anticipate the crash**; the earlier
+     reading ("mostly early alarms on an unfolding crash") is withdrawn.
+   - Rates per ARMED hour (warm-up and cooldowns excluded): ACCIDENT pre-impact 792/h (681–917),
+     UA-DETRAC normal traffic **55/h (41–73)**, pooled 203/h. Pre-impact footage alarms ~14× more
+     often than normal traffic, so it is not a stand-in for normal traffic.
+7. **For phase 4 onwards:** `sim_inputs.yaml` (v5, re-exported with `final_v5 --export-only`, no
+   labels read) keeps the pre-registered fields and adds `false_alarm_model`: Poisson alarms at
+   λ per armed hour, then a 60 s cooldown. Defaults for the simulator: **false alarms λ = 55 per
+   armed camera-hour (UA-DETRAC, normal traffic)**; detection 0.61 with delay 2.8 s. Phase 10
+   sensitivity ranges (`suggested_phase10_ranges`): λ 41–917 per armed hour (UA-DETRAC lower
+   bound to ACCIDENT pre-impact upper bound) and detection 0.30–0.63 (non-US Wilson lower bound
+   to overall Wilson upper bound); Pune is outside the US, so the non-US 0.37 is a pre-specified
+   pessimistic scenario. These replace the earlier, untraceable "36–433/h, 0.29–0.70". Fusion
+   uses these rates as likelihoods, not the window confidence.
