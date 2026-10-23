@@ -166,3 +166,20 @@ on 2026-10-22 at the source.
   zero-shot pipelines built on cloud APIs (Gemini, Qwen3-VL-Plus: not offline), VideoMAE-v2
   (CC BY-NC, remote code; same role as V-JEPA 2), community YOLO / VideoMAE "accident" fine-tunes
   (unknown training data, possible overlap with evaluation videos).
+
+## Amendment 2 (2026-10-23, after stage A on validation, before ANY holdout result)
+Reason (a property of the benchmark, measured on train/val clips only): ACCIDENT clips are
+trimmed so that the impact comes early (median 4.4 s into a 15 s clip). With the warm-up of the
+chosen operating point (3 s window + 3 more windows), 405 of 502 train/val clips have no usable
+road footage before t* - 1 s (0.11 h in total), so E2 on the 1,520 holdout clips will rest on
+roughly 0.3 h, not the "several hours" expected in section 1. The deployed detector is already
+fixed by validation; nothing below changes selection.
+- **E2b (secondary): false alarms per camera-hour on UA-DETRAC** (HF mirror `abhineet123/ua_detrac`,
+  listed in section 3 as optional): 100 fixed-camera traffic sequences from Beijing/Tianjin, 25 fps,
+  ~1.56 h, no accidents, so every alarm is a false alarm; footage after the warm-up counts.
+  Poisson and sequence-clustered bootstrap intervals. Evaluation only (never used for training or
+  selection). Licence: research use (original UA-DETRAC terms are non-commercial).
+- **Road false-alarm rate exported to the simulator:** the pooled rate over ACCIDENT pre-impact
+  footage and UA-DETRAC (both never-seen road CCTV), with E2 and E2b also reported separately.
+- **E3b (secondary): median delay on clips whose impact leaves at least the warm-up + 1 s of lead
+  time**, because on earlier impacts the delay mostly measures the warm-up.
