@@ -185,6 +185,13 @@ def stage_c(cache: Path, ann: pd.DataFrame, out: Path) -> dict[str, object]:
     return choice
 
 
+LATENCY_SAMPLE = 30  # checks before the latency criterion can stop a candidate early
+
+
+class TooSlowError(RuntimeError):
+    """The candidate's median latency exceeds ``verifier.max_latency_s`` (pre-registered)."""
+
+
 class CachedVerifier:
     """VLM scores of candidate alarms, cached on disk per (video, alarm time)."""
 
@@ -203,6 +210,8 @@ class CachedVerifier:
         self.anonymizer = Anonymizer(cfg.privacy, d.vehicle_classes, d.person_class)
         self.tracker = YoloTracker(d)
         self.scores: dict[tuple[str, float], tuple[float, float]] = {}
+        self.new_calls = 0
+        self.limit_s = cfg.verifier.max_latency_s  # type: ignore[union-attr]
         if path.exists():
             old = pd.read_parquet(path)
             self.scores = {(r.video_id, r.t): (r.p_yes, r.latency_s) for r in old.itertuples()}
@@ -224,6 +233,9 @@ class CachedVerifier:
             t0 = time.perf_counter()
             p = self.model.score(frames)
             self.scores[key] = (p, time.perf_counter() - t0)
+            self.new_calls += 1
+            if self.new_calls >= LATENCY_SAMPLE and self.median_latency() > self.limit_s:
+                raise TooSlowError(f"median latency {self.median_latency():.2f} s")
         return self.scores[key][0]
 
     def save(self) -> None:
@@ -285,9 +297,14 @@ def stage_b(cache: Path, ann: pd.DataFrame, out: Path) -> dict[str, object]:
             rows.append({"verifier": name, "eligible": False, "note": f"cannot run: {exc}"[:300]})
             continue
         for tau in v.thresholds:
-            s = summarise_alarms(
-                per_video(w, videos, "combined_p", cfg, th, k, verify=accepts(scorer, tau))
-            )
+            try:
+                s = summarise_alarms(
+                    per_video(w, videos, "combined_p", cfg, th, k, verify=accepts(scorer, tau))
+                )
+            except TooSlowError as exc:
+                log.info("%s: %s; stopping", name, exc)
+                rows.append({"verifier": name, "eligible": False, "note": f"too slow ({exc})"})
+                break
             fa = false_alarms(s)
             rows.append(
                 {
