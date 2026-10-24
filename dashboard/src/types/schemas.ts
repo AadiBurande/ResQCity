@@ -27,8 +27,8 @@ export const IncidentStatusValues = ["candidate", "verifying", "confirmed", "dis
 export type Language = "en" | "hi" | "mr";
 export const LanguageValues = ["en", "hi", "mr"] as const;
 
-export type SourceKind = "camera_event" | "call";
-export const SourceKindValues = ["camera_event", "call"] as const;
+export type SourceKind = "camera_event" | "call" | "operator_review";
+export const SourceKindValues = ["camera_event", "call", "operator_review"] as const;
 
 export type UnitState = "idle" | "ready" | "en_route" | "on_scene" | "transporting" | "at_hospital" | "returning" | "relocating" | "out_of_service";
 export const UnitStateValues = ["idle", "ready", "en_route", "on_scene", "transporting", "at_hospital", "returning", "relocating", "out_of_service"] as const;
@@ -147,6 +147,17 @@ export interface Incident {
   severity: number;
   status: IncidentStatus;
   requirements: ServiceCounts;
+  /** Additive log-odds terms of the posterior (prior, each camera, calls, reviews), for explanations. */
+  evidence_log_odds: Record<string, number>;
+}
+
+/** An operator's verdict after watching the clip of a camera event (phase 4, D-028). */
+export interface Review {
+  id: string;
+  ts: string;
+  event_id: string;
+  confirmed: boolean;
+  synthetic: boolean;
 }
 
 /** Number of units needed (or sent) per agency. */
@@ -165,7 +176,7 @@ export interface SeverityFeatures {
   num_vehicles: number;
 }
 
-/** Pointer from an incident to one piece of evidence (a camera event or a call). */
+/** Pointer from an incident to one piece of evidence (camera event, call or review). */
 export interface SourceRef {
   kind: SourceKind;
   ref_id: string;

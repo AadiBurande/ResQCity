@@ -26,6 +26,7 @@ from resqcity.common.schemas import (
     Incident,
     IncidentStatus,
     Language,
+    Review,
     ServiceCounts,
     SeverityFeatures,
     SourceKind,
@@ -93,6 +94,9 @@ def _examples() -> dict[type[BaseModel], BaseModel]:
             triaged_severity=0.8,
             triage_confidence=0.7,
         ),
+        Review: Review(
+            id="REV-001", ts=T0 + timedelta(seconds=40), event_id="EV-001", confirmed=True
+        ),
         Incident: Incident(
             id="INC-001",
             type=EventType.ACCIDENT,
@@ -106,6 +110,7 @@ def _examples() -> dict[type[BaseModel], BaseModel]:
             severity=0.9,
             status=IncidentStatus.CONFIRMED,
             requirements=counts,
+            evidence_log_odds={"prior": -7.1, "camera:C01": 0.1, "calls": 8.3},
         ),
         Unit: Unit(
             id="AMB-07",

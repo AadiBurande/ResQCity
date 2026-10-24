@@ -65,6 +65,7 @@ class Language(StrEnum):
 class SourceKind(StrEnum):
     CAMERA_EVENT = "camera_event"
     CALL = "call"
+    OPERATOR_REVIEW = "operator_review"
 
 
 class IncidentStatus(StrEnum):
@@ -156,7 +157,7 @@ class SeverityFeatures(Schema):
 
 
 class SourceRef(Schema):
-    """Pointer from an incident to one piece of evidence (a camera event or a call)."""
+    """Pointer from an incident to one piece of evidence (camera event, call or review)."""
 
     kind: SourceKind
     ref_id: Id
@@ -223,6 +224,16 @@ class Call(Schema):
     synthetic: bool = True
 
 
+class Review(Schema):
+    """An operator's verdict after watching the clip of a camera event (phase 4, D-028)."""
+
+    id: Id
+    ts: AwareDatetime
+    event_id: Id
+    confirmed: bool
+    synthetic: bool = True
+
+
 class Incident(Schema):
     """A fused incident hypothesis built from camera events and calls."""
 
@@ -238,6 +249,11 @@ class Incident(Schema):
     severity: Probability
     status: IncidentStatus = IncidentStatus.CANDIDATE
     requirements: ServiceCounts
+    evidence_log_odds: dict[str, float] = Field(
+        default_factory=dict,
+        description="Additive log-odds terms of the posterior (prior, each camera, calls, "
+        "reviews), for explanations.",
+    )
 
     @model_validator(mode="after")
     def _updated_after_created(self) -> Self:
@@ -325,6 +341,7 @@ SCHEMA_MODELS: tuple[type[Schema], ...] = (
     Camera,
     Event,
     Call,
+    Review,
     Incident,
     Unit,
     Station,
