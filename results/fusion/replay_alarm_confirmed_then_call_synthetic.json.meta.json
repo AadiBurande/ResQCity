@@ -1,11 +1,11 @@
 {
   "file": "results/fusion/replay_alarm_confirmed_then_call_synthetic.json",
-  "generated_at_utc": "2026-10-24T10:01:34+00:00",
+  "generated_at_utc": "2026-10-24T10:02:03+00:00",
   "command": "fusion_replay.py --all",
   "synthetic": true,
   "git": {
-    "commit": "e92c61a0444b6f3bb81b634cb3ebce3bbcfbd72b",
-    "dirty": true
+    "commit": "df2869634f598d95507cf7c4b4676cdb3263480e",
+    "dirty": false
   },
   "configs_sha256": {
     "configs/fusion_scenarios/alarm_confirmed_then_call.yaml": "787fd69ae4199e346fd65aee5506090a646915b2405279de6a57e9b232e21e17",

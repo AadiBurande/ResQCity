@@ -1,11 +1,11 @@
 {
   "file": "results/fusion/replay_two_crashes_synthetic.json",
-  "generated_at_utc": "2026-10-24T10:01:35+00:00",
+  "generated_at_utc": "2026-10-24T10:02:04+00:00",
   "command": "fusion_replay.py --all",
   "synthetic": true,
   "git": {
-    "commit": "e92c61a0444b6f3bb81b634cb3ebce3bbcfbd72b",
-    "dirty": true
+    "commit": "df2869634f598d95507cf7c4b4676cdb3263480e",
+    "dirty": false
   },
   "configs_sha256": {
     "configs/fusion_scenarios/two_crashes.yaml": "a9b443e5775c7af5c105b4a365963d399079ca54e58190ef0f89b591f9094c25",
