@@ -1,10 +1,10 @@
 {
   "file": "results/fusion/replay_false_alarm_rejected_synthetic.json",
-  "generated_at_utc": "2026-10-24T10:02:04+00:00",
+  "generated_at_utc": "2026-10-24T10:05:44+00:00",
   "command": "fusion_replay.py --all",
   "synthetic": true,
   "git": {
-    "commit": "df2869634f598d95507cf7c4b4676cdb3263480e",
+    "commit": "c89e20f01eca23ee2df5746153bd3940a7600cfa",
     "dirty": false
   },
   "configs_sha256": {

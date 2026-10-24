@@ -68,9 +68,9 @@
       "evidence_log_odds": {
         "prior": -8.2932,
         "camera:C01": 0.0096,
+        "camera:C01b": 0.0096,
         "camera:C03": -0.0299,
         "camera:C04": -0.015,
-        "camera:C01b": 0.0096,
         "calls": 19.7546
       }
     }
