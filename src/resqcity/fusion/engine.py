@@ -2,13 +2,15 @@
 their posterior, severity and requirements up to date (phase 4; docs/models/fusion.md).
 
 Association (gate): new evidence joins the candidate with the highest posterior among those
-whose anchor node lies within ``base_distance_m + k_location_error * max(err_new, err_anchor)``
-(road-graph distance; err = stated location error of a call, 0 for a camera) and whose FIRST
+whose anchor lies within ``base_distance_m + k_location_error * sqrt(err_new^2 + err_anchor^2)``
+(straight-line distance, because a caller's location error is a straight-line displacement;
+err = stated location error of a call, 0 for a camera) and whose FIRST
 evidence is at most ``time_window_s`` old (one incident per region and window: a camera's
 recurring false alarms must not chain into one endless candidate); otherwise it starts a new
 candidate. A candidate's
 region is the union of its evidence regions (a camera's coverage, or the gate ball of a call);
-its anchor is the most precise location seen (a camera junction beats a call).
+its anchor is the most precise location seen (a camera junction beats a call). A camera's
+coverage is a road-graph ball; a call's region is the straight-line disc of its gate radius.
 Every change recomputes the posterior from all evidence (order-independent, fusion.model).
 """
 
@@ -111,7 +113,6 @@ class FusionEngine:
         self.det, self.bg = detector, background
         self.candidates: dict[str, Candidate] = {}
         self._event_owner: dict[str, str] = {}
-        self._ball_cache: dict[tuple[int, float], dict[int, float]] = {}
         self._n = 0
         # indexes (a week has ~10^5 camera alarms): live candidates by anchor node index, the
         # widest anchor error among them, and the cameras that see each node
@@ -128,18 +129,15 @@ class FusionEngine:
 
     # -- geometry -------------------------------------------------------------------------------
 
-    def _ball(self, node: int, radius_m: float) -> dict[int, float]:
-        """{node index: road-graph distance} within ``radius_m`` of ``node`` (cached)."""
-        key = (node, round(radius_m, 1))
-        if key not in self._ball_cache:
-            d = self.network.shortest_lengths([node], limit_m=radius_m)[0]
-            idx = np.flatnonzero(np.isfinite(d))
-            self._ball_cache[key] = dict(zip(idx.tolist(), d[idx].tolist(), strict=True))
-        return self._ball_cache[key]
+    def _disc(self, node: int, radius_m: float) -> dict[int, float]:
+        """{node index: straight-line distance} within ``radius_m`` of ``node``."""
+        x, y = self.network.xy[self.network.index_of(node)]
+        idx, dist = self.network.nodes_within(x, y, radius_m)
+        return dict(zip(idx.tolist(), dist.tolist(), strict=True))
 
-    def _gate_m(self, err_m: float) -> float:
+    def _gate_m(self, err_a: float, err_b: float = 0.0) -> float:
         g = self.cfg.gate
-        return g.base_distance_m.value + g.k_location_error.value * err_m
+        return g.base_distance_m.value + g.k_location_error.value * float(np.hypot(err_a, err_b))
 
     # -- association ----------------------------------------------------------------------------
 
@@ -147,15 +145,15 @@ class FusionEngine:
         if not self._live:
             return None
         window = self.cfg.gate.time_window_s.value
-        ball = self._ball(node, self._gate_m(max(err_m, self._max_err)))
+        disc = self._disc(node, self._gate_m(err_m, self._max_err))
         hits = []
-        for idx in ball.keys() & self._by_anchor.keys():
+        for idx in disc.keys() & self._by_anchor.keys():
             for cid in self._by_anchor[idx]:
                 c = self._live[cid]
                 if abs((ts - c.first_evidence).total_seconds()) > window:
                     continue
-                if ball[idx] <= self._gate_m(max(err_m, c.anchor_error_m)):
-                    hits.append((-c.posterior, ball[idx], c.id, c))
+                if disc[idx] <= self._gate_m(err_m, c.anchor_error_m):
+                    hits.append((-c.posterior, disc[idx], c.id, c))
         return min(hits)[3] if hits else None
 
     def _index(self, cand: Candidate, add: bool) -> None:
@@ -202,7 +200,7 @@ class FusionEngine:
         loc = call.reported_location
         node = int(self.network.nearest_nodes(loc.lat, loc.lon)[0][0])
         err = float(call.location_error_m)
-        region = np.fromiter(self._ball(node, self._gate_m(err)), dtype=np.int64)
+        region = np.sort(np.fromiter(self._disc(node, self._gate_m(err)), dtype=np.int64))
         cand = self._match(node, err, call.ts) or self._new(node, err, region, call.ts)
         self._grow(cand, node, err, region, call.ts)
         cand.add_call(call, triage)

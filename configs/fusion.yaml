@@ -5,12 +5,21 @@
 detector_inputs: results/vision/sim_inputs.yaml
 
 gate:
-  # Evidence joins a candidate if its road-graph distance to the candidate's node is at most
-  # base_distance_m + k_location_error * (stated location error of the call, 0 for cameras)
+  # Evidence joins a candidate if its STRAIGHT-LINE distance to the candidate's anchor is at most
+  # base_distance_m + k_location_error * sqrt(err_new^2 + err_anchor^2) (err = stated location
+  # error of a call, 0 for a camera; a caller's location error is a straight-line displacement)
   # and it arrives within time_window_s of the candidate's FIRST evidence (one incident per
   # region and window; recurring false alarms of one camera start new candidates).
   base_distance_m: {value: 150.0, source: UNVERIFIED}
-  k_location_error: {value: 2.0, source: UNVERIFIED}
+  k_location_error:
+    value: 3.0
+    source: UNVERIFIED
+    note: >
+      Design rule, not tuned on outcomes: the smallest half-step k for which at least 95 % of
+      same-incident pairs fall inside the gate under the stated error model of calls.yaml
+      (lognormal, median 300 m, sigma 0.7): call-call 96.3 %, call-camera 96.3 % (k = 2: 88 %).
+      The first synthetic week split 25 of 48 same-incident call pairs with road-graph
+      distance and k = 2 (D-028).
   time_window_s: {value: 900.0, source: UNVERIFIED}
 
 camera:

@@ -286,6 +286,12 @@ class RoadNetwork:
         dist, j = cKDTree(self.xy[subset]).query(pts)
         return self.node_ids[subset[j]], dist
 
+    def nodes_within(self, x: float, y: float, radius_m: float) -> tuple[np.ndarray, np.ndarray]:
+        """(node indices, straight-line distances in m) of nodes within ``radius_m`` of the
+        projected point (x, y)."""
+        idx = np.asarray(self._kdtree.query_ball_point([x, y], radius_m), dtype=np.int64)
+        return idx, np.hypot(self.xy[idx, 0] - x, self.xy[idx, 1] - y)
+
     def edge_index(self, u: int, v: int) -> int:
         """Row in ``edges`` of the edge u -> v (OSM node ids)."""
         try:

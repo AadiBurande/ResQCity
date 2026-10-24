@@ -15,17 +15,19 @@ New evidence $e$ at node $x_e$ with stated location error $\varepsilon_e$ (call;
 camera) joins the candidate with the highest posterior among those with
 
 $$
-d_G(x_e, a_j) \le D_0 + k\,\max(\varepsilon_e, \varepsilon_{a_j}), \qquad
+\lVert x_e - a_j \rVert \le D_0 + k\,\sqrt{\varepsilon_e^2 + \varepsilon_{a_j}^2}, \qquad
 |t_e - t_j^{\text{first}}| \le W ,
 $$
 
-where $d_G$ is the road-graph distance (direction ignored), $D_0$ = `gate.base_distance_m`,
-$k$ = `gate.k_location_error`, $W$ = `gate.time_window_s` (measured from the candidate's FIRST evidence: a camera's
+where $\lVert\cdot\rVert$ is the straight-line distance (a caller's location error is a
+straight-line displacement; two uncertain locations combine in quadrature), $D_0$ =
+`gate.base_distance_m`, $k$ = `gate.k_location_error` (chosen so that 95 % of same-incident
+pairs fall inside under the stated error model; see `configs/fusion.yaml`), $W$ = `gate.time_window_s` (measured from the candidate's FIRST evidence: a camera's
 recurring false alarms must not chain into one endless candidate). Otherwise $e$ starts a new
 candidate.
 The region grows as the union of evidence regions: a camera contributes its coverage
-$C_c = \{v : d_G(v, \text{junction}_c) \le r_{\text{cov}}\}$, a call the ball of radius
-$D_0 + k\varepsilon_e$ around its snapped node. Several alarms of one camera count once (only
+$C_c = \{v : d_G(v, \text{junction}_c) \le r_{\text{cov}}\}$ ($d_G$ = road-graph distance), a
+call the straight-line disc of radius $D_0 + k\varepsilon_e$ around its snapped node. Several alarms of one camera count once (only
 its first alarm in the window is used: repeated alarms are not independent).
 
 ## 2. Hypotheses

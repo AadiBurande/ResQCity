@@ -52,21 +52,27 @@ log = logging.getLogger(__name__)
 
 
 def pair_scores(groups: dict[str, list[str | None]]) -> dict[str, float]:
-    """Pairwise precision / recall: items are evidence, truth label = incident id (false
-    evidence is its own singleton), prediction = candidate."""
-    tp = pred_pairs = 0
+    """Association quality over evidence items (truth label = incident id, None = false evidence;
+    prediction = candidate). Recall: share of same-incident pairs that share a candidate.
+    Precision: among pairs in one candidate that involve genuine evidence, the share from the
+    same incident. Recurring false alarms of one camera sharing a candidate are by design and
+    are not counted; false evidence absorbed into real candidates is reported separately."""
+    tp = genuine_pairs = 0
     truth_pairs: Counter = Counter()
+    false_in_real = 0
     for labels in groups.values():
-        n = len(labels)
-        pred_pairs += n * (n - 1) // 2
         counts = Counter(lab for lab in labels if lab is not None)
+        n_real, n_false = sum(counts.values()), labels.count(None)
         tp += sum(c * (c - 1) // 2 for c in counts.values())
+        genuine_pairs += n_real * (n_real - 1) // 2 + n_real * n_false
         truth_pairs.update(counts)
+        false_in_real += n_false if n_real else 0
     total_truth = sum(c * (c - 1) // 2 for c in truth_pairs.values())
     return {
-        "pair_precision": tp / pred_pairs if pred_pairs else 1.0,
+        "pair_precision": tp / genuine_pairs if genuine_pairs else 1.0,
         "pair_recall": tp / total_truth if total_truth else 1.0,
         "same_incident_pairs": total_truth,
+        "false_items_in_real_candidates": false_in_real,
     }
 
 
