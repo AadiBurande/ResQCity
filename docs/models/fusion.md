@@ -66,25 +66,35 @@ exploratory; D-028).
 
 ### 3.2 Calls
 
-Let $n$ be the number of calls in the candidate. Under $H_0$ they are background:
-$n \sim \text{Poisson}(\beta)$, $\beta = \Lambda_F\, m(R)\, W$. Under $H_1$, $n = G + B$ with $B$ the
-same background and $G$ the genuine calls observed by now:
+Calls are treated as a point process with times $t_1 < \dots < t_n$ (in the candidate). Under
+$H_0$ all are background: Poisson with rate $b = \Lambda_F\, m(R)$ per second, so their density is
+$b^n e^{-bT}$. Under $H_1$ the first $k$ calls are genuine and the rest background, summed over
+$k = 0..n$; the common factor $e^{-bT}$ cancels:
 
 $$
-P(G = 0) = p_u + (1-p_u)\,(1 - F_1(\tau)), \qquad
-P(G = 1 + k) = (1-p_u)\,F_1(\tau)\, P(\min(N, A) = k),
+\mathrm{LR}_{\text{calls}} = \sum_{k=0}^{n} G_k\, b^{-k},
 $$
 
-with $p_u$ = `p_unreported` of the candidate's severity class, $F_1$ the lognormal CDF of the
-first-call delay, $\tau$ the time since onset (camera-pinned: alarm time − detector delay;
-otherwise the onset is averaged uniformly over the window before the first evidence),
-$N \sim \text{Poisson}(m)$ the extra calls in total and $A \sim \text{Poisson}(\tau_1/g)$ the arrivals
-of the chained exponential gaps (mean $g$) since the first call ($\tau_1$). Then
-$\mathrm{LR}_{\text{calls}} = P(n\mid H_1)/P(n\mid H_0)$. It increases with $n$ (the ratio
-$\sum_k P(G{=}k)\,\frac{n!}{(n-k)!\,\beta^k}$ is increasing in $n$), so a confirming call never
-lowers the posterior (tested), and $P(G{=}0)$ falls with time, so a candidate without calls loses
-belief as time passes. Checked against a brute-force simulation of `sim.calls`
-(`tests/fusion/test_model.py`).
+where $G_k$ is the density under $H_1$ that exactly the first $k$ calls are genuine and no further
+genuine call has come by now (the call process of `sim.calls`):
+
+$$
+G_0 = \mathbb{E}_s\!\left[p_u + (1-p_u)\,\bigl(1 - F_1(t_{\text{now}} - s)\bigr)\right],
+\qquad
+G_k = (1-p_u)\, \mathbb{E}_s\!\left[f_1(t_1 - s)\right]
+\prod_{j=2}^{k} \frac{q_{j-1}}{g}\, e^{-(t_j - t_{j-1})/g}
+\;\Bigl(1 - q_k\bigl(1 - e^{-(t_{\text{now}} - t_k)/g}\bigr)\Bigr),
+$$
+
+with $p_u$ = `p_unreported` of the candidate's severity class, $f_1, F_1$ the lognormal density
+and CDF of the first-call delay, $N \sim \text{Poisson}(m)$ extra calls arriving one exponential gap
+(mean $g$) after another, $q_j = P(N \ge j)/P(N \ge j-1)$, and $s$ the onset: pinned by a camera
+(first alarm time − detector delay) or, without a camera, uniform over the window before the first
+evidence. So a call at the typical delay after a camera alarm counts more than the same call
+without a camera, and a candidate without calls loses belief as time passes ($G_0$ falls).
+Adding a call (the latest in time) adds the non-negative term $G_{n+1} b^{-(n+1)}$ and leaves the
+others unchanged, so a confirming call never lowers the posterior (tested). $G_0, G_1, G_2$ are
+checked against a brute-force simulation of `sim.calls` (`tests/fusion/test_model.py`).
 
 ### 3.3 Operator review
 
@@ -102,8 +112,9 @@ add units. Type = confidence-weighted vote of the triaged calls, else the camera
 
 1. **Conditional independence** of cameras, calls and reviews given $H$. Callers who saw the
    same crash are counted through the call model, not as independent evidence.
-2. **Count-based calls.** Call timing enters only through "how many by now"; the exact gaps are
-   not used (except to place the first call).
+2. **Prefix assignment.** Under $H_1$ the genuine calls are taken to be the earliest ones (a
+   prank before a genuine call is not considered); background calls about incidents outside the
+   region are ignored.
 3. **At most one incident per region and window**; a candidate is never split or merged later.
 4. **Background calls are false calls only**; genuine calls about incidents outside the region
    that land inside it through location error are ignored ($H_0$ slightly too sharp).

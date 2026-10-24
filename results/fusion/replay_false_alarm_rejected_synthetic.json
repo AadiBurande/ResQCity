@@ -1,0 +1,272 @@
+{
+  "scenario": "false_alarm_rejected",
+  "description": "Camera C10 alarms (lowest confidence bin); the operator review rejects it at 40 s.",
+  "synthetic": true,
+  "grouping_ok": true,
+  "expected_groups": [
+    [
+      "EV-F",
+      "REV-F"
+    ]
+  ],
+  "evidence_to_incident": {
+    "EV-F": "INC-000001",
+    "REV-F": "INC-000001"
+  },
+  "triage": {},
+  "incidents": {
+    "INC-000001": {
+      "id": "INC-000001",
+      "type": "accident",
+      "location": {
+        "lat": 18.5754458,
+        "lon": 73.8993488
+      },
+      "node": 7984208511,
+      "ward_id": "W02",
+      "created_ts": "2026-03-03T14:00:00+05:30",
+      "updated_ts": "2026-03-03T14:10:00+05:30",
+      "sources": [
+        {
+          "kind": "camera_event",
+          "ref_id": "EV-F"
+        },
+        {
+          "kind": "operator_review",
+          "ref_id": "REV-F"
+        }
+      ],
+      "posterior": 1.0063149542103187e-07,
+      "severity": 0.5,
+      "status": "candidate",
+      "requirements": {
+        "ambulance": 1,
+        "police": 1,
+        "fire": 0
+      },
+      "evidence_log_odds": {
+        "prior": -11.3116,
+        "camera:C10": 0.0151,
+        "calls": -1.8397,
+        "review:0": -2.9755
+      }
+    }
+  },
+  "trace": [
+    {
+      "t_s": 0.0,
+      "candidate": "INC-000001",
+      "posterior": 1.2415546745558118e-05
+    },
+    {
+      "t_s": 0.0,
+      "candidate": "INC-000001",
+      "posterior": 1.2415546745558118e-05
+    },
+    {
+      "t_s": 15.0,
+      "candidate": "INC-000001",
+      "posterior": 1.2393814580604229e-05
+    },
+    {
+      "t_s": 30.0,
+      "candidate": "INC-000001",
+      "posterior": 1.2228044397379775e-05
+    },
+    {
+      "t_s": 40.0,
+      "candidate": "INC-000001",
+      "posterior": 6.126678275587529e-07
+    },
+    {
+      "t_s": 45.0,
+      "candidate": "INC-000001",
+      "posterior": 6.055662752876929e-07
+    },
+    {
+      "t_s": 60.0,
+      "candidate": "INC-000001",
+      "posterior": 5.796953134890376e-07
+    },
+    {
+      "t_s": 75.0,
+      "candidate": "INC-000001",
+      "posterior": 5.493758480401407e-07
+    },
+    {
+      "t_s": 90.0,
+      "candidate": "INC-000001",
+      "posterior": 5.171048298273149e-07
+    },
+    {
+      "t_s": 105.0,
+      "candidate": "INC-000001",
+      "posterior": 4.846025928291408e-07
+    },
+    {
+      "t_s": 120.0,
+      "candidate": "INC-000001",
+      "posterior": 4.529593582093718e-07
+    },
+    {
+      "t_s": 135.0,
+      "candidate": "INC-000001",
+      "posterior": 4.2281685670010407e-07
+    },
+    {
+      "t_s": 150.0,
+      "candidate": "INC-000001",
+      "posterior": 3.9451563462159725e-07
+    },
+    {
+      "t_s": 165.0,
+      "candidate": "INC-000001",
+      "posterior": 3.6820091779174384e-07
+    },
+    {
+      "t_s": 180.0,
+      "candidate": "INC-000001",
+      "posterior": 3.4389495274895236e-07
+    },
+    {
+      "t_s": 195.0,
+      "candidate": "INC-000001",
+      "posterior": 3.2154520282344385e-07
+    },
+    {
+      "t_s": 210.0,
+      "candidate": "INC-000001",
+      "posterior": 3.0105595978631644e-07
+    },
+    {
+      "t_s": 225.0,
+      "candidate": "INC-000001",
+      "posterior": 2.8230881283704433e-07
+    },
+    {
+      "t_s": 240.0,
+      "candidate": "INC-000001",
+      "posterior": 2.65175713904569e-07
+    },
+    {
+      "t_s": 255.0,
+      "candidate": "INC-000001",
+      "posterior": 2.4952715508913215e-07
+    },
+    {
+      "t_s": 270.0,
+      "candidate": "INC-000001",
+      "posterior": 2.3523713514650538e-07
+    },
+    {
+      "t_s": 285.0,
+      "candidate": "INC-000001",
+      "posterior": 2.2218602830262118e-07
+    },
+    {
+      "t_s": 300.0,
+      "candidate": "INC-000001",
+      "posterior": 2.1026209339292834e-07
+    },
+    {
+      "t_s": 315.0,
+      "candidate": "INC-000001",
+      "posterior": 1.9936211217786333e-07
+    },
+    {
+      "t_s": 330.0,
+      "candidate": "INC-000001",
+      "posterior": 1.8939148029918236e-07
+    },
+    {
+      "t_s": 345.0,
+      "candidate": "INC-000001",
+      "posterior": 1.8026396441198963e-07
+    },
+    {
+      "t_s": 360.0,
+      "candidate": "INC-000001",
+      "posterior": 1.7190126583573086e-07
+    },
+    {
+      "t_s": 375.0,
+      "candidate": "INC-000001",
+      "posterior": 1.6423248226775036e-07
+    },
+    {
+      "t_s": 390.0,
+      "candidate": "INC-000001",
+      "posterior": 1.571935265460998e-07
+    },
+    {
+      "t_s": 405.0,
+      "candidate": "INC-000001",
+      "posterior": 1.5072653974146384e-07
+    },
+    {
+      "t_s": 420.0,
+      "candidate": "INC-000001",
+      "posterior": 1.4477932141996368e-07
+    },
+    {
+      "t_s": 435.0,
+      "candidate": "INC-000001",
+      "posterior": 1.393047903612514e-07
+    },
+    {
+      "t_s": 450.0,
+      "candidate": "INC-000001",
+      "posterior": 1.342604827411486e-07
+    },
+    {
+      "t_s": 465.0,
+      "candidate": "INC-000001",
+      "posterior": 1.2960809072085007e-07
+    },
+    {
+      "t_s": 480.0,
+      "candidate": "INC-000001",
+      "posterior": 1.253130418011367e-07
+    },
+    {
+      "t_s": 495.0,
+      "candidate": "INC-000001",
+      "posterior": 1.2134411771047536e-07
+    },
+    {
+      "t_s": 510.0,
+      "candidate": "INC-000001",
+      "posterior": 1.1767311066860772e-07
+    },
+    {
+      "t_s": 525.0,
+      "candidate": "INC-000001",
+      "posterior": 1.1427451437740268e-07
+    },
+    {
+      "t_s": 540.0,
+      "candidate": "INC-000001",
+      "posterior": 1.1112524688586907e-07
+    },
+    {
+      "t_s": 555.0,
+      "candidate": "INC-000001",
+      "posterior": 1.082044024531946e-07
+    },
+    {
+      "t_s": 570.0,
+      "candidate": "INC-000001",
+      "posterior": 1.0549302962289238e-07
+    },
+    {
+      "t_s": 585.0,
+      "candidate": "INC-000001",
+      "posterior": 1.0297393287601906e-07
+    },
+    {
+      "t_s": 600.0,
+      "candidate": "INC-000001",
+      "posterior": 1.0063149542103187e-07
+    }
+  ]
+}

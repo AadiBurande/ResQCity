@@ -1,0 +1,11 @@
+# Scripted replay (SYNTHETIC). A low-confidence camera alarm; the operator rejects the clip.
+name: false_alarm_rejected
+description: Camera C10 alarms (lowest confidence bin); the operator review rejects it at 40 s.
+start: "2026-03-03T14:00:00+05:30"
+end_s: 600
+tick_s: 15
+evidence:
+  - {kind: camera, id: EV-F, camera: C10, t: 0, confidence: 0.33}
+  - {kind: review, id: REV-F, event: EV-F, t: 40, confirmed: false}
+expect:
+  groups: [[EV-F, REV-F]]

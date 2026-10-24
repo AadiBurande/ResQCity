@@ -1,0 +1,11 @@
+# Scripted replay (SYNTHETIC). One call, nothing else ever confirms it.
+name: prank_call
+description: A single fire call far from any camera; no second call, no camera.
+start: "2026-03-03T23:00:00+05:30"
+end_s: 2400
+tick_s: 30
+evidence:
+  - {kind: call, id: CALL-P, near: C12, offset_m: [600, 400], t: 0, error_m: 300, language: hi,
+     text: "यहाँ आग लगी है।"}
+expect:
+  groups: [[CALL-P]]

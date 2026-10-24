@@ -1,0 +1,605 @@
+{
+  "scenario": "two_views_one_crash",
+  "description": "Two views of junction C01 alarm on one crash; two callers (Marathi, English) follow.",
+  "synthetic": true,
+  "grouping_ok": true,
+  "expected_groups": [
+    [
+      "EV-1",
+      "EV-2",
+      "CALL-1",
+      "CALL-2"
+    ]
+  ],
+  "evidence_to_incident": {
+    "EV-1": "INC-000001",
+    "EV-2": "INC-000001",
+    "CALL-1": "INC-000001",
+    "CALL-2": "INC-000001"
+  },
+  "triage": {
+    "CALL-1": {
+      "type": "accident",
+      "severity": 0.5
+    },
+    "CALL-2": {
+      "type": "accident",
+      "severity": 0.5
+    }
+  },
+  "incidents": {
+    "INC-000001": {
+      "id": "INC-000001",
+      "type": "accident",
+      "location": {
+        "lat": 18.5346918,
+        "lon": 73.8795394
+      },
+      "node": 2252429946,
+      "ward_id": "W21",
+      "created_ts": "2026-03-03T18:00:00+05:30",
+      "updated_ts": "2026-03-03T18:25:00+05:30",
+      "sources": [
+        {
+          "kind": "camera_event",
+          "ref_id": "EV-1"
+        },
+        {
+          "kind": "camera_event",
+          "ref_id": "EV-2"
+        },
+        {
+          "kind": "call",
+          "ref_id": "CALL-1"
+        },
+        {
+          "kind": "call",
+          "ref_id": "CALL-2"
+        }
+      ],
+      "posterior": 0.9999891973483975,
+      "severity": 0.5,
+      "status": "candidate",
+      "requirements": {
+        "ambulance": 1,
+        "police": 1,
+        "fire": 0
+      },
+      "evidence_log_odds": {
+        "prior": -8.2932,
+        "camera:C01": 0.0096,
+        "camera:C03": -0.0299,
+        "camera:C04": -0.015,
+        "camera:C01b": 0.0096,
+        "calls": 19.7546
+      }
+    }
+  },
+  "trace": [
+    {
+      "t_s": 0.0,
+      "candidate": "INC-000001",
+      "posterior": 3.705314133742059e-05
+    },
+    {
+      "t_s": 0.0,
+      "candidate": "INC-000001",
+      "posterior": 3.705314133742059e-05
+    },
+    {
+      "t_s": 2.0,
+      "candidate": "INC-000001",
+      "posterior": 3.963531675697491e-05
+    },
+    {
+      "t_s": 15.0,
+      "candidate": "INC-000001",
+      "posterior": 3.9566051718274e-05
+    },
+    {
+      "t_s": 30.0,
+      "candidate": "INC-000001",
+      "posterior": 3.903686066394472e-05
+    },
+    {
+      "t_s": 45.0,
+      "candidate": "INC-000001",
+      "posterior": 3.789056489323568e-05
+    },
+    {
+      "t_s": 60.0,
+      "candidate": "INC-000001",
+      "posterior": 3.627186449813948e-05
+    },
+    {
+      "t_s": 75.0,
+      "candidate": "INC-000001",
+      "posterior": 3.437482252196311e-05
+    },
+    {
+      "t_s": 90.0,
+      "candidate": "INC-000001",
+      "posterior": 3.235566713179497e-05
+    },
+    {
+      "t_s": 105.0,
+      "candidate": "INC-000001",
+      "posterior": 3.032203657433079e-05
+    },
+    {
+      "t_s": 120.0,
+      "candidate": "INC-000001",
+      "posterior": 2.8342145066657933e-05
+    },
+    {
+      "t_s": 135.0,
+      "candidate": "INC-000001",
+      "posterior": 2.6456146036943198e-05
+    },
+    {
+      "t_s": 150.0,
+      "candidate": "INC-000001",
+      "posterior": 2.4685348432939546e-05
+    },
+    {
+      "t_s": 165.0,
+      "candidate": "INC-000001",
+      "posterior": 2.3038840233327927e-05
+    },
+    {
+      "t_s": 170.0,
+      "candidate": "INC-000001",
+      "posterior": 0.8637404334094979
+    },
+    {
+      "t_s": 180.0,
+      "candidate": "INC-000001",
+      "posterior": 0.8575205361440513
+    },
+    {
+      "t_s": 195.0,
+      "candidate": "INC-000001",
+      "posterior": 0.8481482493718481
+    },
+    {
+      "t_s": 210.0,
+      "candidate": "INC-000001",
+      "posterior": 0.8387899050423697
+    },
+    {
+      "t_s": 225.0,
+      "candidate": "INC-000001",
+      "posterior": 0.8295179489824174
+    },
+    {
+      "t_s": 240.0,
+      "candidate": "INC-000001",
+      "posterior": 0.8204021718649644
+    },
+    {
+      "t_s": 255.0,
+      "candidate": "INC-000001",
+      "posterior": 0.8115076575215696
+    },
+    {
+      "t_s": 260.0,
+      "candidate": "INC-000001",
+      "posterior": 0.999993712941739
+    },
+    {
+      "t_s": 270.0,
+      "candidate": "INC-000001",
+      "posterior": 0.999993495542267
+    },
+    {
+      "t_s": 285.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999931765159719
+    },
+    {
+      "t_s": 300.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999928678052096
+    },
+    {
+      "t_s": 315.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999925712009443
+    },
+    {
+      "t_s": 330.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999922881761478
+    },
+    {
+      "t_s": 345.0,
+      "candidate": "INC-000001",
+      "posterior": 0.999992019871018
+    },
+    {
+      "t_s": 360.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999917670936185
+    },
+    {
+      "t_s": 375.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999915303339025
+    },
+    {
+      "t_s": 390.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999913097884165
+    },
+    {
+      "t_s": 405.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999911053926698
+    },
+    {
+      "t_s": 420.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999909168581897
+    },
+    {
+      "t_s": 435.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999907437115461
+    },
+    {
+      "t_s": 450.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999905853330798
+    },
+    {
+      "t_s": 465.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999904409935801
+    },
+    {
+      "t_s": 480.0,
+      "candidate": "INC-000001",
+      "posterior": 0.99999030988768
+    },
+    {
+      "t_s": 495.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999901911632262
+    },
+    {
+      "t_s": 510.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999900839462805
+    },
+    {
+      "t_s": 525.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999899873617354
+    },
+    {
+      "t_s": 540.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999899005497495
+    },
+    {
+      "t_s": 555.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999898226783723
+    },
+    {
+      "t_s": 570.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999897529528065
+    },
+    {
+      "t_s": 585.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999896906217901
+    },
+    {
+      "t_s": 600.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999896349815824
+    },
+    {
+      "t_s": 615.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999895853780083
+    },
+    {
+      "t_s": 630.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999895412069656
+    },
+    {
+      "t_s": 645.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999895019137597
+    },
+    {
+      "t_s": 660.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999894669915659
+    },
+    {
+      "t_s": 675.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999894359792775
+    },
+    {
+      "t_s": 690.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999894084589417
+    },
+    {
+      "t_s": 705.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999893840529522
+    },
+    {
+      "t_s": 720.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999893624211229
+    },
+    {
+      "t_s": 735.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999893432577411
+    },
+    {
+      "t_s": 750.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999893262886725
+    },
+    {
+      "t_s": 765.0,
+      "candidate": "INC-000001",
+      "posterior": 0.99998931126857
+    },
+    {
+      "t_s": 780.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892979782187
+    },
+    {
+      "t_s": 795.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892862220413
+    },
+    {
+      "t_s": 810.0,
+      "candidate": "INC-000001",
+      "posterior": 0.999989275825776
+    },
+    {
+      "t_s": 825.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892666343305
+    },
+    {
+      "t_s": 840.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892585098107
+    },
+    {
+      "t_s": 855.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892513297239
+    },
+    {
+      "t_s": 870.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892449853415
+    },
+    {
+      "t_s": 885.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892393802193
+    },
+    {
+      "t_s": 900.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892344288611
+    },
+    {
+      "t_s": 915.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892300555162
+    },
+    {
+      "t_s": 930.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892261931006
+    },
+    {
+      "t_s": 945.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892227822286
+    },
+    {
+      "t_s": 960.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892197703504
+    },
+    {
+      "t_s": 975.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892171109784
+    },
+    {
+      "t_s": 990.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892147630008
+    },
+    {
+      "t_s": 1005.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892126900682
+    },
+    {
+      "t_s": 1020.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892108600498
+    },
+    {
+      "t_s": 1035.0,
+      "candidate": "INC-000001",
+      "posterior": 0.999989209244548
+    },
+    {
+      "t_s": 1050.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892078184711
+    },
+    {
+      "t_s": 1065.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892065596495
+    },
+    {
+      "t_s": 1080.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892054484992
+    },
+    {
+      "t_s": 1095.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892044677225
+    },
+    {
+      "t_s": 1110.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892036020421
+    },
+    {
+      "t_s": 1125.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892028379666
+    },
+    {
+      "t_s": 1140.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892021635823
+    },
+    {
+      "t_s": 1155.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892015683705
+    },
+    {
+      "t_s": 1170.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892010430431
+    },
+    {
+      "t_s": 1185.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892005794011
+    },
+    {
+      "t_s": 1200.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999892001702053
+    },
+    {
+      "t_s": 1215.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891998090655
+    },
+    {
+      "t_s": 1230.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891994903407
+    },
+    {
+      "t_s": 1245.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891992090514
+    },
+    {
+      "t_s": 1260.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891989608024
+    },
+    {
+      "t_s": 1275.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891987417138
+    },
+    {
+      "t_s": 1290.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891985483615
+    },
+    {
+      "t_s": 1305.0,
+      "candidate": "INC-000001",
+      "posterior": 0.999989198377723
+    },
+    {
+      "t_s": 1320.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891982271305
+    },
+    {
+      "t_s": 1335.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891980942295
+    },
+    {
+      "t_s": 1350.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891979769423
+    },
+    {
+      "t_s": 1365.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891978734344
+    },
+    {
+      "t_s": 1380.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891977820873
+    },
+    {
+      "t_s": 1395.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891977014725
+    },
+    {
+      "t_s": 1410.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891976303295
+    },
+    {
+      "t_s": 1425.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891975675448
+    },
+    {
+      "t_s": 1440.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891975121372
+    },
+    {
+      "t_s": 1455.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891974632397
+    },
+    {
+      "t_s": 1470.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891974200873
+    },
+    {
+      "t_s": 1485.0,
+      "candidate": "INC-000001",
+      "posterior": 0.999989197382005
+    },
+    {
+      "t_s": 1500.0,
+      "candidate": "INC-000001",
+      "posterior": 0.9999891973483975
+    }
+  ]
+}

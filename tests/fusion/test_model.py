@@ -38,8 +38,6 @@ def _ev(**kw: object) -> Evidence:
         "now_s": 1000.0,
         "first_evidence_s": 700.0,
         "onset_s": 697.0,
-        "first_call_s": None,
-        "n_calls": 0,
         "severity_class": "serious",
     }
     return Evidence(**{**base, **kw})
@@ -51,48 +49,53 @@ def test_prior_is_poisson_odds():
     assert MODEL.prior_log_odds(0.01) == pytest.approx(math.log(math.expm1(pi)))
 
 
-# The model conditions on the observed first-call time; the simulation integrates over it, and
-# the test plugs in the median first-call time: exact for n = 0, approximate for n >= 1
-# (measured gaps: 0.4 %, 3 %, 15 %).
-TOLERANCE = {0: 0.02, 1: 0.06, 2: 0.2}
-
-
-def test_calls_likelihood_matches_monte_carlo():
-    """P(n calls by now | H1) / P(n | H0), against a brute-force simulation of the call process
-    exactly as sim.calls generates it (first-call delay, chained extra calls) plus background."""
+def test_genuine_call_densities_match_monte_carlo():
+    """G_0, G_1, G_2 against a brute-force simulation of the call process exactly as sim.calls
+    generates it (pinned onset 0, observed at 600 s; densities from binned call times)."""
     rng = np.random.default_rng(0)
-    rep, w = CALLS.reporting, FUSION.gate.time_window_s.value
-    onset, now, n_sims = 697.0, 1000.0, 400_000
-    beta = 2.0 / 86400 * 0.01 * w
+    rep, n_sims, now = CALLS.reporting, 2_000_000, 600.0
     reported = rng.random(n_sims) >= rep.p_unreported.value["serious"]
-    first = onset + rep.first_delay_median_s.value * np.exp(
+    first = rep.first_delay_median_s.value * np.exp(
         rep.first_delay_sigma.value * rng.standard_normal(n_sims)
     )
     extras = rng.poisson(rep.extra_calls_mean.value["serious"], n_sims)
-    seen = np.zeros(n_sims, int)
-    arrival = first.copy()
-    seen += reported & (first <= now)
-    for k in range(int(extras.max())):
-        arrival = arrival + rng.exponential(rep.extra_gap_mean_s.value, n_sims)
-        seen += reported & (extras > k) & (arrival <= now)
-    background = rng.poisson(beta, n_sims)
-    total = seen + background
-    for n in (0, 1, 2):
-        sel = total == n
-        p1 = float(np.mean(sel))
-        p0 = beta**n * math.exp(-beta) / math.factorial(n)
-        # condition on when the first observed call came: use the simulated median among sel
-        first_obs = float(np.median(first[sel & (seen > 0)])) if n else None
-        model = math.exp(MODEL.calls_log_lr(_ev(n_calls=n, first_call_s=first_obs, now_s=now)))
-        assert model == pytest.approx(p1 / p0, rel=TOLERANCE[n]), n
+    second = first + rng.exponential(rep.extra_gap_mean_s.value, n_sims)
+    third = second + rng.exponential(rep.extra_gap_mean_s.value, n_sims)
+    n_by_now = reported * (
+        (first <= now).astype(int)
+        + ((extras > 0) & (second <= now))
+        + ((extras > 1) & (third <= now))
+    )
+    ev0 = _ev(onset_s=0.0, now_s=now, first_evidence_s=0.0)
+    assert MODEL.genuine_densities(ev0)[0] == pytest.approx(np.mean(n_by_now == 0), rel=0.01)
+    lo, hi = 150.0, 210.0  # first call in this bin, nothing else by now
+    sel1 = (n_by_now == 1) & (first >= lo) & (first < hi)
+    g1 = MODEL.genuine_densities(_ev(onset_s=0.0, now_s=now, call_times_s=[180.0]))[1]
+    assert g1 == pytest.approx(np.mean(sel1) / (hi - lo), rel=0.05)
+    lo2, hi2 = 60.0, 120.0  # second call 60-120 s after the first
+    sel2 = (
+        (n_by_now == 2)
+        & (first >= lo)
+        & (first < hi)
+        & (second - first >= lo2)
+        & (second - first < hi2)
+    )
+    g2 = MODEL.genuine_densities(_ev(onset_s=0.0, now_s=now, call_times_s=[180.0, 270.0]))[2]
+    assert g2 == pytest.approx(np.mean(sel2) / ((hi - lo) * (hi2 - lo2)), rel=0.1)
+
+
+def test_a_typically_timed_call_counts_more_when_a_camera_pinned_the_onset():
+    call = 697.0 + CALLS.reporting.first_delay_median_s.value
+    kw = {"call_times_s": [call], "now_s": call + 10, "first_evidence_s": 697.0}
+    pinned = MODEL.calls_log_lr(_ev(onset_s=697.0, **kw))
+    unknown = MODEL.calls_log_lr(_ev(onset_s=None, **{**kw, "first_evidence_s": call}))
+    assert pinned > unknown
 
 
 @pytest.mark.parametrize("onset", [697.0, None])
 def test_more_calls_never_lower_the_posterior(onset):
-    lrs = [
-        MODEL.calls_log_lr(_ev(n_calls=n, first_call_s=800.0 if n else None, onset_s=onset))
-        for n in range(6)
-    ]
+    times = [800.0, 860.0, 900.0, 950.0, 990.0]
+    lrs = [MODEL.calls_log_lr(_ev(call_times_s=times[:n], onset_s=onset)) for n in range(6)]
     assert all(b >= a for a, b in itertools.pairwise(lrs))
 
 

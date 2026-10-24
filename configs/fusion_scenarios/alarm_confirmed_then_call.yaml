@@ -1,0 +1,13 @@
+# Scripted replay (SYNTHETIC). A top-bin alarm, confirmed by the operator, then a caller.
+name: alarm_confirmed_then_call
+description: Camera C20 alarms (top confidence bin), review confirms at 40 s, a call at 200 s.
+start: "2026-03-03T19:30:00+05:30"
+end_s: 900
+tick_s: 15
+evidence:
+  - {kind: camera, id: EV-C, camera: C20, t: 0, confidence: 0.81}
+  - {kind: review, id: REV-C, event: EV-C, t: 40, confirmed: true}
+  - {kind: call, id: CALL-C, near: C20, offset_m: [150, -50], t: 200, error_m: 300, language: en,
+     text: "A truck and a car have collided near the junction. The truck has overturned."}
+expect:
+  groups: [[EV-C, REV-C, CALL-C]]

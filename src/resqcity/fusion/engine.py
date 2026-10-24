@@ -223,15 +223,14 @@ class FusionEngine:
                 continue  # too early to count a silent camera
             b = None if alarm is None else self.det.bin_of(alarm.confidence)
             cams.append(CameraObservation(cid, self.bg.mass(inside), b))
-        calls = sorted(c.ts for c, _ in cand.calls)
+        calls = sorted(c.ts.timestamp() for c, _ in cand.calls)
         return Evidence(
             region_mass=max(self.bg.mass(cand.region), 1e-12),
             now_s=now.timestamp(),
             first_evidence_s=cand.first_evidence.timestamp(),
             onset_s=onset,
-            first_call_s=calls[0].timestamp() if calls else None,
-            n_calls=len(calls),
             severity_class=severity_class(severity, self.requirements.severity),
+            call_times_s=calls,
             cameras=cams,
             reviews=[r.confirmed for r in cand.reviews],
         )

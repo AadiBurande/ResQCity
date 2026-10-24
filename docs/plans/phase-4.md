@@ -136,3 +136,9 @@ Regenerate the dashboard TypeScript types (`tools/gen_ts_types.py`; the pre-comm
 - 2026-10-24: the call simulator is `src/resqcity/sim/calls.py` (not `fusion/call_sim.py`) and the
   synthetic-week check is `src/resqcity/sim/fusion_check.py` (not `fusion/check_week.py`): both
   read ground truth, and `tests/test_architecture.py` allows that only inside `sim/`.
+- 2026-10-24: the scripted replay is `src/resqcity/sim/fusion_replay.py` (it needs the incident
+  background built from `sim.generator`), with `sim/background.py`; `geo.cameras.camera_coverage`
+  is shared by the simulator and fusion.
+- 2026-10-24: the call term was first count-based ("how many calls by now"); the replays showed
+  that a camera-pinned onset then LOWERED the posterior of a typically timed call. Replaced by
+  the point-process likelihood (docs/models/fusion.md §3.2) before any results were kept.

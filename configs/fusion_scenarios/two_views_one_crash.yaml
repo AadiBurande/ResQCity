@@ -1,0 +1,18 @@
+# Scripted replay (SYNTHETIC). Two camera views of one junction see a crash; two callers report it.
+# Acceptance (BUILD_PROMPT phase 4): all four pieces of evidence end in ONE incident.
+name: two_views_one_crash
+description: Two views of junction C01 alarm on one crash; two callers (Marathi, English) follow.
+start: "2026-03-03T18:00:00+05:30"
+end_s: 1500
+tick_s: 15
+extra_cameras:
+  - {id: C01b, same_as: C01}       # a second camera on the same junction (other direction)
+evidence:
+  - {kind: camera, id: EV-1, camera: C01, t: 0, confidence: 0.62}
+  - {kind: camera, id: EV-2, camera: C01b, t: 2, confidence: 0.55}
+  - {kind: call, id: CALL-1, near: C01, offset_m: [90, 40], t: 170, error_m: 300, language: mr,
+     text: "बंड गार्डन रोड जवळ अपघात झाला आहे. एक माणूस जखमी होऊन रस्त्यावर पडला आहे."}
+  - {kind: call, id: CALL-2, near: C01, offset_m: [-60, 120], t: 260, error_m: 300, language: en,
+     text: "A car and a bike have collided on Bund Garden Road. A person is bleeding."}
+expect:
+  groups: [[EV-1, EV-2, CALL-1, CALL-2]]

@@ -1,0 +1,17 @@
+# Scripted replay (SYNTHETIC). Two crashes far apart at almost the same time: two incidents.
+name: two_crashes
+description: Crashes near C05 and C30 a minute apart; two calls each; handset (ELS) locations.
+start: "2026-03-03T09:00:00+05:30"
+end_s: 1200
+tick_s: 15
+evidence:
+  - {kind: call, id: CALL-A1, near: C05, offset_m: [30, 20], t: 120, error_m: 50, language: hi,
+     text: "यहाँ एक्सीडेंट हो गया है। एक व्यक्ति का खून बह रहा है।"}
+  - {kind: call, id: CALL-B1, near: C30, offset_m: [-20, 10], t: 180, error_m: 50, language: en,
+     text: "There has been an accident near the junction. 3 vehicles are involved."}
+  - {kind: call, id: CALL-A2, near: C05, offset_m: [-40, 0], t: 240, error_m: 50, language: mr,
+     text: "इथे रस्ता अपघात झाला आहे, लवकर मदत पाठवा."}
+  - {kind: call, id: CALL-B2, near: C30, offset_m: [10, -30], t: 300, error_m: 50, language: en,
+     text: "Road accident here, please send help."}
+expect:
+  groups: [[CALL-A1, CALL-A2], [CALL-B1, CALL-B2]]
