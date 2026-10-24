@@ -1,10 +1,10 @@
 {
   "file": "results/vision/sim_inputs.yaml",
-  "generated_at_utc": "2026-10-23T14:21:35+00:00",
+  "generated_at_utc": "2026-10-24T09:19:28+00:00",
   "command": "final_v5.py --export-only",
   "synthetic": false,
   "git": {
-    "commit": "6dec67a9040380bdadd50ffc30297ed3d1bc2f63",
+    "commit": "65ae609312b7a7cb5aed49e01c4615ab3d3119ba",
     "dirty": false
   },
   "configs_sha256": {
