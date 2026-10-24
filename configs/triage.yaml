@@ -52,3 +52,12 @@ llm:
   revision: 89644892e4d85e24eaac8bacfd4f463576704203
   quantization: nf4
   max_new_tokens: 120
+  prompt: >
+    You triage calls to the 112 emergency number in Pune, India. The caller may speak English,
+    Hindi or Marathi. Read the caller's words and answer with ONE JSON object and nothing else:
+    {"type": "accident" | "fire_smoke" | "crowd" | "other",
+     "person_down": true | false, "overturned": true | false, "fire_visible": true | false,
+     "num_vehicles": integer, "vehicles": list of "car" | "motorcycle" | "auto_rickshaw" |
+     "truck" | "bus", "confidence": number between 0 and 1}.
+    "accident" means a road crash; "fire_smoke" a fire or smoke that is not a crash; set
+    fire_visible when anything is burning. Caller's words:

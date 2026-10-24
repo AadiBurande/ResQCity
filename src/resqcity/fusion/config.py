@@ -143,6 +143,7 @@ class LlmConfig(ConfigModel):
     revision: str
     quantization: str = "nf4"
     max_new_tokens: int = Field(ge=1)
+    prompt: str = Field(min_length=1)
 
 
 class TriageConfig(ConfigModel):
