@@ -86,6 +86,15 @@ class FusionEngine:
         self._event_owner: dict[str, str] = {}
         self._ball_cache: dict[tuple[int, float], dict[int, float]] = {}
         self._n = 0
+        # indexes (a week has ~10^5 camera alarms): live candidates by anchor node index, the
+        # widest anchor error among them, and the cameras that see each node
+        self._live: dict[str, Candidate] = {}
+        self._by_anchor: dict[int, set[str]] = {}
+        self._max_err = 0.0
+        self._cams_at: dict[int, list[str]] = {}
+        for cid, nodes in coverage.items():
+            for v in nodes.tolist():
+                self._cams_at.setdefault(v, []).append(cid)
 
     # -- geometry -------------------------------------------------------------------------------
 
@@ -105,27 +114,35 @@ class FusionEngine:
     # -- association ----------------------------------------------------------------------------
 
     def _match(self, node: int, err_m: float, ts: datetime) -> Candidate | None:
-        window = self.cfg.gate.time_window_s.value
-        live = [
-            c
-            for c in self.candidates.values()
-            if c.status == IncidentStatus.CANDIDATE and (ts - c.updated).total_seconds() <= window
-        ]
-        if not live:
+        if not self._live:
             return None
-        widest = max(err_m, max(c.anchor_error_m for c in live))
-        ball = self._ball(node, self._gate_m(widest))
+        window = self.cfg.gate.time_window_s.value
+        ball = self._ball(node, self._gate_m(max(err_m, self._max_err)))
         hits = []
-        for c in live:
-            d = ball.get(self.network.index_of(c.anchor))
-            if d is not None and d <= self._gate_m(max(err_m, c.anchor_error_m)):
-                hits.append((-c.posterior, d, c.id, c))
+        for idx in ball.keys() & self._by_anchor.keys():
+            for cid in self._by_anchor[idx]:
+                c = self._live[cid]
+                if (ts - c.updated).total_seconds() > window:
+                    continue
+                if ball[idx] <= self._gate_m(max(err_m, c.anchor_error_m)):
+                    hits.append((-c.posterior, ball[idx], c.id, c))
         return min(hits)[3] if hits else None
+
+    def _index(self, cand: Candidate, add: bool) -> None:
+        key = self.network.index_of(cand.anchor)
+        if add:
+            self._by_anchor.setdefault(key, set()).add(cand.id)
+            self._max_err = max(self._max_err, cand.anchor_error_m)
+        else:
+            self._by_anchor[key].discard(cand.id)
+            if not self._by_anchor[key]:
+                del self._by_anchor[key]
 
     def _new(self, node: int, err_m: float, region: np.ndarray, ts: datetime) -> Candidate:
         self._n += 1
         cand = Candidate(f"INC-{self._n:06d}", node, err_m, region, ts, ts)
-        self.candidates[cand.id] = cand
+        self.candidates[cand.id] = self._live[cand.id] = cand
+        self._index(cand, add=True)
         return cand
 
     def _grow(
@@ -134,7 +151,9 @@ class FusionEngine:
         cand.region = np.union1d(cand.region, region)
         cand.updated = max(cand.updated, ts)
         if err_m < cand.anchor_error_m:
+            self._index(cand, add=False)
             cand.anchor, cand.anchor_error_m = node, err_m
+            self._index(cand, add=True)
 
     # -- evidence -------------------------------------------------------------------------------
 
@@ -168,16 +187,17 @@ class FusionEngine:
         cand.updated = max(cand.updated, review.ts)
         return self._refresh(cand, review.ts, force=True)
 
-    def tick(self, now: datetime) -> list[Incident]:
-        """Time passes: posteriors drift (no call yet), stale candidates are dismissed."""
+    def tick(self, now: datetime, refresh: bool = True) -> list[Incident]:
+        """Time passes: stale candidates are dismissed and (``refresh``) posteriors drift as
+        no call comes."""
         out = []
-        for cand in list(self.candidates.values()):
-            if cand.status != IncidentStatus.CANDIDATE:
-                continue
+        for cand in list(self._live.values()):
             if (now - cand.updated).total_seconds() > self.cfg.update.expiry_s:
                 cand.status = IncidentStatus.DISMISSED
+                del self._live[cand.id]
+                self._index(cand, add=False)
                 out += self._refresh(cand, now, force=True)
-            else:
+            elif refresh:
                 out += self._refresh(cand, now, force=False)
         return out
 
@@ -214,10 +234,9 @@ class FusionEngine:
             else None
         )
         cams = []
-        for cid, cover in self.coverage.items():
-            inside = np.intersect1d(cover, cand.region, assume_unique=True)
-            if not len(inside):
-                continue
+        seen = sorted({cid for v in cand.region.tolist() for cid in self._cams_at.get(v, ())})
+        for cid in seen:
+            inside = np.intersect1d(self.coverage[cid], cand.region, assume_unique=True)
             alarm = first_alarm.get(cid)
             if alarm is None and (now - cand.first_evidence).total_seconds() < self.det.delay_s:
                 continue  # too early to count a silent camera
