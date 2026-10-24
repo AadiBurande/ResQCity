@@ -1,0 +1,89 @@
+{
+  "status": "synthetic tool check (templates and lexicon by the same authors); not a research result",
+  "items": 195,
+  "languages": [
+    "en",
+    "hi",
+    "mr"
+  ],
+  "rules": {
+    "en/held_out": {
+      "items": 30,
+      "type_accuracy": 0.3333333333333333,
+      "cue_recall": 0.0,
+      "false_cue_rate_on_clean_accidents": 0.0
+    },
+    "en/main": {
+      "items": 35,
+      "type_accuracy": 0.9428571428571428,
+      "cue_recall": 1.0,
+      "false_cue_rate_on_clean_accidents": 0.0
+    },
+    "hi/held_out": {
+      "items": 30,
+      "type_accuracy": 0.3333333333333333,
+      "cue_recall": 0.0,
+      "false_cue_rate_on_clean_accidents": 0.0
+    },
+    "hi/main": {
+      "items": 35,
+      "type_accuracy": 0.9428571428571428,
+      "cue_recall": 1.0,
+      "false_cue_rate_on_clean_accidents": 0.0
+    },
+    "mr/held_out": {
+      "items": 30,
+      "type_accuracy": 0.3333333333333333,
+      "cue_recall": 0.0,
+      "false_cue_rate_on_clean_accidents": 0.0
+    },
+    "mr/main": {
+      "items": 35,
+      "type_accuracy": 0.9428571428571428,
+      "cue_recall": 1.0,
+      "false_cue_rate_on_clean_accidents": 0.0
+    },
+    "seconds_per_call": 3.470051283679473e-05
+  },
+  "llm": {
+    "model": "Qwen/Qwen3-VL-2B-Instruct",
+    "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+    "en/held_out": {
+      "items": 30,
+      "type_accuracy": 0.7333333333333333,
+      "cue_recall": 1.0,
+      "false_cue_rate_on_clean_accidents": 0.5
+    },
+    "en/main": {
+      "items": 35,
+      "type_accuracy": 0.8571428571428571,
+      "cue_recall": 1.0,
+      "false_cue_rate_on_clean_accidents": 1.0
+    },
+    "hi/held_out": {
+      "items": 30,
+      "type_accuracy": 0.5333333333333333,
+      "cue_recall": 0.7727272727272727,
+      "false_cue_rate_on_clean_accidents": 0.0
+    },
+    "hi/main": {
+      "items": 35,
+      "type_accuracy": 0.8285714285714286,
+      "cue_recall": 1.0,
+      "false_cue_rate_on_clean_accidents": 0.6666666666666666
+    },
+    "mr/held_out": {
+      "items": 30,
+      "type_accuracy": 0.6,
+      "cue_recall": 0.5909090909090909,
+      "false_cue_rate_on_clean_accidents": 0.5
+    },
+    "mr/main": {
+      "items": 35,
+      "type_accuracy": 0.7142857142857143,
+      "cue_recall": 1.0,
+      "false_cue_rate_on_clean_accidents": 0.6666666666666666
+    },
+    "seconds_per_call": 2.4759250697435795
+  }
+}

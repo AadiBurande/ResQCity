@@ -1,0 +1,28 @@
+{
+  "file": "results/fusion/triage_eval_synthetic.json",
+  "generated_at_utc": "2026-10-24T09:51:07+00:00",
+  "command": "eval_triage.py --llm",
+  "synthetic": true,
+  "git": {
+    "commit": "72cdd9bcd48cc8cca5ae6988882fc2f231a89762",
+    "dirty": false
+  },
+  "configs_sha256": {
+    "configs/call_templates.yaml": "d36877fe92e9a13732dcfcf514a9610756103236b3fafd49b5eaa49748eb3be7",
+    "configs/triage.yaml": "d36a862fe97d5f77a6faa42c526a7fb6f669ad10e2da44c032fb581048affeb8"
+  },
+  "seeds": {},
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  }
+}
