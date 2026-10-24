@@ -11,6 +11,8 @@ import yaml
 from resqcity.vision.eval import final_v5
 from resqcity.vision.eval.explore_v5 import (
     armed_time,
+    auc,
+    bin_shares,
     chance_detection,
     content_free_detected,
     detection_time,
@@ -170,3 +172,15 @@ def test_chance_detection_by_simulation() -> None:
     sim = np.mean(rng.poisson(rate * window_h, 200_000) > 0)
     assert chance_detection(rate) == pytest.approx(sim, abs=0.005)
     assert chance_detection(0.0) == 0.0
+
+
+def test_auc_brute_force() -> None:
+    pos, neg = np.array([0.9, 0.5, 0.5]), np.array([0.5, 0.1])
+    pairs = [(a > b) + 0.5 * (a == b) for a in pos for b in neg]
+    assert auc(pos, neg) == pytest.approx(np.mean(pairs))
+
+
+def test_bin_shares_edges() -> None:
+    edges = np.array([0.3, 0.5, 0.7, 1.0])
+    got = bin_shares(np.array([0.3, 0.49, 0.5, 0.7, 1.0]), edges)
+    assert got.tolist() == pytest.approx([0.4, 0.2, 0.4])

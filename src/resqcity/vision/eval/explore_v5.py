@@ -54,8 +54,12 @@ IMPACT_BANDS_S = (0.0, 3.0, 5.0, 7.0, 9.0, 15.0, math.inf)
 TIME_TOL_S = 1e-6
 
 
-def reconstruct_alarms(pc: pd.DataFrame, nd: pd.DataFrame) -> tuple[dict, dict, object, dict, int]:
-    """Verified alarm times of the final run for every holdout clip and UA-DETRAC sequence."""
+def reconstruct_alarms(
+    pc: pd.DataFrame, nd: pd.DataFrame
+) -> tuple[dict, dict, object, dict, int, dict]:
+    """Verified alarm times of the final run for every holdout clip and UA-DETRAC sequence, and
+    per alarm (video, time) its confidence (stacker probability of the alarm window, as in the
+    live ``Event.confidence``) and verifier score."""
     b = json.loads((V5 / "stage_b.json").read_text(encoding="utf-8"))
     run, tag, op = b["chosen_run"], b["detector_tag"], b["operating_point"]
     cfg = run_config(run)
@@ -99,7 +103,7 @@ def reconstruct_alarms(pc: pd.DataFrame, nd: pd.DataFrame) -> tuple[dict, dict, 
             )
         return rescorer[0](vid, t) >= b["tau"]
 
-    alarms = {}
+    alarms, conf = {}, {}
     for vid, g in w.groupby("video_id"):
         g = g.sort_values("end_s")
         alarms[vid] = verified_alarm_times(
@@ -109,13 +113,18 @@ def reconstruct_alarms(pc: pd.DataFrame, nd: pd.DataFrame) -> tuple[dict, dict, 
             op["threshold"],
             lambda t, v=vid: ok(v, t),
         )
+        by_t = dict(zip(g["end_s"], g["combined_p"], strict=True))
+        for t in alarms[vid]:
+            key = (vid, round(float(t), 3))
+            p_yes = score[key] if key in score else rescorer[0].scores[key][0]
+            conf[(vid, t)] = (float(by_t[t]), float(p_yes))
     if misses:
         raise RuntimeError(f"{len(misses)} ACCIDENT verifier scores missing from the cache")
     if rescorer:
         rescorer[0].save()
     rescored = len(pd.read_parquet(rescore_path)) if rescore_path.exists() else 0
     durations = dict(zip(vids["video_id"], vids["duration_s"], strict=True))
-    return alarms, durations, cfg, op, rescored
+    return alarms, durations, cfg, op, rescored, conf
 
 
 def detection_time(alarm_list: list[float], onset_s: float) -> float | None:
@@ -402,6 +411,87 @@ def chance_levels(units: pd.DataFrame, rates: dict) -> dict[str, object]:
     }
 
 
+def auc(pos: np.ndarray, neg: np.ndarray) -> float:
+    """P(a random positive scores above a random negative), ties counted half."""
+    if len(pos) == 0 or len(neg) == 0:
+        return float("nan")
+    diff = pos[:, None] - neg[None, :]
+    return float(np.mean(diff > 0) + 0.5 * np.mean(diff == 0))
+
+
+def bin_shares(values: np.ndarray, edges: np.ndarray) -> np.ndarray:
+    """Share of values in each bin [e0, e1), ..., [e_{k-1}, e_k] (last bin closed)."""
+    idx = np.clip(np.searchsorted(edges, values, side="right") - 1, 0, len(edges) - 2)
+    return np.bincount(idx, minlength=len(edges) - 1) / max(len(values), 1)
+
+
+def confidence_model(
+    pc: pd.DataFrame, nd: pd.DataFrame, alarms: dict, conf: dict, warm_up: float, threshold: float
+) -> dict[str, object]:
+    """Alarm confidence of real detections vs normal-traffic false alarms (D-028).
+
+    Fixed before looking at the data: bins are the tertiles of the UA-DETRAC false-alarm
+    confidences (lowest edge = alarm threshold, highest = 1); the primary real set is the first
+    detection on clips where the camera was armed at the impact; all detections are a
+    sensitivity set. LR per bin = share of real alarms / share of false alarms; 95 % intervals
+    by bootstrap over clips and sequences."""
+    onset = pc["accident_onset_s"].to_numpy(float)
+    lead = onset - ACCIDENT_PRE_TOLERANCE_S >= warm_up + 1.0
+    armed = lead & (pc["road_false_alarms"].to_numpy() == 0)
+    real = {}
+    for name, mask in (("armed", armed), ("all", np.ones(len(pc), bool))):
+        rows = []
+        for v, t, m in zip(pc["video_id"], onset, mask, strict=True):
+            hit = detection_time(alarms.get(v, []), t)
+            if m and hit is not None:
+                rows.append(conf[(v, hit)])
+        real[name] = np.asarray(rows, float).reshape(-1, 2)
+    false_groups = [
+        np.asarray([conf[(v, t)] for t in alarms.get(v, [])], float).reshape(-1, 2)
+        for v in nd["video_id"]
+    ]
+    false_all = np.concatenate(false_groups)
+    edges = np.concatenate([[threshold], np.quantile(false_all[:, 0], [1 / 3, 2 / 3]), [1.0]])
+    rng = np.random.default_rng(BOOTSTRAP_SEED)
+
+    def lr_block(true_vals: np.ndarray) -> dict[str, object]:
+        lr = bin_shares(true_vals, edges) / bin_shares(false_all[:, 0], edges)
+        boots = []
+        for _ in range(BOOTSTRAP_REPS):
+            t = true_vals[rng.integers(0, len(true_vals), len(true_vals))]
+            pick = rng.integers(0, len(false_groups), len(false_groups))
+            f = np.concatenate([false_groups[i] for i in pick])[:, 0]
+            with np.errstate(divide="ignore", invalid="ignore"):
+                boots.append(bin_shares(t, edges) / bin_shares(f, edges))
+        b = np.asarray(boots)
+        return {
+            "n_real": len(true_vals),
+            "real_share_per_bin": bin_shares(true_vals, edges).tolist(),
+            "likelihood_ratio_per_bin": lr.tolist(),
+            "lr_ci95_per_bin": [
+                [float(np.nanpercentile(b[:, j], 2.5)), float(np.nanpercentile(b[:, j], 97.5))]
+                for j in range(len(edges) - 1)
+            ],
+            "auc_confidence": auc(true_vals[:, 0], false_all[:, 0]),
+            "auc_verifier_p": auc(true_vals[:, 1], false_all[:, 1]),
+        }
+
+    return {
+        "definition": "confidence = stacker probability of the alarm window (live "
+        "Event.confidence); verifier_p = verifier score of the accepted alarm",
+        "bin_rule": "tertiles of UA-DETRAC false-alarm confidence, fixed before analysis",
+        "bin_edges": edges.tolist(),
+        "n_false": len(false_all),
+        "false_share_per_bin": bin_shares(false_all[:, 0], edges).tolist(),
+        "real_armed": lr_block(real["armed"]),
+        "real_all_detections": lr_block(real["all"]),
+        "samples": {
+            "real_armed_confidence": sorted(real["armed"][:, 0].tolist()),
+            "false_confidence": sorted(false_all[:, 0].tolist()),
+        },
+    }
+
+
 def simulator_defaults(clip: dict, rates: dict, cooldown: float) -> dict[str, object]:
     armed = clip["detection_when_armed"]
     lead = clip["detection_with_lead_time_incl_masking"]
@@ -440,7 +530,7 @@ def main(argv: list[str] | None = None) -> int:
     nd = pd.read_csv(V5 / "per_sequence_ua_detrac.csv")
     if set(pc.loc[~pc["us"].astype(bool), "region"]) - NON_US_REGIONS:
         raise RuntimeError("per_clip.csv regions do not match NON_US_REGIONS")
-    alarms, durations, cfg, op, rescored = reconstruct_alarms(pc, nd)
+    alarms, durations, cfg, op, rescored, conf = reconstruct_alarms(pc, nd)
     check_reproduction(alarms, pc, nd)
     cc = cfg.clip_classifier
     cooldown = cfg.alarm.cooldown_s
@@ -467,6 +557,9 @@ def main(argv: list[str] | None = None) -> int:
         "detection_clustered": clustered_detection(pc),
         "simulator_defaults": simulator_defaults(clip, rates, cooldown),
     }
+    report["simulator_defaults"]["confidence_model"] = confidence_model(
+        pc, nd, alarms, conf, warm_up, op["threshold"]
+    )
     b = json.loads((V5 / "stage_b.json").read_text(encoding="utf-8"))
     configs = [CONFIG_DIR / "vision.yaml", SWEEPS / f"{b['chosen_run']}.yaml"]
     seeds = {"bootstrap": BOOTSTRAP_SEED}
@@ -477,6 +570,8 @@ def main(argv: list[str] | None = None) -> int:
             "video_id": v,
             "source": "ua_detrac" if v in set(nd["video_id"]) else "accident",
             "alarm_s": t,
+            "confidence": conf[(v, t)][0],
+            "verifier_p": conf[(v, t)][1],
         }
         for v in sorted(alarms)
         for t in alarms[v]
