@@ -8,7 +8,8 @@ import pytest
 from resqcity.common.requirements import load_requirements_config
 from resqcity.common.schemas import Camera, EventType, GeoPoint, SeverityFeatures
 from resqcity.fusion.config import DetectorModel, FusionConfig, load_fusion_config
-from resqcity.sim.detection import DetectionProcess, coverage
+from resqcity.geo.cameras import camera_coverage
+from resqcity.sim.detection import DetectionProcess
 from resqcity.sim.groundtruth import GroundTruthIncident
 from tests.conftest import at, node_id
 
@@ -67,9 +68,9 @@ def _process(network, cams, detector=None, cfg=None) -> DetectionProcess:
 
 def test_coverage_is_a_road_graph_ball(toy_network):
     cams = [_camera("C1", 2, 2)]
-    near = coverage(toy_network, cams, 50.0)["C1"]
+    near = camera_coverage(toy_network, cams, 50.0)["C1"]
     assert [int(toy_network.node_ids[i]) for i in near] == [node_id(2, 2)]
-    wide = coverage(toy_network, cams, 250.0)["C1"]
+    wide = camera_coverage(toy_network, cams, 250.0)["C1"]
     assert len(wide) == 5  # the junction and its four neighbours (~211-222 m away)
 
 

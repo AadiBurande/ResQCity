@@ -21,6 +21,7 @@ from resqcity.common.requirements import RequirementsConfig, required_services, 
 from resqcity.common.rng import stream
 from resqcity.common.schemas import Camera, Event, EventType, SeverityFeatures
 from resqcity.fusion.config import DetectorModel, FusionConfig
+from resqcity.geo.cameras import camera_coverage
 from resqcity.geo.network import RoadNetwork
 from resqcity.sim.groundtruth import GroundTruthIncident
 
@@ -35,12 +36,6 @@ class SimEvent:
     incident_id: str | None
 
 
-def coverage(network: RoadNetwork, cameras: list[Camera], radius_m: float) -> dict[str, np.ndarray]:
-    """Node indices within ``radius_m`` (road-graph distance) of each camera's junction."""
-    dist = network.shortest_lengths([c.junction_node for c in cameras], limit_m=radius_m)
-    return {c.id: np.flatnonzero(np.isfinite(row)) for c, row in zip(cameras, dist, strict=True)}
-
-
 class DetectionProcess:
     def __init__(
         self,
@@ -52,7 +47,7 @@ class DetectionProcess:
     ) -> None:
         self.network, self.cameras, self.det, self.cfg = network, cameras, detector, cfg
         self.requirements = requirements
-        self.cover = coverage(network, cameras, cfg.camera.coverage_radius_m.value)
+        self.cover = camera_coverage(network, cameras, cfg.camera.coverage_radius_m.value)
         self._covering: dict[int, list[int]] = {}
         for k, cam in enumerate(cameras):
             for node in self.cover[cam.id]:

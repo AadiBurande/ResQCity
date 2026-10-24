@@ -1,0 +1,173 @@
+"""Evidence model and posterior of a candidate incident (formulation: docs/models/fusion.md).
+
+Hypothesis H1 for a candidate: at least one real incident occurred inside the candidate's region
+R (a set of road-graph nodes) during its window. H0: none did; all its evidence is background
+(false camera alarms, false calls). The posterior is recomputed from ALL evidence of the
+candidate whenever it changes, so it does not depend on the order in which evidence arrived.
+Evidence kinds are conditionally independent given H (an explicit assumption):
+
+- prior odds        e^pi - 1,  pi = incident rate x mass(R) x W  (Poisson)
+- camera c alarmed  LR = 1 + q_c p_det s_real(b) / (W mu_c s_false(b))
+- camera c silent   LR = 1 - q_c p_det             (covers part of R, no alarm in the window)
+- n calls           LR = P(n | H1) / P(n | H0)      (Poisson background + genuine calls)
+- operator review   LR = sens / (1 - spec)  or  (1 - sens) / spec
+
+with q_c = mass(coverage_c n R) / mass(R) x share of camera-detectable types, mu_c the long-run
+false-alarm rate (per second) and s the confidence-bin shares of real and false alarms.
+"""
+
+import math
+from dataclasses import dataclass, field
+
+import numpy as np
+
+from resqcity.common.schemas import EventType
+from resqcity.fusion.config import CallsConfig, DetectorModel, FusionConfig
+
+SECONDS_PER_DAY = 86400.0
+DELAY_GRID = 41  # onset positions averaged over when the onset is unknown (call-only candidate)
+MAX_GENUINE_CALLS = 30
+
+
+@dataclass(frozen=True)
+class Background:
+    """What the control room knows about where and how often incidents and false calls occur.
+
+    Built outside fusion (fusion may not read the simulator; D-028): ``node_share`` is the
+    incident location distribution over node indices (sums to 1)."""
+
+    node_share: np.ndarray
+    incident_rate_per_day: float
+    type_share: dict[EventType, float]
+    false_call_rate_per_day: float
+
+    def mass(self, nodes: np.ndarray) -> float:
+        return float(self.node_share[nodes].sum()) if len(nodes) else 0.0
+
+
+@dataclass(frozen=True)
+class CameraObservation:
+    camera_id: str
+    covered_mass: float  # mass(coverage_c n R)
+    alarm_bin: int | None  # confidence bin of the camera's first alarm in the window, or None
+
+
+@dataclass
+class Evidence:
+    """Everything the posterior needs about one candidate (already associated)."""
+
+    region_mass: float
+    now_s: float
+    first_evidence_s: float
+    onset_s: float | None  # pinned by a camera alarm (alarm time - detector delay), else None
+    first_call_s: float | None
+    n_calls: int
+    severity_class: str
+    cameras: list[CameraObservation] = field(default_factory=list)
+    reviews: list[bool] = field(default_factory=list)
+
+
+def _poisson(k: int, mean: float) -> float:
+    if k < 0:
+        return 0.0
+    return math.exp(-mean + k * math.log(mean) - math.lgamma(k + 1)) if mean > 0 else float(k == 0)
+
+
+def _min_poisson(k: int, m: float, a: float) -> float:
+    """P(min(N, A) = k) for independent N ~ Poisson(m), A ~ Poisson(a)."""
+    p_n, p_a = _poisson(k, m), _poisson(k, a)
+    tail_n = 1.0 - sum(_poisson(j, m) for j in range(k + 1))  # P(N > k)
+    tail_a = 1.0 - sum(_poisson(j, a) for j in range(k))  # P(A >= k)
+    return p_n * tail_a + max(tail_n, 0.0) * p_a
+
+
+def _lognormal_cdf(x: float, median: float, sigma: float) -> float:
+    if x <= 0:
+        return 0.0
+    return 0.5 * (1.0 + math.erf(math.log(x / median) / (sigma * math.sqrt(2.0))))
+
+
+class EvidenceModel:
+    def __init__(
+        self,
+        background: Background,
+        detector: DetectorModel,
+        calls: CallsConfig,
+        cfg: FusionConfig,
+    ) -> None:
+        self.bg, self.det, self.calls, self.cfg = background, detector, calls, cfg
+        self.window_s = cfg.gate.time_window_s.value
+        detectable = cfg.camera.detected_types
+        total = sum(background.type_share.values())
+        self.detectable_share = sum(background.type_share.get(t, 0.0) for t in detectable) / total
+        self.mu_per_s = detector.long_run_false_rate_per_h / 3600.0
+
+    # -- terms ----------------------------------------------------------------------------------
+
+    def prior_log_odds(self, region_mass: float) -> float:
+        pi = self.bg.incident_rate_per_day / SECONDS_PER_DAY * region_mass * self.window_s
+        return math.log(math.expm1(max(pi, 1e-300)))
+
+    def camera_log_lr(self, obs: CameraObservation, region_mass: float) -> float:
+        q = min(1.0, obs.covered_mass / region_mass) * self.detectable_share if region_mass else 0.0
+        if obs.alarm_bin is None:
+            return math.log(max(1.0 - q * self.det.p_detect, 1e-300))
+        b = obs.alarm_bin
+        real = q * self.det.p_detect * self.det.real_shares[b] / self.window_s
+        return math.log1p(real / (self.mu_per_s * self.det.false_shares[b]))
+
+    def _p_first_call_by(self, elapsed_s: float) -> float:
+        rep = self.calls.reporting
+        return _lognormal_cdf(
+            elapsed_s, rep.first_delay_median_s.value, rep.first_delay_sigma.value
+        )
+
+    def calls_log_lr(self, ev: Evidence) -> float:
+        rep = self.calls.reporting
+        beta = self.bg.false_call_rate_per_day / SECONDS_PER_DAY * ev.region_mass * self.window_s
+        p_u = rep.p_unreported.value[ev.severity_class]
+        m = rep.extra_calls_mean.value[ev.severity_class]
+        if ev.onset_s is not None:
+            p_first = self._p_first_call_by(ev.now_s - ev.onset_s)
+        else:  # onset unknown: uniform over the window before the first evidence
+            starts = np.linspace(
+                ev.first_evidence_s - self.window_s, ev.first_evidence_s, DELAY_GRID
+            )
+            p_first = float(np.mean([self._p_first_call_by(ev.now_s - s) for s in starts]))
+        since_first = 0.0 if ev.first_call_s is None else ev.now_s - ev.first_call_s
+        # extra calls: N ~ Poisson(m) in total, arriving one exponential gap after another
+        # (sim.calls), so the number seen by now is min(N, A) with A ~ Poisson(since_first / gap)
+        a = since_first / rep.extra_gap_mean_s.value
+        p_extra = [_min_poisson(k, m, a) for k in range(MAX_GENUINE_CALLS)]
+        n = ev.n_calls
+        # genuine calls observed by now: 0 (unreported or not yet), or 1 + extras seen
+        p_genuine = [(p_u + (1.0 - p_u) * (1.0 - p_first))]
+        p_genuine += [(1.0 - p_u) * p_first * p_extra[k - 1] for k in range(1, MAX_GENUINE_CALLS)]
+        h1 = sum(
+            p_genuine[k] * _poisson(n - k, beta) for k in range(min(n, MAX_GENUINE_CALLS - 1) + 1)
+        )
+        h0 = _poisson(n, beta)
+        return math.log(max(h1, 1e-300)) - math.log(max(h0, 1e-300))
+
+    def review_log_lr(self, confirmed: bool) -> float:
+        r = self.cfg.review
+        sens, spec = r.sensitivity.value, r.specificity.value
+        return math.log(sens / (1.0 - spec)) if confirmed else math.log((1.0 - sens) / spec)
+
+    # -- posterior ------------------------------------------------------------------------------
+
+    def log_odds_terms(self, ev: Evidence) -> dict[str, float]:
+        terms = {"prior": self.prior_log_odds(ev.region_mass)}
+        for obs in ev.cameras:
+            terms[f"camera:{obs.camera_id}"] = self.camera_log_lr(obs, ev.region_mass)
+        terms["calls"] = self.calls_log_lr(ev)
+        for i, confirmed in enumerate(ev.reviews):
+            terms[f"review:{i}"] = self.review_log_lr(confirmed)
+        return terms
+
+    def posterior(self, ev: Evidence) -> tuple[float, dict[str, float]]:
+        terms = self.log_odds_terms(ev)
+        z = sum(terms.values())
+        floor = self.cfg.update.posterior_floor
+        p = 1.0 / (1.0 + math.exp(-z)) if z > -700 else 0.0
+        return min(max(p, floor), 1.0 - floor), terms

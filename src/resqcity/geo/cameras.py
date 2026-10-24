@@ -110,3 +110,11 @@ def load_cameras(path: Path) -> list[Camera]:
     with path.open(encoding="utf-8") as fh:
         data = yaml.safe_load(fh) or {}
     return _CAMERAS.validate_python(data.get("cameras", []))
+
+
+def camera_coverage(
+    network: RoadNetwork, cameras: list[Camera], radius_m: float
+) -> dict[str, np.ndarray]:
+    """Node indices within ``radius_m`` (road-graph distance) of each camera's junction."""
+    dist = network.shortest_lengths([c.junction_node for c in cameras], limit_m=radius_m)
+    return {c.id: np.flatnonzero(np.isfinite(row)) for c, row in zip(cameras, dist, strict=True)}
