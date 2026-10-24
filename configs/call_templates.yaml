@@ -1,0 +1,129 @@
+# Caller-text templates for the synthetic 112 call process (phase 4). SYNTHETIC, written by the
+# ResQCity authors; not transcripts of real calls. Two sets per language:
+#   main     - phrasings the rule-triage lexicon (configs/triage.yaml) was written from;
+#   held_out - paraphrases NEVER used to write the lexicon; triage accuracy is reported on both.
+# Simulated calls draw from both sets (share_held_out). Placeholders: {loc} location phrase,
+# {v1} {v2} vehicle words, {n} number of vehicles.
+synthetic: true
+share_held_out: 0.5
+
+languages:
+  en:
+    location: ["near {road}", "on {road}"]
+    location_unknown: "near the junction"
+    vehicles: {car: car, motorcycle: bike, auto_rickshaw: rickshaw, truck: truck, bus: bus}
+    main:
+      types:
+        accident:
+          - "There has been an accident {loc}."
+          - "A {v1} and a {v2} have collided {loc}."
+          - "Road accident {loc}, please send help."
+        fire_smoke:
+          - "There is a fire {loc}."
+          - "Smoke is coming out of a building {loc}."
+        crowd:
+          - "A big crowd has gathered and people are fighting {loc}."
+        other:
+          - "Someone needs help {loc}."
+      cues:
+        person_down: ["Someone is injured and lying on the road.", "A person is bleeding."]
+        overturned: ["The {v1} has overturned."]
+        fire_visible: ["The vehicle has caught fire."]
+        multi_vehicle: ["{n} vehicles are involved."]
+    held_out:
+      types:
+        accident:
+          - "A {v1} crashed into a {v2} {loc}."
+          - "Vehicles smashed into each other {loc}."
+        fire_smoke:
+          - "Flames are visible {loc}."
+          - "Something is burning {loc}, lots of smoke."
+        crowd:
+          - "There is a mob {loc}, the situation is tense."
+        other:
+          - "Please send someone {loc}, there is a problem."
+      cues:
+        person_down: ["A man is not moving.", "Somebody got badly hurt."]
+        overturned: ["The {v1} flipped over."]
+        fire_visible: ["The {v1} is in flames."]
+        multi_vehicle: ["Many vehicles, maybe {n}."]
+
+  hi:
+    location: ["{road} के पास", "{road} पर"]
+    location_unknown: "चौराहे के पास"
+    vehicles: {car: कार, motorcycle: बाइक, auto_rickshaw: रिक्शा, truck: ट्रक, bus: बस}
+    main:
+      types:
+        accident:
+          - "{loc} एक्सीडेंट हो गया है।"
+          - "{loc} एक {v1} और एक {v2} की टक्कर हो गई है।"
+          - "{loc} सड़क दुर्घटना हुई है, जल्दी मदद भेजिए।"
+        fire_smoke:
+          - "{loc} आग लगी है।"
+          - "{loc} एक इमारत से धुआँ निकल रहा है।"
+        crowd:
+          - "{loc} बहुत भीड़ जमा है और लोग लड़ रहे हैं।"
+        other:
+          - "{loc} किसी को मदद चाहिए।"
+      cues:
+        person_down: ["एक आदमी घायल होकर सड़क पर पड़ा है।", "एक व्यक्ति का खून बह रहा है।"]
+        overturned: ["{v1} पलट गया है।"]
+        fire_visible: ["गाड़ी में आग लग गई है।"]
+        multi_vehicle: ["{n} गाड़ियाँ शामिल हैं।"]
+    held_out:
+      types:
+        accident:
+          - "{loc} {v1} ने {v2} को ठोक दिया है।"
+          - "{loc} गाड़ियाँ आपस में भिड़ गई हैं।"
+        fire_smoke:
+          - "{loc} लपटें दिख रही हैं।"
+          - "{loc} कुछ जल रहा है, बहुत धुआँ है।"
+        crowd:
+          - "{loc} हंगामा हो रहा है, माहौल तनावपूर्ण है।"
+        other:
+          - "{loc} कोई समस्या है, किसी को भेजिए।"
+      cues:
+        person_down: ["एक आदमी हिल नहीं रहा है।", "किसी को बहुत चोट लगी है।"]
+        overturned: ["{v1} उलट गया है।"]
+        fire_visible: ["{v1} जल रहा है।"]
+        multi_vehicle: ["कई गाड़ियाँ हैं, शायद {n}।"]
+
+  mr:
+    location: ["{road} जवळ", "{road} वर"]
+    location_unknown: "चौकाजवळ"
+    vehicles: {car: कार, motorcycle: बाईक, auto_rickshaw: रिक्षा, truck: ट्रक, bus: बस}
+    main:
+      types:
+        accident:
+          - "{loc} अपघात झाला आहे."
+          - "{loc} एक {v1} आणि एक {v2} यांची धडक झाली आहे."
+          - "{loc} रस्ता अपघात झाला आहे, लवकर मदत पाठवा."
+        fire_smoke:
+          - "{loc} आग लागली आहे."
+          - "{loc} एका इमारतीतून धूर येत आहे."
+        crowd:
+          - "{loc} मोठी गर्दी जमली आहे आणि लोक भांडत आहेत."
+        other:
+          - "{loc} कोणालातरी मदतीची गरज आहे."
+      cues:
+        person_down: ["एक माणूस जखमी होऊन रस्त्यावर पडला आहे.", "एका व्यक्तीला रक्तस्राव होत आहे."]
+        overturned: ["{v1} उलटली आहे."]
+        fire_visible: ["गाडीला आग लागली आहे."]
+        multi_vehicle: ["{n} वाहने सामील आहेत."]
+    held_out:
+      types:
+        accident:
+          - "{loc} {v1} ने {v2} ला ठोकले आहे."
+          - "{loc} गाड्या एकमेकांवर आदळल्या आहेत."
+        fire_smoke:
+          - "{loc} ज्वाळा दिसत आहेत."
+          - "{loc} काहीतरी जळत आहे, खूप धूर आहे."
+        crowd:
+          - "{loc} गोंधळ सुरू आहे, वातावरण तणावपूर्ण आहे."
+        other:
+          - "{loc} काहीतरी अडचण आहे, कोणाला तरी पाठवा."
+      cues:
+        person_down: ["एक माणूस हालचाल करत नाही.", "कोणालातरी खूप लागले आहे."]
+        overturned: ["{v1} पलटी झाली आहे."]
+        fire_visible: ["{v1} पेटली आहे."]
+        multi_vehicle: ["अनेक गाड्या आहेत, कदाचित {n}."]

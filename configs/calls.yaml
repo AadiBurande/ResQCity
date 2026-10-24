@@ -1,0 +1,57 @@
+# Synthetic 112 call process (phase 4, D-028). EVERYTHING HERE IS SYNTHETIC.
+# No source was found for crash-to-call delay in India, calls per incident or the share of false
+# calls, so these are UNVERIFIED assumptions and phase-10 sensitivity factors.
+synthetic: true
+
+reporting:
+  # P(no call at all) by severity class (requirements.yaml classes).
+  p_unreported:
+    value: {minor: 0.30, serious: 0.10, critical: 0.03}
+    source: UNVERIFIED
+  # Delay from incident onset to the FIRST call: lognormal.
+  first_delay_median_s: {value: 180.0, source: UNVERIFIED}
+  first_delay_sigma: {value: 0.8, source: UNVERIFIED}
+  # Further calls about the same incident: Poisson count, exponential gaps after the first call.
+  extra_calls_mean:
+    value: {minor: 0.3, serious: 1.0, critical: 2.0}
+    source: UNVERIFIED
+  extra_gap_mean_s: {value: 120.0, source: UNVERIFIED}
+
+location:
+  # The reported location is the true location displaced in a random direction by a lognormal
+  # distance. ``mode`` picks the default; "els" is a scenario (handset location).
+  mode: cell
+  modes:
+    cell:
+      median_error_m: {value: 300.0, source: UNVERIFIED}
+      sigma: {value: 0.7, source: UNVERIFIED}
+    els:
+      median_error_m:
+        value: 50.0
+        source: >
+          Google Android Emergency Location Service, India launch: "accuracy of up to 50 metres"
+          (press reports, December 2025, e.g. thenewsminute.com/news/google-activates-android-
+          emergency-location-service-in-india)
+        note: >
+          "Up to 50 m" is used as the median (an interpretation). At launch only Uttar Pradesh
+          was integrated, so this is a scenario for Pune, not the default.
+      sigma: {value: 0.7, source: UNVERIFIED}
+
+language_mix:
+  value: {en: 0.30, hi: 0.30, mr: 0.40}
+  source: UNVERIFIED
+
+caller_cues:
+  # P(a caller mentions a cue that is present) and P(mentions one that is absent).
+  p_mention_present: {value: 0.70, source: UNVERIFIED}
+  p_mention_absent: {value: 0.05, source: UNVERIFIED}
+  # P(the caller describes another incident type than the true one).
+  p_type_confusion: {value: 0.05, source: UNVERIFIED}
+
+false_calls:
+  # Calls that claim an incident of our types where there is none (prank, mistaken, hoax),
+  # citywide, Poisson. Placed like incidents (hotspot weights) with the incident type mix.
+  rate_per_day: {value: 2.0, source: UNVERIFIED}
+  note: >
+    Pune city police received 23,887 Dial 112 calls in July 2026 (Free Press Journal,
+    2026-08-03), mostly about matters outside this model; no share of false calls was found.

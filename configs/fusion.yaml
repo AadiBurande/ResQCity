@@ -1,0 +1,36 @@
+# Fusion of camera events, 112 calls and operator reviews into incidents (phase 4, D-028).
+# Formulation: docs/models/fusion.md. Rates are NOT repeated here: the detector model comes from
+# results/vision/sim_inputs.yaml (measured), incident rates from incidents.yaml and call
+# behaviour from calls.yaml.
+detector_inputs: results/vision/sim_inputs.yaml
+
+gate:
+  # Evidence joins a candidate if its road-graph distance to the candidate's node is at most
+  # base_distance_m + k_location_error * (stated location error of the call, 0 for cameras)
+  # and it arrives within time_window_s of the candidate's latest evidence.
+  base_distance_m: {value: 150.0, source: UNVERIFIED}
+  k_location_error: {value: 2.0, source: UNVERIFIED}
+  time_window_s: {value: 900.0, source: UNVERIFIED}
+
+camera:
+  # An incident is visible to a camera if its node is within this road-graph distance of the
+  # camera's junction. Only accidents produce camera events in the simulator: the fire/smoke
+  # detector is uncalibrated (limitation L13).
+  coverage_radius_m: {value: 50.0, source: UNVERIFIED}
+  detected_types: [accident]
+
+review:
+  # Operator watches the alarm clip (optional evidence step; when it is used is policy, phase 6).
+  sensitivity: {value: 0.95, source: UNVERIFIED}
+  specificity: {value: 0.98, source: UNVERIFIED}
+  duration_s: {value: 30.0, source: UNVERIFIED}
+
+severity:
+  # Reliability weights when camera and call severity estimates are combined.
+  camera_weight: {value: 0.5, source: UNVERIFIED}
+  call_weight: {value: 0.5, source: UNVERIFIED}
+
+update:
+  posterior_epsilon: 0.02        # emit an Incident update when the posterior moves by more
+  expiry_s: 1800.0               # drop a candidate after this long without new evidence
+  posterior_floor: 1.0e-9        # numerical guard for log-odds

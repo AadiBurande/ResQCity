@@ -131,3 +131,8 @@ Regenerate the dashboard TypeScript types (`tools/gen_ts_types.py`; the pre-comm
   - `uv run python -m resqcity.fusion.check_week`: the JSON is written with provenance (`dirty: false` after commit);
   - the slice-1 re-export leaves `results/vision/holdout_access.log` at one line.
 - **Review:** a `research-auditor` review of the Phase 4 results and claims before the phase is marked done.
+
+## Deviations during implementation
+- 2026-10-24: the call simulator is `src/resqcity/sim/calls.py` (not `fusion/call_sim.py`) and the
+  synthetic-week check is `src/resqcity/sim/fusion_check.py` (not `fusion/check_week.py`): both
+  read ground truth, and `tests/test_architecture.py` allows that only inside `sim/`.

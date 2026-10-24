@@ -158,3 +158,17 @@ def test_river_distance(toy_network):
     ].iloc[0]
     assert row0 == pytest.approx(55.6, abs=8)
     assert row3 > 600
+
+
+def test_shortest_lengths_and_unproject(toy_network):
+    from tests.conftest import node_id
+
+    a, b = node_id(2, 0), node_id(2, 2)
+    d = toy_network.shortest_lengths([a], [b])[0, 0]
+    two_edges = toy_network.path_length_m([a, node_id(2, 1), b])
+    assert d == pytest.approx(two_edges)
+    assert toy_network.shortest_lengths([a], [b], limit_m=d / 2)[0, 0] == float("inf")
+    i = toy_network.index_of(a)
+    lat, lon = toy_network.unproject(*toy_network.xy[i])
+    assert lat == pytest.approx(toy_network.nodes["lat"][i], abs=1e-7)
+    assert lon == pytest.approx(toy_network.nodes["lon"][i], abs=1e-7)

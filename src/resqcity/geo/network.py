@@ -180,6 +180,8 @@ class RoadNetwork:
     _index: dict[int, int] = field(init=False, repr=False)
     _kdtree: cKDTree = field(init=False, repr=False)
     _to_xy: Transformer = field(init=False, repr=False)
+    _to_wgs84: Transformer = field(init=False, repr=False)
+    _length_matrix: csr_matrix | None = field(init=False, repr=False)
     _matrix_cache: dict[tuple[Any, ...], csr_matrix] = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -202,6 +204,8 @@ class RoadNetwork:
         self.xy = self.nodes[["x", "y"]].to_numpy(float)
         self._kdtree = cKDTree(self.xy)
         self._to_xy = Transformer.from_crs(WGS84, self.projected_crs, always_xy=True)
+        self._to_wgs84 = Transformer.from_crs(self.projected_crs, WGS84, always_xy=True)
+        self._length_matrix = None
         self._edge_lookup = {
             (int(u), int(v)): i for i, (u, v) in enumerate(zip(self.u_idx, self.v_idx, strict=True))
         }
@@ -263,6 +267,11 @@ class RoadNetwork:
     def project(self, lat: Sequence[float] | float, lon: Sequence[float] | float) -> np.ndarray:
         x, y = self._to_xy.transform(np.asarray(lon, float), np.asarray(lat, float))
         return np.column_stack([np.atleast_1d(x), np.atleast_1d(y)])
+
+    def unproject(self, x: float, y: float) -> tuple[float, float]:
+        """(lat, lon) of a point in the projected CRS (metres)."""
+        lon, lat = self._to_wgs84.transform(float(x), float(y))
+        return float(lat), float(lon)
 
     def nearest_nodes(
         self, lat: Sequence[float] | float, lon: Sequence[float] | float, in_city_only: bool = False
@@ -352,6 +361,27 @@ class RoadNetwork:
         """
         src = [self.index_of(s) for s in sources]
         dist = dijkstra(self._matrix(t, scenario, profile), directed=True, indices=src)
+        dist = np.atleast_2d(dist)
+        if targets is None:
+            return dist
+        return dist[:, [self.index_of(n) for n in targets]]
+
+    def shortest_lengths(
+        self,
+        sources: Iterable[int],
+        targets: Iterable[int] | None = None,
+        limit_m: float = np.inf,
+    ) -> np.ndarray:
+        """Shortest road-graph distances (m) from each source node id, ignoring direction (a
+        distance on the map, not a drive); beyond ``limit_m`` the result is inf. Shape as in
+        :meth:`shortest_times`."""
+        if self._length_matrix is None:
+            lengths = self.edges["length_m"].to_numpy(float)
+            self._length_matrix = csr_matrix(
+                (lengths, (self.u_idx, self.v_idx)), shape=(self.n_nodes, self.n_nodes)
+            )
+        src = [self.index_of(s) for s in sources]
+        dist = dijkstra(self._length_matrix, directed=False, indices=src, limit=limit_m)
         dist = np.atleast_2d(dist)
         if targets is None:
             return dist

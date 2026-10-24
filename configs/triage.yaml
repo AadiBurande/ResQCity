@@ -1,0 +1,54 @@
+# Call triage (phase 4). The rule lexicon below was written ONLY from the "main" phrasings in
+# configs/call_templates.yaml; the "held_out" paraphrases test it on unseen wording. Both files are
+# by the same authors, so even held-out accuracy is optimistic for real callers (limitation).
+rules:
+  # Type priority when keywords of several types match (an accident with a burning car is an
+  # accident with fire_visible, not a building fire).
+  type_priority: [accident, fire_smoke, crowd, other]
+  fallback_type: other
+  confidence_matched: {value: 0.8, source: UNVERIFIED}
+  confidence_fallback: {value: 0.2, source: UNVERIFIED}
+  languages:
+    en:
+      types:
+        accident: [accident, collided, collision]
+        fire_smoke: [fire, smoke]
+        crowd: [crowd, fighting]
+        other: [help]
+      cues:
+        person_down: [injured, bleeding, lying on the road]
+        overturned: [overturned]
+        fire_visible: [caught fire]
+      vehicle_count_pattern: '(\d+) vehicles'
+      vehicles: {car: car, bike: motorcycle, rickshaw: auto_rickshaw, truck: truck, bus: bus}
+    hi:
+      types:
+        accident: [एक्सीडेंट, टक्कर, दुर्घटना]
+        fire_smoke: [आग, धुआँ]
+        crowd: [भीड़, लड़ रहे]
+        other: [मदद]
+      cues:
+        person_down: [घायल, खून]
+        overturned: [पलट]
+        fire_visible: [गाड़ी में आग]
+      vehicle_count_pattern: '(\d+) गाड़ियाँ'
+      vehicles: {कार: car, बाइक: motorcycle, रिक्शा: auto_rickshaw, ट्रक: truck, बस: bus}
+    mr:
+      types:
+        accident: [अपघात, धडक]
+        fire_smoke: [आग, धूर]
+        crowd: [गर्दी, भांडत]
+        other: [मदत]
+      cues:
+        person_down: [जखमी, रक्तस्राव]
+        overturned: [उलटली]
+        fire_visible: [गाडीला आग]
+      vehicle_count_pattern: '(\d+) वाहने'
+      vehicles: {कार: car, बाईक: motorcycle, रिक्षा: auto_rickshaw, ट्रक: truck, बस: bus}
+
+llm:
+  enabled: false                       # optional, offline; never needed by tests or experiments
+  model: Qwen/Qwen3-VL-2B-Instruct     # already in the local Hugging Face cache (phase 3b)
+  revision: 89644892e4d85e24eaac8bacfd4f463576704203
+  quantization: nf4
+  max_new_tokens: 120
