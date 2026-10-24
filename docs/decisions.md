@@ -628,3 +628,24 @@ the working-session log, not on a committed file.
    vs 60 per camera-hour); on an armed camera it detects well above chance (0.59 vs 0.15–0.27).
    In normal traffic it alarms about every two minutes per camera.
    The simulator results for CCTV-triggered policies must be read with that in mind.
+
+## D-028 Phase 4 design choices: CCTV role, offline triage, unverified call parameters  (2026-10-24)
+Plan: `docs/plans/phase-4.md` (approved by the user before any phase-4 code).
+1. **Why CCTV evidence needs confirmation.** About 3–5 % of synthetic incidents fall within
+   50–100 m of one of the 40 camera sites (one generated week; indicative), so a camera sees a
+   real crash about once a year, against about 29 false alarms per camera-hour (D-027). A camera
+   alarm alone is therefore real with probability of order 10⁻⁶. This is arithmetic on committed
+   numbers, to be re-derived by the phase-4 week check, not a result.
+2. **User decision: full model.** Fusion uses confidence-dependent likelihood ratios measured from
+   the final v5 run (exploratory), an optional operator-review evidence step (sensitivity,
+   specificity and review time UNVERIFIED, swept in phase 10), and phase 10 adds a break-even
+   analysis of the detector quality needed for CCTV-first dispatch to pay off.
+3. **User decision: offline LLM triage.** The optional LLM call triager runs a local model from
+   the Hugging Face cache (caller text never leaves the machine, no API key). It is off by default;
+   the keyword rule triager is the baseline, and tests and experiments never need the LLM.
+4. **Call parameters are UNVERIFIED.** No source was found for crash-to-call delay in India,
+   calls per incident or the share of prank calls; they live in `configs/calls.yaml` marked
+   UNVERIFIED and are swept in phase 10. Two facts were confirmed at the source: Pune city police
+   received 23,887 Dial 112 calls in July 2026 (Free Press Journal, 2026-08-03); Android's
+   Emergency Location Service reports about 50 m accuracy, but in India only Uttar Pradesh was
+   integrated at launch (press reports, December 2025), so 50 m is a scenario, not the default.
