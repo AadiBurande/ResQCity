@@ -7,7 +7,8 @@ detector_inputs: results/vision/sim_inputs.yaml
 gate:
   # Evidence joins a candidate if its road-graph distance to the candidate's node is at most
   # base_distance_m + k_location_error * (stated location error of the call, 0 for cameras)
-  # and it arrives within time_window_s of the candidate's latest evidence.
+  # and it arrives within time_window_s of the candidate's FIRST evidence (one incident per
+  # region and window; recurring false alarms of one camera start new candidates).
   base_distance_m: {value: 150.0, source: UNVERIFIED}
   k_location_error: {value: 2.0, source: UNVERIFIED}
   time_window_s: {value: 900.0, source: UNVERIFIED}

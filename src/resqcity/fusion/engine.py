@@ -3,8 +3,10 @@ their posterior, severity and requirements up to date (phase 4; docs/models/fusi
 
 Association (gate): new evidence joins the candidate with the highest posterior among those
 whose anchor node lies within ``base_distance_m + k_location_error * max(err_new, err_anchor)``
-(road-graph distance; err = stated location error of a call, 0 for a camera) and whose latest
-evidence is at most ``time_window_s`` old; otherwise it starts a new candidate. A candidate's
+(road-graph distance; err = stated location error of a call, 0 for a camera) and whose FIRST
+evidence is at most ``time_window_s`` old (one incident per region and window: a camera's
+recurring false alarms must not chain into one endless candidate); otherwise it starts a new
+candidate. A candidate's
 region is the union of its evidence regions (a camera's coverage, or the gate ball of a call);
 its anchor is the most precise location seen (a camera junction beats a call).
 Every change recomputes the posterior from all evidence (order-independent, fusion.model).
@@ -52,17 +54,42 @@ class Candidate:
     posterior: float = 0.0
     terms: dict[str, float] = field(default_factory=dict)
     emitted: tuple[float, str, tuple[int, ...]] | None = None
+    # running aggregates (kept incrementally; recomputing over long evidence lists is slow)
+    first_evidence: datetime | None = None
+    first_alarm: dict[str, Event] = field(default_factory=dict)
+    camera_severity: list[float] = field(default_factory=lambda: [0.0, 0.0])  # sum, count
+    call_severity: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    requirements: dict[str, int] = field(default_factory=lambda: dict.fromkeys(AGENCIES, 0))
+    type_votes: Counter = field(default_factory=Counter)
 
-    @property
-    def first_evidence(self) -> datetime:
-        times = [e.ts for e in self.events] + [c.ts for c, _ in self.calls]
-        return min(times)
+    def _seen(self, ts: datetime) -> None:
+        if self.first_evidence is None or ts < self.first_evidence:
+            self.first_evidence = ts
+
+    def _need(self, counts: ServiceCounts) -> None:
+        for a in AGENCIES:
+            self.requirements[a] = max(self.requirements[a], getattr(counts, a))
+
+    def add_event(self, e: Event) -> None:
+        self.events.append(e)
+        self._seen(e.ts)
+        first = self.first_alarm.get(e.camera_id)
+        if first is None or e.ts < first.ts:
+            self.first_alarm[e.camera_id] = e
+        self.camera_severity[0] += e.severity_score
+        self.camera_severity[1] += 1
+        self._need(e.required_services)
+
+    def add_call(self, call: Call, t: TriageResult) -> None:
+        self.calls.append((call, t))
+        self._seen(call.ts)
+        self.call_severity[0] += t.severity
+        self.call_severity[1] += 1
+        self._need(t.requirements)
+        self.type_votes[t.type] += t.confidence
 
 
-def _max_counts(counts: list[ServiceCounts]) -> ServiceCounts:
-    return ServiceCounts(
-        **{a.value: max((getattr(c, a.value) for c in counts), default=0) for a in Agency}
-    )
+AGENCIES = tuple(a.value for a in Agency)
 
 
 class FusionEngine:
@@ -95,6 +122,9 @@ class FusionEngine:
         for cid, nodes in coverage.items():
             for v in nodes.tolist():
                 self._cams_at.setdefault(v, []).append(cid)
+        self._lat = network.nodes["lat"].to_numpy(float)
+        self._lon = network.nodes["lon"].to_numpy(float)
+        self._ward = network.nodes["ward_id"].astype(str).to_numpy()
 
     # -- geometry -------------------------------------------------------------------------------
 
@@ -122,7 +152,7 @@ class FusionEngine:
         for idx in ball.keys() & self._by_anchor.keys():
             for cid in self._by_anchor[idx]:
                 c = self._live[cid]
-                if (ts - c.updated).total_seconds() > window:
+                if abs((ts - c.first_evidence).total_seconds()) > window:
                     continue
                 if ball[idx] <= self._gate_m(max(err_m, c.anchor_error_m)):
                     hits.append((-c.posterior, ball[idx], c.id, c))
@@ -164,7 +194,7 @@ class FusionEngine:
             cam.junction_node, 0.0, region, event.ts
         )
         self._grow(cand, cam.junction_node, 0.0, region, event.ts)
-        cand.events.append(event)
+        cand.add_event(event)
         self._event_owner[event.id] = cand.id
         return self._refresh(cand, event.ts, force=True)
 
@@ -175,7 +205,7 @@ class FusionEngine:
         region = np.fromiter(self._ball(node, self._gate_m(err)), dtype=np.int64)
         cand = self._match(node, err, call.ts) or self._new(node, err, region, call.ts)
         self._grow(cand, node, err, region, call.ts)
-        cand.calls.append((call, triage))
+        cand.add_call(call, triage)
         return self._refresh(cand, call.ts, force=True)
 
     def on_review(self, review: Review) -> list[Incident]:
@@ -206,28 +236,20 @@ class FusionEngine:
     def _severity(self, cand: Candidate) -> tuple[float, ServiceCounts, EventType]:
         w = self.cfg.severity
         parts, weights = [], []
-        if cand.events:
-            parts.append(float(np.mean([e.severity_score for e in cand.events])))
-            weights.append(w.camera_weight.value)
-        if cand.calls:
-            parts.append(float(np.mean([t.severity for _, t in cand.calls])))
-            weights.append(w.call_weight.value)
+        for (total, n), weight in (
+            (cand.camera_severity, w.camera_weight.value),
+            (cand.call_severity, w.call_weight.value),
+        ):
+            if n:
+                parts.append(total / n)
+                weights.append(weight)
         severity = float(np.average(parts, weights=weights))
-        reqs = [e.required_services for e in cand.events] + [t.requirements for _, t in cand.calls]
-        if cand.calls:
-            votes = Counter()
-            for _, t in cand.calls:
-                votes[t.type] += t.confidence
-            etype = votes.most_common(1)[0][0]
-        else:
-            etype = cand.events[0].type
-        return severity, _max_counts(reqs), etype
+        etype = cand.type_votes.most_common(1)[0][0] if cand.type_votes else cand.events[0].type
+        return severity, ServiceCounts(**cand.requirements), etype
 
     def evidence(self, cand: Candidate, now: datetime) -> Evidence:
         severity, _, _ = self._severity(cand)
-        first_alarm: dict[str, Event] = {}
-        for e in sorted(cand.events, key=lambda e: e.ts):
-            first_alarm.setdefault(e.camera_id, e)
+        first_alarm = cand.first_alarm
         onset = (
             min(e.ts for e in first_alarm.values()).timestamp() - self.det.delay_s
             if first_alarm
@@ -272,16 +294,15 @@ class FusionEngine:
     def incident(self, cand: Candidate, now: datetime) -> Incident:
         severity, reqs, etype = self._severity(cand)
         i = self.network.index_of(cand.anchor)
-        nodes = self.network.nodes
         sources = [SourceRef(kind=SourceKind.CAMERA_EVENT, ref_id=e.id) for e in cand.events]
         sources += [SourceRef(kind=SourceKind.CALL, ref_id=c.id) for c, _ in cand.calls]
         sources += [SourceRef(kind=SourceKind.OPERATOR_REVIEW, ref_id=r.id) for r in cand.reviews]
         return Incident(
             id=cand.id,
             type=etype,
-            location=GeoPoint(lat=float(nodes["lat"].iat[i]), lon=float(nodes["lon"].iat[i])),
+            location=GeoPoint(lat=float(self._lat[i]), lon=float(self._lon[i])),
             node=cand.anchor,
-            ward_id=str(nodes["ward_id"].iat[i]) or "unknown",
+            ward_id=str(self._ward[i]) or "unknown",
             created_ts=cand.created,
             updated_ts=max(now, cand.created),
             sources=sources,

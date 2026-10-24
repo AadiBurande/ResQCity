@@ -16,11 +16,13 @@ camera) joins the candidate with the highest posterior among those with
 
 $$
 d_G(x_e, a_j) \le D_0 + k\,\max(\varepsilon_e, \varepsilon_{a_j}), \qquad
-t_e - t_j^{\text{latest}} \le W ,
+|t_e - t_j^{\text{first}}| \le W ,
 $$
 
 where $d_G$ is the road-graph distance (direction ignored), $D_0$ = `gate.base_distance_m`,
-$k$ = `gate.k_location_error`, $W$ = `gate.time_window_s`. Otherwise $e$ starts a new candidate.
+$k$ = `gate.k_location_error`, $W$ = `gate.time_window_s` (measured from the candidate's FIRST evidence: a camera's
+recurring false alarms must not chain into one endless candidate). Otherwise $e$ starts a new
+candidate.
 The region grows as the union of evidence regions: a camera contributes its coverage
 $C_c = \{v : d_G(v, \text{junction}_c) \le r_{\text{cov}}\}$, a call the ball of radius
 $D_0 + k\varepsilon_e$ around its snapped node. Several alarms of one camera count once (only

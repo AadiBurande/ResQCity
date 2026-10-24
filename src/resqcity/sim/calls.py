@@ -74,14 +74,10 @@ class CallSimulator:
 
     def _node_road_names(self) -> dict[int, str]:
         """Name of the most important named road at each node (callers name the main road)."""
-        e = self.network.edges
-        order = np.lexsort((np.arange(len(e)), self.network.class_code))  # best class first
-        names: dict[int, str] = {}
-        for i in order:
-            name, u = e["name"].iat[i], int(e["u"].iat[i])
-            if name and u not in names:
-                names[u] = str(name)
-        return names
+        e = self.network.edges[["u", "name"]].assign(rank=self.network.class_code)
+        e = e[e["name"].astype(str) != ""].sort_values(["rank"], kind="stable")
+        first = e.drop_duplicates("u", keep="first")
+        return dict(zip(first["u"].astype(int), first["name"].astype(str), strict=True))
 
     # -- text -----------------------------------------------------------------------------------
 

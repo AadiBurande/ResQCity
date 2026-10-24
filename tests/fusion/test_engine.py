@@ -170,3 +170,14 @@ def test_call_only_incident_type_and_severity(toy_network):
     assert inc.type == EventType.FIRE_SMOKE
     assert inc.requirements.fire >= 1
     assert 0.3 < inc.posterior < 0.99  # one call: likely but not certain
+
+
+def test_recurring_alarms_of_one_camera_do_not_chain_forever(toy_network):
+    eng = _engine(toy_network)
+    for k in range(16):  # one alarm every 2 min for 30 min
+        eng.on_event(_event("C1", 120.0 * k))
+    window = FUSION.gate.time_window_s.value
+    assert len(eng.candidates) == 2  # measured from each candidate's first evidence
+    for cand in eng.candidates.values():
+        span = max(e.ts for e in cand.events) - min(e.ts for e in cand.events)
+        assert span.total_seconds() <= window
