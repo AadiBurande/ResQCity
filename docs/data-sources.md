@@ -27,6 +27,9 @@ Synthetic data is listed too, so readers can see which inputs are real.
 | YOLO11n weights, MobileNetV3-small ImageNet weights, OpenCV YuNet face model | Ultralytics (AGPL-3.0); torchvision (BSD); OpenCV Zoo (MIT) | as listed | 2026-10-20 | detection, frame features, face blurring | pretrained models | per licence |
 | Synthetic incidents | `resqcity.sim.generator` + `configs/incidents.yaml` | n/a | generated | ground truth for the simulator | **synthetic** | n/a |
 | Scenario weather / festival timings | `configs/scenarios/*.yaml` | n/a | authored | monsoon and Ganeshotsav scenarios | **synthetic, illustrative** | n/a |
+| Synthetic 112 calls and caller texts (en/hi/mr) | `resqcity.sim.calls` + `configs/calls.yaml`, `configs/call_templates.yaml` (authored) | n/a | generated | call process, triage check | **synthetic** | n/a |
+| Pune Dial 112 call volume (23,887 calls, July 2026) | [Free Press Journal, 2026-08-03](https://freepressjournal.in/pune/pune-city-police-rank-29th-in-maharashtras-dial-112-emergency-response-sangli-tops-state-list) | press article (citation only) | 2026-10-24 (read) | context for the false-call assumption (D-028) | real (reported figure) | citation only |
+| Android Emergency Location Service accuracy ("up to 50 m"; India launch, UP only) | press reports, December 2025, e.g. [The News Minute](https://www.thenewsminute.com/news/google-activates-android-emergency-location-service-in-india) | press article (citation only) | 2026-10-24 (read) | caller-location scenario `els` | real (reported figure) | citation only |
 
 Exact download time, OSMnx version and SHA-256 of every raw file: `data/raw/download_meta.json`
 (written by `python -m resqcity.geo.download`).
