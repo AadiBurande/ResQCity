@@ -455,18 +455,18 @@ def confidence_model(
     rng = np.random.default_rng(BOOTSTRAP_SEED)
 
     def lr_block(true_vals: np.ndarray) -> dict[str, object]:
-        lr = bin_shares(true_vals, edges) / bin_shares(false_all[:, 0], edges)
+        lr = bin_shares(true_vals[:, 0], edges) / bin_shares(false_all[:, 0], edges)
         boots = []
         for _ in range(BOOTSTRAP_REPS):
             t = true_vals[rng.integers(0, len(true_vals), len(true_vals))]
             pick = rng.integers(0, len(false_groups), len(false_groups))
             f = np.concatenate([false_groups[i] for i in pick])[:, 0]
             with np.errstate(divide="ignore", invalid="ignore"):
-                boots.append(bin_shares(t, edges) / bin_shares(f, edges))
+                boots.append(bin_shares(t[:, 0], edges) / bin_shares(f, edges))
         b = np.asarray(boots)
         return {
             "n_real": len(true_vals),
-            "real_share_per_bin": bin_shares(true_vals, edges).tolist(),
+            "real_share_per_bin": bin_shares(true_vals[:, 0], edges).tolist(),
             "likelihood_ratio_per_bin": lr.tolist(),
             "lr_ci95_per_bin": [
                 [float(np.nanpercentile(b[:, j], 2.5)), float(np.nanpercentile(b[:, j], 97.5))]
