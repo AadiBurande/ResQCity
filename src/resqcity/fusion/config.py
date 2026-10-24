@@ -162,6 +162,9 @@ class Gate(ConfigModel):
 class CameraModel(ConfigModel):
     coverage_radius_m: SourcedValue[float]
     detected_types: list[EventType]
+    cue_flip_probability: SourcedValue[float]
+    persistent_share: SourcedValue[float]
+    persistent_rate_multiplier: SourcedValue[float]
 
 
 class Review(ConfigModel):
@@ -204,3 +207,61 @@ def load_triage_config(path: Path | None = None) -> TriageConfig:
 
 def load_fusion_config(path: Path | None = None) -> FusionConfig:
     return load_model(FusionConfig, path or CONFIG_DIR / "fusion.yaml")
+
+
+# -- measured detector model (results/vision/sim_inputs.yaml, simulator_defaults) -----------------
+
+
+class DetectorModel(ConfigModel):
+    """The camera detector as the simulator and fusion see it (D-027 simulator defaults; the
+    confidence model is exploratory, D-028)."""
+
+    p_detect: float = Field(gt=0, le=1)
+    delay_s: float = Field(ge=0)
+    false_rate_per_armed_h: float = Field(gt=0)
+    cooldown_s: float = Field(gt=0)
+    bin_edges: list[float] = Field(min_length=2)
+    real_shares: list[float]
+    false_shares: list[float]
+    real_confidences: list[float] = Field(min_length=1)
+    false_confidences: list[float] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _check(self) -> Self:
+        n = len(self.bin_edges) - 1
+        if len(self.real_shares) != n or len(self.false_shares) != n:
+            raise ValueError("one real and one false share per confidence bin")
+        if any(s <= 0 for s in self.false_shares):
+            raise ValueError("false-alarm shares must be positive (likelihood ratio)")
+        return self
+
+    @property
+    def long_run_false_rate_per_h(self) -> float:
+        """False alarms per camera-hour with the cooldown: lambda / (1 + lambda * cooldown)."""
+        lam = self.false_rate_per_armed_h
+        return lam / (1.0 + lam * self.cooldown_s / 3600.0)
+
+    def bin_of(self, confidence: float) -> int:
+        edges = self.bin_edges
+        for j in range(len(edges) - 2, -1, -1):
+            if confidence >= edges[j]:
+                return j
+        return 0
+
+
+def load_detector_model(path: Path) -> DetectorModel:
+    import yaml
+
+    d = yaml.safe_load(path.read_text(encoding="utf-8"))["simulator_defaults"]
+    cm = d["confidence_model"]
+    return DetectorModel(
+        p_detect=d["detection_probability_when_armed"],
+        delay_s=d["delay_median_s"],
+        false_rate_per_armed_h=d["false_alarm_rate_per_armed_hour"],
+        cooldown_s=d["cooldown_s"],
+        bin_edges=cm["bin_edges"],
+        real_shares=cm["real_armed"]["real_share_per_bin"],
+        false_shares=cm["false_share_per_bin"],
+        real_confidences=cm["samples"]["real_armed_confidence"],
+        false_confidences=cm["samples"]["false_confidence"],
+    )

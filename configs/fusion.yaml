@@ -18,6 +18,13 @@ camera:
   # detector is uncalibrated (limitation L13).
   coverage_radius_m: {value: 50.0, source: UNVERIFIED}
   detected_types: [accident]
+  # Simulator only: P(a severity cue seen by the camera is wrong), per cue.
+  cue_flip_probability: {value: 0.10, source: UNVERIFIED}
+  # Simulator only: a share of cameras alarm falsely more often than measured on average
+  # (16 of 100 UA-DETRAC sequences alarmed at the first possible instant, D-027). Default off;
+  # phase-10 factor.
+  persistent_share: {value: 0.0, source: UNVERIFIED}
+  persistent_rate_multiplier: {value: 3.0, source: UNVERIFIED}
 
 review:
   # Operator watches the alarm clip (optional evidence step; when it is used is policy, phase 6).
