@@ -7,8 +7,13 @@ on the Pune network with the 40 camera sites, using the TUNING seed base (evalua
 untouched for the confirmatory experiments). Reports, per replication and pooled:
 - association: pairwise precision / recall of "same incident" over evidence items;
 - calibration: final posterior of each candidate vs whether it holds genuine evidence;
-- time from onset to posterior >= 0.5 for real incidents, by evidence path;
+- time from onset to posterior >= 0.5 for real incidents, by the TRUE evidence path (which of
+  the candidate's camera events and calls really belong to the incident);
+- how often a genuine call lands in a candidate seeded by a camera false alarm;
 - false candidates per day, and how many of them reach 0.5.
+Camera coverage is thin (about 2 % of the incident location mass within 50 m road-graph of a
+camera junction), so a single week holds well under one incident in camera view: use enough
+replications before reading anything about the camera path.
 These check the model and its inputs; they are not research results (D-028).
 Output: results/fusion/week_check_synthetic.json.
 """
@@ -71,6 +76,8 @@ def pair_scores(groups: dict[str, list[str | None]]) -> dict[str, float]:
     return {
         "pair_precision": tp / genuine_pairs if genuine_pairs else 1.0,
         "pair_recall": tp / total_truth if total_truth else 1.0,
+        "pairs_together": tp,
+        "pairs_in_candidates": genuine_pairs,
         "same_incident_pairs": total_truth,
         "false_items_in_real_candidates": false_in_real,
     }
@@ -101,8 +108,9 @@ def run(rep: int, scenario: str, network: RoadNetwork, seed_base: int) -> dict:
         + [(c.call.ts, 1, c.call.id, c) for c in calls]
     )
     truth: dict[str, str | None] = {}
+    kind_of: dict[str, int] = {}
     first_reach: dict[str, object] = {}  # candidate -> first time posterior >= threshold
-    path: dict[str, list[str]] = defaultdict(list)
+    seeded_by: dict[str, str] = {}  # candidate -> "true"/"false" evidence that opened it
     next_expiry = start + EXPIRY_TICK
     t0 = time.perf_counter()
     for ts, kind, eid, item in stream:
@@ -114,24 +122,24 @@ def run(rep: int, scenario: str, network: RoadNetwork, seed_base: int) -> dict:
         else:
             out = engine.on_call(item.call, triager.triage(item.call))
         truth[eid] = item.incident_id
+        kind_of[eid] = kind
         for inc in out:
-            path[inc.id].append("camera" if kind == 0 else "call")
+            seeded_by.setdefault(inc.id, "true" if item.incident_id else "false")
             if inc.posterior >= THRESHOLD and inc.id not in first_reach:
                 first_reach[inc.id] = ts
     elapsed = time.perf_counter() - t0
     end = start + timedelta(hours=hours)
     onset = {i.id: i.onset_ts for i in incidents}
-    covered_ids = {
-        i.id for i in incidents if i.type in fusion.camera.detected_types and any(
-            network.index_of(i.node) in set(cover[c.id].tolist()) for c in cams
-        )
-    }  # fmt: skip
+    covered = {int(v) for a in cover.values() for v in a.tolist()}
+    detectable = [i for i in incidents if i.type in fusion.camera.detected_types]
+    covered_ids = {i.id for i in detectable if network.index_of(i.node) in covered}
+    coverage_mass = float(np.sum(gen.node_share[sorted(covered)]))
 
     groups: dict[str, list[str | None]] = {}
     final: list[tuple[float, bool]] = []
     reach_by_path: dict[str, list[float]] = defaultdict(list)
     n_real_cands = Counter()
-    false_cands = false_reach = 0
+    false_cands = false_reach = seeded_false = 0
     for cand in engine.candidates.values():
         ids = [e.id for e in cand.events] + [c.id for c, _ in cand.calls]
         labels = [truth[i] for i in ids]
@@ -144,12 +152,14 @@ def run(rep: int, scenario: str, network: RoadNetwork, seed_base: int) -> dict:
             false_reach += cand.id in first_reach
             continue
         inc_id = real.most_common(1)[0][0]
-        kinds = path[cand.id]
-        p = "call only" if "camera" not in kinds else (
-            "camera only" if "call" not in kinds else (
-                "camera then call" if kinds.index("camera") < kinds.index("call") else
-                "call then camera"))  # fmt: skip
+        true_kinds = {kind_of[i] for i in ids if truth[i] == inc_id}
+        p = {
+            frozenset({0}): "true camera only",
+            frozenset({1}): "call only",
+            frozenset({0, 1}): "true camera + call",
+        }[frozenset(true_kinds)]
         n_real_cands[p] += 1
+        seeded_false += seeded_by.get(cand.id) == "false"
         if cand.id in first_reach:
             reach_by_path[p].append((first_reach[cand.id] - onset[inc_id]).total_seconds())
     cal = []
@@ -158,7 +168,7 @@ def run(rep: int, scenario: str, network: RoadNetwork, seed_base: int) -> dict:
     for lo, hi in itertools.pairwise(CAL_EDGES):
         sel = (post >= lo) & (post < hi if hi < 1.0 else post <= hi)
         cal.append({
-            "bin": [lo, hi], "candidates": int(sel.sum()),
+            "bin": [lo, hi], "candidates": int(sel.sum()), "real": int(real_flag[sel].sum()),
             "mean_posterior": float(post[sel].mean()) if sel.any() else None,
             "share_real": float(real_flag[sel].mean()) if sel.any() else None,
         })  # fmt: skip
@@ -166,7 +176,10 @@ def run(rep: int, scenario: str, network: RoadNetwork, seed_base: int) -> dict:
     return {
         "replication": rep,
         "incidents": len(incidents),
+        "detectable_incidents": len(detectable),
+        "camera_coverage_mass": coverage_mass,
         "incidents_in_camera_view": len(covered_ids),
+        "expected_incidents_in_camera_view": len(detectable) * coverage_mass,
         "calls": len(calls),
         "false_calls": sum(c.incident_id is None for c in calls),
         "camera_events": len(events),
@@ -175,10 +188,9 @@ def run(rep: int, scenario: str, network: RoadNetwork, seed_base: int) -> dict:
         "association": pair_scores(groups),
         "calibration": cal,
         "real_candidates_by_path": dict(n_real_cands),
-        "onset_to_threshold_s": {
-            p: {"n": len(v), "median": float(np.median(v)), "p90": float(np.percentile(v, 90))}
-            for p, v in reach_by_path.items()
-        },
+        "real_candidates_seeded_by_a_false_alarm": seeded_false,
+        "onset_to_threshold_s": {p: sorted(round(x) for x in v) for p, v in reach_by_path.items()},
+        "days": days,
         "real_incidents_reaching_threshold": len(
             {
                 Counter(lab for lab in groups[c] if lab).most_common(1)[0][0]
@@ -189,6 +201,62 @@ def run(rep: int, scenario: str, network: RoadNetwork, seed_base: int) -> dict:
         "false_candidates_per_day": false_cands / days,
         "false_candidates_reaching_threshold_per_day": false_reach / days,
         "fusion_seconds": elapsed,
+    }
+
+
+def quantiles(values: list[float]) -> dict[str, float | int]:
+    return {
+        "n": len(values),
+        "median": float(np.median(values)),
+        "p90": float(np.percentile(values, 90)),
+    }
+
+
+def pool(reps: list[dict]) -> dict:
+    """Totals over replications: a single week holds ~0.8 incidents in camera view."""
+    total = {
+        k: sum(r[k] for r in reps)
+        for k in (
+            "incidents", "detectable_incidents", "incidents_in_camera_view",
+            "expected_incidents_in_camera_view", "calls", "false_calls", "camera_events",
+            "true_camera_events", "candidates", "real_candidates_seeded_by_a_false_alarm", "days",
+        )
+    }  # fmt: skip
+    paths: dict[str, list[float]] = defaultdict(list)
+    by_path = Counter()
+    for r in reps:
+        for name, values in r["onset_to_threshold_s"].items():
+            paths[name] += values
+        by_path.update(r["real_candidates_by_path"])
+    pairs = {k: sum(r["association"][k] for r in reps)
+             for k in ("pairs_together", "pairs_in_candidates", "same_incident_pairs",
+                       "false_items_in_real_candidates")}  # fmt: skip
+    cal = []
+    for j, (lo, hi) in enumerate(itertools.pairwise(CAL_EDGES)):
+        n = sum(r["calibration"][j]["candidates"] for r in reps)
+        real = sum(r["calibration"][j]["real"] for r in reps)
+        cal.append({"bin": [lo, hi], "candidates": n, "real": real,
+                    "share_real": real / n if n else None})  # fmt: skip
+    return {
+        "replications": len(reps),
+        **total,
+        "association": {
+            "pair_precision": pairs["pairs_together"] / max(pairs["pairs_in_candidates"], 1),
+            "pair_recall": pairs["pairs_together"] / max(pairs["same_incident_pairs"], 1),
+            **pairs,
+        },
+        "real_candidates_by_path": dict(by_path),
+        "onset_to_threshold_s": {k: quantiles(v) for k, v in sorted(paths.items())},
+        "real_incidents_reaching_threshold": sum(
+            r["real_incidents_reaching_threshold"] for r in reps
+        ),
+        "false_candidates_per_day": sum(r["false_candidates_per_day"] * r["days"] for r in reps)
+        / total["days"],
+        "false_candidates_reaching_threshold_per_day": sum(
+            r["false_candidates_reaching_threshold_per_day"] * r["days"] for r in reps
+        )
+        / total["days"],
+        "calibration": cal,
     }
 
 
@@ -205,13 +273,15 @@ def main(argv: list[str] | None = None) -> int:
     for r in range(args.reps):
         reps.append(run(r, args.scenario, network, seed_base))
         log.info("replication %d: %s", r, {k: v for k, v in reps[-1].items() if k in (
-            "incidents", "calls", "camera_events", "candidates", "association")})  # fmt: skip
+            "incidents", "incidents_in_camera_view", "calls", "camera_events",
+            "candidates")})  # fmt: skip
     report = {
         "status": "synthetic model check (UNVERIFIED call and review parameters; measured "
         "detector); not a research result",
         "scenario": args.scenario,
         "seed_base": "tuning_seed_base",
         "threshold": THRESHOLD,
+        "pooled": pool(reps),
         "replications": reps,
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -223,7 +293,7 @@ def main(argv: list[str] | None = None) -> int:
                   f"scenarios/{args.scenario}.yaml")
     ]  # fmt: skip
     write_meta(OUT, configs=configs, synthetic=True, seeds={"tuning_seed_base": seed_base})
-    print(json.dumps(report, indent=2))
+    print(json.dumps({k: v for k, v in report.items() if k != "replications"}, indent=2))
     return 0
 
 
