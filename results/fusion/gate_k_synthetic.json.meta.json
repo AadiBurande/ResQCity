@@ -1,14 +1,14 @@
 {
   "file": "results/fusion/gate_k_synthetic.json",
-  "generated_at_utc": "2026-10-26T16:39:06+00:00",
+  "generated_at_utc": "2026-10-26T17:25:06+00:00",
   "command": "gate_coverage.py",
   "synthetic": true,
   "git": {
-    "commit": "3e28abea1482b5606f9ae3607c6f2c29e06936c1",
-    "dirty": true
+    "commit": "5689aeef7b5f482d142228b3f4902f740f513ff5",
+    "dirty": false
   },
   "configs_sha256": {
-    "configs/fusion.yaml": "82b31c768494253ada072306c0d0056f2d0a87a85103316487fba7fd72c367e5",
+    "configs/fusion.yaml": "e255088b989b1b3075d507fd7d1a0be2b3442816a8e42a18a82ee8760c944030",
     "configs/calls.yaml": "4e4ac487986505e76ce0d76bdc781e284c6c0991c19078fa8907919c7b8338a2"
   },
   "seeds": {

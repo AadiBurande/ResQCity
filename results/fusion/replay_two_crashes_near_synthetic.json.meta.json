@@ -1,15 +1,15 @@
 {
   "file": "results/fusion/replay_two_crashes_near_synthetic.json",
-  "generated_at_utc": "2026-10-26T16:38:31+00:00",
+  "generated_at_utc": "2026-10-26T17:25:08+00:00",
   "command": "fusion_replay.py --all",
   "synthetic": true,
   "git": {
-    "commit": "3e28abea1482b5606f9ae3607c6f2c29e06936c1",
-    "dirty": true
+    "commit": "5689aeef7b5f482d142228b3f4902f740f513ff5",
+    "dirty": false
   },
   "configs_sha256": {
     "configs/fusion_scenarios/two_crashes_near.yaml": "a8ce3a91e24d0fcc712c47880df9bf3488829b0b6d988c7b0f8f30ab79a232c8",
-    "configs/fusion.yaml": "82b31c768494253ada072306c0d0056f2d0a87a85103316487fba7fd72c367e5",
+    "configs/fusion.yaml": "e255088b989b1b3075d507fd7d1a0be2b3442816a8e42a18a82ee8760c944030",
     "configs/calls.yaml": "4e4ac487986505e76ce0d76bdc781e284c6c0991c19078fa8907919c7b8338a2",
     "configs/triage.yaml": "d36a862fe97d5f77a6faa42c526a7fb6f669ad10e2da44c032fb581048affeb8",
     "configs/cameras.yaml": "fdfbfdd81597195281364bcae4b0b086a8562f12c05345c5515b26d4ba360cb6",
