@@ -226,6 +226,9 @@ class DetectorModel(ConfigModel):
     false_shares: list[float]
     real_confidences: list[float] = Field(min_length=1)
     false_confidences: list[float] = Field(min_length=1)
+    # committed CIs of the two measured inputs; absent only in tests that build a model by hand
+    p_detect_ci95: list[float] | None = Field(default=None, min_length=2, max_length=2)
+    false_rate_ci95: list[float] | None = Field(default=None, min_length=2, max_length=2)
 
     @model_validator(mode="after")
     def _check(self) -> Self:
@@ -241,6 +244,57 @@ class DetectorModel(ConfigModel):
         """False alarms per camera-hour with the cooldown: lambda / (1 + lambda * cooldown)."""
         lam = self.false_rate_per_armed_h
         return lam / (1.0 + lam * self.cooldown_s / 3600.0)
+
+    @property
+    def mean_armed_s(self) -> float:
+        """Mean time a camera stays armed before a false alarm silences it: 3600 / lambda."""
+        return 3600.0 / self.false_rate_per_armed_h
+
+    @property
+    def armed_fraction(self) -> float:
+        """Stationary share of time a camera can alarm at all (alternating renewal: an
+        Exp(lambda) armed spell, then a fixed cooldown). Incident arrivals are independent of
+        camera state, so by PASTA this is also P(armed when a crash happens)."""
+        return self.mean_armed_s / (self.mean_armed_s + self.cooldown_s)
+
+    @property
+    def effective_p_detect(self) -> float:
+        """P(a camera covering a crash alarms on it) = p_detect x P(armed). The detector's own
+        false alarms silence it for the cooldown, so this is well below ``p_detect`` (D-029)."""
+        return self.p_detect * self.armed_fraction
+
+    def masking(self) -> dict[str, object]:
+        """The self-masking block of D-029, with the interval implied by the committed CIs of
+        the two measured inputs (detection when armed, and the false-alarm rate)."""
+
+        def effective(p: float, lam: float) -> float:
+            return p * (3600.0 / lam) / ((3600.0 / lam) + self.cooldown_s)
+
+        have_ci = self.p_detect_ci95 is not None and self.false_rate_ci95 is not None
+        ci = (
+            [
+                effective(self.p_detect_ci95[0], self.false_rate_ci95[1]),
+                effective(self.p_detect_ci95[1], self.false_rate_ci95[0]),
+            ]
+            if have_ci
+            else None
+        )
+        return {
+            "definition": "alternating renewal: an Exp(lambda) armed spell, then a fixed "
+            "cooldown. Incident arrivals are independent of camera state, so by PASTA the "
+            "time-average armed fraction is also P(armed when a crash happens).",
+            "false_rate_per_armed_h": self.false_rate_per_armed_h,
+            "cooldown_s": self.cooldown_s,
+            "mean_armed_s": self.mean_armed_s,
+            "armed_fraction": self.armed_fraction,
+            "deaf_fraction": 1.0 - self.armed_fraction,
+            "p_detect_when_armed": self.p_detect,
+            "effective_p_detect": self.effective_p_detect,
+            "effective_p_detect_ci95": ci,
+            "ci_basis": "corners of the committed detection and false-alarm CIs in "
+            "results/vision/sim_inputs.yaml (not a joint interval)",
+            "long_run_false_alarms_per_camera_h": self.long_run_false_rate_per_h,
+        }
 
     def bin_of(self, confidence: float) -> int:
         edges = self.bin_edges
@@ -265,4 +319,6 @@ def load_detector_model(path: Path) -> DetectorModel:
         false_shares=cm["false_share_per_bin"],
         real_confidences=cm["samples"]["real_armed_confidence"],
         false_confidences=cm["samples"]["false_confidence"],
+        p_detect_ci95=d["detection_probability_ci95"],
+        false_rate_ci95=d["false_alarm_rate_ci95"],
     )

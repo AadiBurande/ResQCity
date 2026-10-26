@@ -1,0 +1,38 @@
+{
+  "status": "synthetic: the assumed call error model of configs/calls.yaml, which is UNVERIFIED. In-sample by construction (D-029) - not independent evidence.",
+  "base_distance_m": 150.0,
+  "location_mode": "cell",
+  "median_error_m": 300.0,
+  "sigma": 0.7,
+  "target_coverage": 0.95,
+  "selected_k": 3.0,
+  "smallest_k_reaching_target": 3.0,
+  "draws": 4000000,
+  "k_grid": [
+    1.0,
+    1.5,
+    2.0,
+    2.5,
+    3.0,
+    3.5,
+    4.0
+  ],
+  "call_call": [
+    0.61472925,
+    0.78691625,
+    0.883049,
+    0.93476575,
+    0.96268025,
+    0.978084,
+    0.9867425
+  ],
+  "call_camera": [
+    0.718971,
+    0.83910275,
+    0.90490325,
+    0.94170725,
+    0.9631825,
+    0.97610925,
+    0.9841675
+  ]
+}

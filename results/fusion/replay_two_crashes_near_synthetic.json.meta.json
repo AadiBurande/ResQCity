@@ -1,0 +1,32 @@
+{
+  "file": "results/fusion/replay_two_crashes_near_synthetic.json",
+  "generated_at_utc": "2026-10-26T16:38:31+00:00",
+  "command": "fusion_replay.py --all",
+  "synthetic": true,
+  "git": {
+    "commit": "3e28abea1482b5606f9ae3607c6f2c29e06936c1",
+    "dirty": true
+  },
+  "configs_sha256": {
+    "configs/fusion_scenarios/two_crashes_near.yaml": "a8ce3a91e24d0fcc712c47880df9bf3488829b0b6d988c7b0f8f30ab79a232c8",
+    "configs/fusion.yaml": "82b31c768494253ada072306c0d0056f2d0a87a85103316487fba7fd72c367e5",
+    "configs/calls.yaml": "4e4ac487986505e76ce0d76bdc781e284c6c0991c19078fa8907919c7b8338a2",
+    "configs/triage.yaml": "d36a862fe97d5f77a6faa42c526a7fb6f669ad10e2da44c032fb581048affeb8",
+    "configs/cameras.yaml": "fdfbfdd81597195281364bcae4b0b086a8562f12c05345c5515b26d4ba360cb6",
+    "configs/incidents.yaml": "54f245fe34f19dcfd8acba582925fa6f86a8d5bf35d0c3369a21c1b4011454d5"
+  },
+  "seeds": {},
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  }
+}

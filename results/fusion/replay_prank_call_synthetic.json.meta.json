@@ -1,11 +1,11 @@
 {
   "file": "results/fusion/replay_prank_call_synthetic.json",
-  "generated_at_utc": "2026-10-26T15:55:37+00:00",
+  "generated_at_utc": "2026-10-26T16:38:30+00:00",
   "command": "fusion_replay.py --all",
   "synthetic": true,
   "git": {
-    "commit": "e0fdf765e85602b82787c984180bfd40a04c6b57",
-    "dirty": false
+    "commit": "3e28abea1482b5606f9ae3607c6f2c29e06936c1",
+    "dirty": true
   },
   "configs_sha256": {
     "configs/fusion_scenarios/prank_call.yaml": "3f4ea2094ce978202163cf9b7f8e96326614b412c9348d4174e3db6f834da725",

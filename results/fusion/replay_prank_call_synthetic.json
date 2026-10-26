@@ -35,7 +35,7 @@
           "ref_id": "CALL-P"
         }
       ],
-      "posterior": 0.46642070736789665,
+      "posterior": 0.46784997334316325,
       "severity": 0.55,
       "status": "dismissed",
       "requirements": {
@@ -45,7 +45,7 @@
       },
       "evidence_log_odds": {
         "prior": -6.832,
-        "camera:C12": -0.012,
+        "camera:C12": -0.0062,
         "calls": 6.7094
       }
     }
@@ -64,402 +64,402 @@
     {
       "t_s": 30.0,
       "candidate": "INC-000001",
-      "posterior": 0.6714836777018417
+      "posterior": 0.6727490476706436
     },
     {
       "t_s": 60.0,
       "candidate": "INC-000001",
-      "posterior": 0.6409643801172038
+      "posterior": 0.6422846799835351
     },
     {
       "t_s": 90.0,
       "candidate": "INC-000001",
-      "posterior": 0.6129611811989554
+      "posterior": 0.6143224955519677
     },
     {
       "t_s": 120.0,
       "candidate": "INC-000001",
-      "posterior": 0.5879303857927282
+      "posterior": 0.5893207539279364
     },
     {
       "t_s": 150.0,
       "candidate": "INC-000001",
-      "posterior": 0.5660744977128819
+      "posterior": 0.5674843595350564
     },
     {
       "t_s": 180.0,
       "candidate": "INC-000001",
-      "posterior": 0.5473777183503173
+      "posterior": 0.5487999077535086
     },
     {
       "t_s": 210.0,
       "candidate": "INC-000001",
-      "posterior": 0.5316616225909514
+      "posterior": 0.5330910714911453
     },
     {
       "t_s": 240.0,
       "candidate": "INC-000001",
-      "posterior": 0.5186446981275471
+      "posterior": 0.5200780134148065
     },
     {
       "t_s": 270.0,
       "candidate": "INC-000001",
-      "posterior": 0.5079946092379043
+      "posterior": 0.5094296411239724
     },
     {
       "t_s": 300.0,
       "candidate": "INC-000001",
-      "posterior": 0.49936796455326915
+      "posterior": 0.5008034322125201
     },
     {
       "t_s": 330.0,
       "candidate": "INC-000001",
-      "posterior": 0.49243691239253573
+      "posterior": 0.49387211102525963
     },
     {
       "t_s": 360.0,
       "candidate": "INC-000001",
-      "posterior": 0.48690446400731213
+      "posterior": 0.4883390519324478
     },
     {
       "t_s": 390.0,
       "candidate": "INC-000001",
-      "posterior": 0.48251139008733845
+      "posterior": 0.4839452426582035
     },
     {
       "t_s": 420.0,
       "candidate": "INC-000001",
-      "posterior": 0.4790374750450485
+      "posterior": 0.4804705891532843
     },
     {
       "t_s": 450.0,
       "candidate": "INC-000001",
-      "posterior": 0.47629939399874505
+      "posterior": 0.4777318283661929
     },
     {
       "t_s": 480.0,
       "candidate": "INC-000001",
-      "posterior": 0.4741468507195399
+      "posterior": 0.4755786902384101
     },
     {
       "t_s": 510.0,
       "candidate": "INC-000001",
-      "posterior": 0.47245805691226944
+      "posterior": 0.47388939247334755
     },
     {
       "t_s": 540.0,
       "candidate": "INC-000001",
-      "posterior": 0.47113520458403124
+      "posterior": 0.4725661225029873
     },
     {
       "t_s": 570.0,
       "candidate": "INC-000001",
-      "posterior": 0.47010028413150434
+      "posterior": 0.4715308612946898
     },
     {
       "t_s": 600.0,
       "candidate": "INC-000001",
-      "posterior": 0.46929140726967195
+      "posterior": 0.4707217095359651
     },
     {
       "t_s": 630.0,
       "candidate": "INC-000001",
-      "posterior": 0.4686596774229428
+      "posterior": 0.470089759767542
     },
     {
       "t_s": 660.0,
       "candidate": "INC-000001",
-      "posterior": 0.4681665857180886
+      "posterior": 0.46959649321820285
     },
     {
       "t_s": 690.0,
       "candidate": "INC-000001",
-      "posterior": 0.46778187928298304
+      "posterior": 0.46921164843070545
     },
     {
       "t_s": 720.0,
       "candidate": "INC-000001",
-      "posterior": 0.46748183692005885
+      "posterior": 0.46891149698289086
     },
     {
       "t_s": 750.0,
       "candidate": "INC-000001",
-      "posterior": 0.4672478866810171
+      "posterior": 0.4686774609700264
     },
     {
       "t_s": 780.0,
       "candidate": "INC-000001",
-      "posterior": 0.46706550497262483
+      "posterior": 0.4684950119582949
     },
     {
       "t_s": 810.0,
       "candidate": "INC-000001",
-      "posterior": 0.4669233443247135
+      "posterior": 0.4683527985845445
     },
     {
       "t_s": 840.0,
       "candidate": "INC-000001",
-      "posterior": 0.46681254501758657
+      "posterior": 0.468241958022137
     },
     {
       "t_s": 870.0,
       "candidate": "INC-000001",
-      "posterior": 0.4667261934379234
+      "posterior": 0.46815557419231263
     },
     {
       "t_s": 900.0,
       "candidate": "INC-000001",
-      "posterior": 0.466658896869849
+      "posterior": 0.4680882524312442
     },
     {
       "t_s": 930.0,
       "candidate": "INC-000001",
-      "posterior": 0.466606450285688
+      "posterior": 0.4680357861772164
     },
     {
       "t_s": 960.0,
       "candidate": "INC-000001",
-      "posterior": 0.4665655755905767
+      "posterior": 0.46799489613031103
     },
     {
       "t_s": 990.0,
       "candidate": "INC-000001",
-      "posterior": 0.4665337177840443
+      "posterior": 0.46796302634525244
     },
     {
       "t_s": 1020.0,
       "candidate": "INC-000001",
-      "posterior": 0.46650888574665667
+      "posterior": 0.4679381849629382
     },
     {
       "t_s": 1050.0,
       "candidate": "INC-000001",
-      "posterior": 0.4664895279620147
+      "posterior": 0.4679188198885555
     },
     {
       "t_s": 1080.0,
       "candidate": "INC-000001",
-      "posterior": 0.46647443555670276
+      "posterior": 0.4679037217967695
     },
     {
       "t_s": 1110.0,
       "candidate": "INC-000001",
-      "posterior": 0.4664626666825452
+      "posterior": 0.46789194848655213
     },
     {
       "t_s": 1140.0,
       "candidate": "INC-000001",
-      "posterior": 0.46645348756106403
+      "posterior": 0.46788276590406597
     },
     {
       "t_s": 1170.0,
       "candidate": "INC-000001",
-      "posterior": 0.4664463265293092
+      "posterior": 0.4678756021715585
     },
     {
       "t_s": 1200.0,
       "candidate": "INC-000001",
-      "posterior": 0.46644073822629634
+      "posterior": 0.4678700117605316
     },
     {
       "t_s": 1230.0,
       "candidate": "INC-000001",
-      "posterior": 0.4664363756861925
+      "posterior": 0.46786564757454535
     },
     {
       "t_s": 1260.0,
       "candidate": "INC-000001",
-      "posterior": 0.4664329685949288
+      "posterior": 0.4678622391977152
     },
     {
       "t_s": 1290.0,
       "candidate": "INC-000001",
-      "posterior": 0.46643030635036076
+      "posterior": 0.46785957594853406
     },
     {
       "t_s": 1320.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642822486557
+      "posterior": 0.46785749367822654
     },
     {
       "t_s": 1350.0,
       "candidate": "INC-000001",
-      "posterior": 0.4664265962886491
+      "posterior": 0.46785586448667366
     },
     {
       "t_s": 1380.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642532099468076
+      "posterior": 0.46785458871138275
     },
     {
       "t_s": 1410.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642432134782513
+      "posterior": 0.46785358868722643
     },
     {
       "t_s": 1440.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642353684230653
+      "posterior": 0.46785280388560074
     },
     {
       "t_s": 1470.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642292031751487
+      "posterior": 0.4678521871281003
     },
     {
       "t_s": 1500.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642243500977326
+      "posterior": 0.4678517016371752
     },
     {
       "t_s": 1530.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642205225581307
+      "posterior": 0.46785131873873925
     },
     {
       "t_s": 1560.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642174970386624
+      "posterior": 0.4678510160725889
     },
     {
       "t_s": 1590.0,
       "candidate": "INC-000001",
-      "posterior": 0.4664215099201556
+      "posterior": 0.467850776198367
     },
     {
       "t_s": 1620.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642131930335695
+      "posterior": 0.46785058550961567
     },
     {
       "t_s": 1650.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642116723895044
+      "posterior": 0.4678504333878086
     },
     {
       "t_s": 1680.0,
       "candidate": "INC-000001",
-      "posterior": 0.466421045440422
+      "posterior": 0.4678503115433039
     },
     {
       "t_s": 1710.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642094743600826
+      "posterior": 0.4678502135018958
     },
     {
       "t_s": 1740.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642086816881506
+      "posterior": 0.46785013420478094
     },
     {
       "t_s": 1770.0,
       "candidate": "INC-000001",
-      "posterior": 0.4664208036852405
+      "posterior": 0.46785006969686505
     },
     {
       "t_s": 1800.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642075089219315
+      "posterior": 0.4678500168838894
     },
     {
       "t_s": 1830.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 1860.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 1890.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 1920.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 1950.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 1980.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 2010.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 2040.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 2070.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 2100.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 2130.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 2160.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 2190.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 2220.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 2250.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 2280.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 2310.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 2340.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 2370.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     },
     {
       "t_s": 2400.0,
       "candidate": "INC-000001",
-      "posterior": 0.46642070736789665
+      "posterior": 0.46784997334316325
     }
   ]
 }

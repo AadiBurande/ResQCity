@@ -10,7 +10,10 @@ untouched for the confirmatory experiments). Reports, per replication and pooled
 - time from onset to posterior >= 0.5 for real incidents, by the TRUE evidence path (which of
   the candidate's camera events and calls really belong to the incident);
 - how often a genuine call lands in a candidate seeded by a camera false alarm;
-- false candidates per day, and how many of them reach 0.5.
+- whether the FUSED type and required services match the incident (they drive dispatch from
+  phase 6 on), and how often one incident ends up as two dispatch-level candidates;
+- false candidates per day, and how many of them reach 0.5;
+- the detector's self-masking block (``detector_masking``), so D-029's headline is traceable.
 Camera coverage is thin (about 2 % of the incident location mass within 50 m road-graph of a
 camera junction), so a single week holds well under one incident in camera view: use enough
 replications before reading anything about the camera path.
@@ -131,6 +134,7 @@ def run(rep: int, scenario: str, network: RoadNetwork, seed_base: int) -> dict:
     end = start + timedelta(hours=hours)
     onset = {i.id: i.onset_ts for i in incidents}
     covered = {int(v) for a in cover.values() for v in a.tolist()}
+    by_id = {i.id: i for i in incidents}
     detectable = [i for i in incidents if i.type in fusion.camera.detected_types]
     covered_ids = {i.id for i in detectable if network.index_of(i.node) in covered}
     coverage_mass = float(np.sum(gen.node_share[sorted(covered)]))
@@ -139,13 +143,16 @@ def run(rep: int, scenario: str, network: RoadNetwork, seed_base: int) -> dict:
     final: list[tuple[float, bool]] = []
     reach_by_path: dict[str, list[float]] = defaultdict(list)
     n_real_cands = Counter()
+    fused = Counter()
+    reached_incidents: Counter = Counter()
     false_cands = false_reach = seeded_false = 0
     for cand in engine.candidates.values():
         ids = [e.id for e in cand.events] + [c.id for c, _ in cand.calls]
         labels = [truth[i] for i in ids]
         groups[cand.id] = labels
         real = Counter(lab for lab in labels if lab is not None)
-        posterior = engine.model.posterior(engine.evidence(cand, min(cand.updated, end)))[0]
+        at = min(cand.updated, end)  # the moment of its last evidence; see posterior_evaluated_at
+        posterior = engine.model.posterior(engine.evidence(cand, at))[0]
         final.append((posterior, bool(real)))
         if not real:
             false_cands += 1
@@ -160,8 +167,19 @@ def run(rep: int, scenario: str, network: RoadNetwork, seed_base: int) -> dict:
         }[frozenset(true_kinds)]
         n_real_cands[p] += 1
         seeded_false += seeded_by.get(cand.id) == "false"
+        truth_inc = by_id[inc_id]
+        got = engine.incident(cand, at)
+        fused["n"] += 1
+        fused["type_correct"] += got.type == truth_inc.type
+        want, have = truth_inc.requirements, got.requirements
+        under = any(getattr(have, a) < getattr(want, a) for a in ("ambulance", "police", "fire"))
+        over = any(getattr(have, a) > getattr(want, a) for a in ("ambulance", "police", "fire"))
+        fused["requirements_exact"] += not under and not over
+        fused["requirements_under"] += under
+        fused["requirements_over"] += over and not under
         if cand.id in first_reach:
             reach_by_path[p].append((first_reach[cand.id] - onset[inc_id]).total_seconds())
+            reached_incidents[inc_id] += 1
     cal = []
     post = np.array([p for p, _ in final])
     real_flag = np.array([r for _, r in final])
@@ -169,6 +187,7 @@ def run(rep: int, scenario: str, network: RoadNetwork, seed_base: int) -> dict:
         sel = (post >= lo) & (post < hi if hi < 1.0 else post <= hi)
         cal.append({
             "bin": [lo, hi], "candidates": int(sel.sum()), "real": int(real_flag[sel].sum()),
+            "posterior_sum": float(post[sel].sum()),
             "mean_posterior": float(post[sel].mean()) if sel.any() else None,
             "share_real": float(real_flag[sel].mean()) if sel.any() else None,
         })  # fmt: skip
@@ -189,15 +208,14 @@ def run(rep: int, scenario: str, network: RoadNetwork, seed_base: int) -> dict:
         "calibration": cal,
         "real_candidates_by_path": dict(n_real_cands),
         "real_candidates_seeded_by_a_false_alarm": seeded_false,
+        "fused_estimate": dict(fused),
+        "real_candidates_reaching_threshold": int(sum(reached_incidents.values())),
+        "duplicate_dispatch_candidates": int(
+            sum(reached_incidents.values()) - len(reached_incidents)
+        ),
         "onset_to_threshold_s": {p: sorted(round(x) for x in v) for p, v in reach_by_path.items()},
         "days": days,
-        "real_incidents_reaching_threshold": len(
-            {
-                Counter(lab for lab in groups[c] if lab).most_common(1)[0][0]
-                for c in first_reach
-                if any(groups[c])
-            }
-        ),
+        "real_incidents_reaching_threshold": len(reached_incidents),
         "false_candidates_per_day": false_cands / days,
         "false_candidates_reaching_threshold_per_day": false_reach / days,
         "fusion_seconds": elapsed,
@@ -275,13 +293,27 @@ def main(argv: list[str] | None = None) -> int:
         log.info("replication %d: %s", r, {k: v for k, v in reps[-1].items() if k in (
             "incidents", "incidents_in_camera_view", "calls", "camera_events",
             "candidates")})  # fmt: skip
+    detector = load_detector_model(PROJECT_ROOT / load_fusion_config().detector_inputs)
+    masking = detector.masking()
+    pooled = pool(reps)
+    masking["expected_true_detections"] = (
+        pooled["incidents_in_camera_view"] * detector.effective_p_detect
+    )
+    masking["observed_true_detections"] = pooled["true_camera_events"]
     report = {
         "status": "synthetic model check (UNVERIFIED call and review parameters; measured "
         "detector); not a research result",
         "scenario": args.scenario,
         "seed_base": "tuning_seed_base",
         "threshold": THRESHOLD,
-        "pooled": pool(reps),
+        "posterior_evaluated_at": "the time of each candidate's last evidence (not the end of "
+        "the horizon), so the calibration table excludes the decay a candidate suffers while "
+        "nothing further confirms it",
+        "calibration_label": "a candidate counts as real if it holds any genuine evidence, which "
+        "is stricter than the hypothesis H1 (an incident occurred anywhere in its region during "
+        "its window)",
+        "detector_masking": masking,
+        "pooled": pooled,
         "replications": reps,
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)

@@ -7,14 +7,16 @@ candidate whenever it changes, so it does not depend on the order in which evide
 Evidence kinds are conditionally independent given H (an explicit assumption):
 
 - prior odds        e^pi - 1,  pi = incident rate x mass(R) x W  (Poisson)
-- camera c alarmed  LR = 1 + q_c p_det s_real(b) / (W mu_c s_false(b))
-- camera c silent   LR = 1 - q_c p_det             (covers part of R, no alarm in the window)
+- camera c alarmed  LR = 1 + q_c p_eff s_real(b) / (W mu_c s_false(b))
+- camera c silent   LR = 1 - q_c p_eff             (covers part of R, no alarm in the window)
 - calls             LR = L(call times | H1) / L(call times | H0)  (point-process densities:
                     genuine calls = first-call delay + chained gaps; background = Poisson)
 - operator review   LR = sens / (1 - spec)  or  (1 - sens) / spec
 
 with q_c = mass(coverage_c n R) / mass(R) x share of camera-detectable types, mu_c the long-run
-false-alarm rate (per second) and s the confidence-bin shares of real and false alarms.
+false-alarm rate (per second), s the confidence-bin shares of real and false alarms, and p_eff the
+detection probability AFTER self-masking (p_detect x armed fraction, D-029): a camera silenced by
+its own last false alarm cannot alarm on a crash either.
 """
 
 import math
@@ -117,10 +119,11 @@ class EvidenceModel:
 
     def camera_log_lr(self, obs: CameraObservation, region_mass: float) -> float:
         q = min(1.0, obs.covered_mass / region_mass) * self.detectable_share if region_mass else 0.0
+        p_eff = self.det.effective_p_detect
         if obs.alarm_bin is None:
-            return math.log(max(1.0 - q * self.det.p_detect, 1e-300))
+            return math.log(max(1.0 - q * p_eff, 1e-300))
         b = obs.alarm_bin
-        real = q * self.det.p_detect * self.det.real_shares[b] / self.window_s
+        real = q * p_eff * self.det.real_shares[b] / self.window_s
         return math.log1p(real / (self.mu_per_s * self.det.false_shares[b]))
 
     def _first_cdf(self, x: float) -> float:

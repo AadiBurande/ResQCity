@@ -5,7 +5,10 @@ No neural network runs here (master plan, design principle 2). Per camera, a tim
   (a share of cameras can trigger persistently more often; phase-10 factor);
 - true detections: an incident of a camera-detectable type whose node lies within the coverage
   radius (road-graph distance) is detected with ``p_detect`` after ``delay_s``, unless the camera
-  is in a cooldown at that moment (masked, as measured in D-027).
+  is in a cooldown at that moment (masked, as measured in D-027). A masked crash is then missed
+  for good: the simulator gives the camera no second chance once the cooldown lapses, although a
+  real crash scene persists. This conservative assumption is what turns p_detect into the much
+  lower effective detection of D-029 (L22), and it is a phase-10 sensitivity factor.
 Confidences are drawn from the measured real / false alarm confidences (D-028, exploratory).
 Severity cues seen by the camera are the true cues, each flipped with ``cue_flip_probability``.
 Random streams: ``camera_false/<camera>`` and ``camera_detect/<incident>/<camera>`` (common random

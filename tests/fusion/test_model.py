@@ -105,7 +105,27 @@ def test_camera_terms():
     silent = CameraObservation("C1", covered_mass=0.01, alarm_bin=None)
     assert MODEL.camera_log_lr(seen, 0.01) > MODEL.camera_log_lr(low, 0.01) > 0.0
     assert MODEL.camera_log_lr(silent, 0.01) < 0.0
-    assert MODEL.camera_log_lr(silent, 0.01) == pytest.approx(math.log(1 - 0.43 / 1.0 * 0.6))
+    # the silent term uses the detection probability AFTER self-masking (D-029), not p_detect
+    assert MODEL.camera_log_lr(silent, 0.01) == pytest.approx(
+        math.log(1 - 0.43 * DET.effective_p_detect)
+    )
+    assert MODEL.camera_log_lr(silent, 0.01) != pytest.approx(math.log(1 - 0.43 * DET.p_detect))
+
+
+def test_effective_detection_is_p_detect_times_the_armed_fraction():
+    assert DET.mean_armed_s == pytest.approx(3600.0 / DET.false_rate_per_armed_h)
+    armed = DET.mean_armed_s / (DET.mean_armed_s + DET.cooldown_s)
+    assert DET.armed_fraction == pytest.approx(armed)
+    assert DET.effective_p_detect == pytest.approx(DET.p_detect * armed)
+    assert DET.effective_p_detect < DET.p_detect
+
+
+def test_an_alarm_is_weak_evidence_on_its_own():
+    """With the measured inputs a single camera alarm multiplies the odds by at most ~1.1, even
+    in the top confidence bin and when the camera covers the whole candidate region (D-029)."""
+    for b in range(len(DET.bin_edges) - 1):
+        lr = math.exp(MODEL.camera_log_lr(CameraObservation("C1", 0.01, b), 0.01))
+        assert 1.0 < lr < 1.2, (b, lr)
 
 
 def test_reviews_and_posterior():

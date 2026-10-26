@@ -1,0 +1,20 @@
+# Scripted replay (SYNTHETIC). The real discrimination test: two crashes 600 m apart (the closest
+# any two camera sites get), each with two handset-located callers. The association gate for two
+# 50 m calls is 150 + 3*sqrt(50^2+50^2) = 362 m, so 600 m is just outside it and the two must
+# stay separate. Compare two_crashes_merged.yaml, which is inside the gate.
+name: two_crashes_near
+description: Crashes near C04 and C06, 600 m apart; two calls each; handset (ELS) locations.
+start: "2026-03-03T09:00:00+05:30"
+end_s: 1200
+tick_s: 15
+evidence:
+  - {kind: call, id: CALL-A1, near: C04, offset_m: [20, 15], t: 120, error_m: 50, language: hi,
+     text: "यहाँ एक्सीडेंट हो गया है। एक व्यक्ति का खून बह रहा है।"}
+  - {kind: call, id: CALL-B1, near: C06, offset_m: [-15, 20], t: 180, error_m: 50, language: en,
+     text: "There has been an accident near the junction. 3 vehicles are involved."}
+  - {kind: call, id: CALL-A2, near: C04, offset_m: [-25, 10], t: 240, error_m: 50, language: mr,
+     text: "इथे रस्ता अपघात झाला आहे, लवकर मदत पाठवा."}
+  - {kind: call, id: CALL-B2, near: C06, offset_m: [10, -20], t: 300, error_m: 50, language: en,
+     text: "Road accident here, please send help."}
+expect:
+  groups: [[CALL-A1, CALL-A2], [CALL-B1, CALL-B2]]

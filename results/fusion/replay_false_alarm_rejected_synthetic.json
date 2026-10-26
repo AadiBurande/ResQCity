@@ -36,7 +36,7 @@
           "ref_id": "REV-F"
         }
       ],
-      "posterior": 1.0063149542103187e-07,
+      "posterior": 9.990982390599781e-08,
       "severity": 0.5,
       "status": "candidate",
       "requirements": {
@@ -46,7 +46,7 @@
       },
       "evidence_log_odds": {
         "prior": -11.3116,
-        "camera:C10": 0.0151,
+        "camera:C10": 0.0079,
         "calls": -1.8397,
         "review:0": -2.9755
       }
@@ -56,217 +56,217 @@
     {
       "t_s": 0.0,
       "candidate": "INC-000001",
-      "posterior": 1.2415546745558118e-05
+      "posterior": 1.2326510635713393e-05
     },
     {
       "t_s": 0.0,
       "candidate": "INC-000001",
-      "posterior": 1.2415546745558118e-05
+      "posterior": 1.2326510635713393e-05
     },
     {
       "t_s": 15.0,
       "candidate": "INC-000001",
-      "posterior": 1.2393814580604229e-05
+      "posterior": 1.2304934317590575e-05
     },
     {
       "t_s": 30.0,
       "candidate": "INC-000001",
-      "posterior": 1.2228044397379775e-05
+      "posterior": 1.214035291434298e-05
     },
     {
       "t_s": 40.0,
       "candidate": "INC-000001",
-      "posterior": 6.126678275587529e-07
+      "posterior": 6.082741266333474e-07
     },
     {
       "t_s": 45.0,
       "candidate": "INC-000001",
-      "posterior": 6.055662752876929e-07
+      "posterior": 6.012235025759493e-07
     },
     {
       "t_s": 60.0,
       "candidate": "INC-000001",
-      "posterior": 5.796953134890376e-07
+      "posterior": 5.755380723150431e-07
     },
     {
       "t_s": 75.0,
       "candidate": "INC-000001",
-      "posterior": 5.493758480401407e-07
+      "posterior": 5.454360405049129e-07
     },
     {
       "t_s": 90.0,
       "candidate": "INC-000001",
-      "posterior": 5.171048298273149e-07
+      "posterior": 5.13396451350907e-07
     },
     {
       "t_s": 105.0,
       "candidate": "INC-000001",
-      "posterior": 4.846025928291408e-07
+      "posterior": 4.811273015938031e-07
     },
     {
       "t_s": 120.0,
       "candidate": "INC-000001",
-      "posterior": 4.529593582093718e-07
+      "posterior": 4.4971099396143483e-07
     },
     {
       "t_s": 135.0,
       "candidate": "INC-000001",
-      "posterior": 4.2281685670010407e-07
+      "posterior": 4.197846570624545e-07
     },
     {
       "t_s": 150.0,
       "candidate": "INC-000001",
-      "posterior": 3.9451563462159725e-07
+      "posterior": 3.916863950134712e-07
     },
     {
       "t_s": 165.0,
       "candidate": "INC-000001",
-      "posterior": 3.6820091779174384e-07
+      "posterior": 3.655603921543248e-07
     },
     {
       "t_s": 180.0,
       "candidate": "INC-000001",
-      "posterior": 3.4389495274895236e-07
+      "posterior": 3.4142873548183705e-07
     },
     {
       "t_s": 195.0,
       "candidate": "INC-000001",
-      "posterior": 3.2154520282344385e-07
+      "posterior": 3.192392650868804e-07
     },
     {
       "t_s": 210.0,
       "candidate": "INC-000001",
-      "posterior": 3.0105595978631644e-07
+      "posterior": 2.9889695910300735e-07
     },
     {
       "t_s": 225.0,
       "candidate": "INC-000001",
-      "posterior": 2.8230881283704433e-07
+      "posterior": 2.802842559021924e-07
     },
     {
       "t_s": 240.0,
       "candidate": "INC-000001",
-      "posterior": 2.65175713904569e-07
+      "posterior": 2.6327402569910065e-07
     },
     {
       "t_s": 255.0,
       "candidate": "INC-000001",
-      "posterior": 2.4952715508913215e-07
+      "posterior": 2.4773768934899203e-07
     },
     {
       "t_s": 270.0,
       "candidate": "INC-000001",
-      "posterior": 2.3523713514650538e-07
+      "posterior": 2.3355014921515352e-07
     },
     {
       "t_s": 285.0,
       "candidate": "INC-000001",
-      "posterior": 2.2218602830262118e-07
+      "posterior": 2.2059263741001054e-07
     },
     {
       "t_s": 300.0,
       "candidate": "INC-000001",
-      "posterior": 2.1026209339292834e-07
+      "posterior": 2.087542141117728e-07
     },
     {
       "t_s": 315.0,
       "candidate": "INC-000001",
-      "posterior": 1.9936211217786333e-07
+      "posterior": 1.9793240130224764e-07
     },
     {
       "t_s": 330.0,
       "candidate": "INC-000001",
-      "posterior": 1.8939148029918236e-07
+      "posterior": 1.8803327307086258e-07
     },
     {
       "t_s": 345.0,
       "candidate": "INC-000001",
-      "posterior": 1.8026396441198963e-07
+      "posterior": 1.7897121448838194e-07
     },
     {
       "t_s": 360.0,
       "candidate": "INC-000001",
-      "posterior": 1.7190126583573086e-07
+      "posterior": 1.7066848838713111e-07
     },
     {
       "t_s": 375.0,
       "candidate": "INC-000001",
-      "posterior": 1.6423248226775036e-07
+      "posterior": 1.6305470093481843e-07
     },
     {
       "t_s": 390.0,
       "candidate": "INC-000001",
-      "posterior": 1.571935265460998e-07
+      "posterior": 1.560662245656317e-07
     },
     {
       "t_s": 405.0,
       "candidate": "INC-000001",
-      "posterior": 1.5072653974146384e-07
+      "posterior": 1.4964561528112496e-07
     },
     {
       "t_s": 420.0,
       "candidate": "INC-000001",
-      "posterior": 1.4477932141996368e-07
+      "posterior": 1.4374104699883935e-07
     },
     {
       "t_s": 435.0,
       "candidate": "INC-000001",
-      "posterior": 1.393047903612514e-07
+      "posterior": 1.383057761378129e-07
     },
     {
       "t_s": 450.0,
       "candidate": "INC-000001",
-      "posterior": 1.342604827411486e-07
+      "posterior": 1.3329764339995994e-07
     },
     {
       "t_s": 465.0,
       "candidate": "INC-000001",
-      "posterior": 1.2960809072085007e-07
+      "posterior": 1.2867861566824355e-07
     },
     {
       "t_s": 480.0,
       "candidate": "INC-000001",
-      "posterior": 1.253130418011367e-07
+      "posterior": 1.244143683775158e-07
     },
     {
       "t_s": 495.0,
       "candidate": "INC-000001",
-      "posterior": 1.2134411771047536e-07
+      "posterior": 1.204739071357302e-07
     },
     {
       "t_s": 510.0,
       "candidate": "INC-000001",
-      "posterior": 1.1767311066860772e-07
+      "posterior": 1.1682922645260871e-07
     },
     {
       "t_s": 525.0,
       "candidate": "INC-000001",
-      "posterior": 1.1427451437740268e-07
+      "posterior": 1.1345500294652863e-07
     },
     {
       "t_s": 540.0,
       "candidate": "INC-000001",
-      "posterior": 1.1112524688586907e-07
+      "posterior": 1.1032832019698661e-07
     },
     {
       "t_s": 555.0,
       "candidate": "INC-000001",
-      "posterior": 1.082044024531946e-07
+      "posterior": 1.0742842238713314e-07
     },
     {
       "t_s": 570.0,
       "candidate": "INC-000001",
-      "posterior": 1.0549302962289238e-07
+      "posterior": 1.0473649396944178e-07
     },
     {
       "t_s": 585.0,
       "candidate": "INC-000001",
-      "posterior": 1.0297393287601906e-07
+      "posterior": 1.022354627413569e-07
     },
     {
       "t_s": 600.0,
       "candidate": "INC-000001",
-      "posterior": 1.0063149542103187e-07
+      "posterior": 9.990982390599781e-08
     }
   ]
 }

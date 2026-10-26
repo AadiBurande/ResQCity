@@ -15,11 +15,15 @@ gate:
     value: 3.0
     source: UNVERIFIED
     note: >
-      Design rule, not tuned on outcomes: the smallest half-step k for which at least 95 % of
-      same-incident pairs fall inside the gate under the stated error model of calls.yaml
-      (lognormal, median 300 m, sigma 0.7): call-call 96.3 %, call-camera 96.3 % (k = 2: 88 %).
-      The first synthetic week split 25 of 48 same-incident call pairs with road-graph
-      distance and k = 2 (D-028).
+      Smallest half-step k for which at least 95 % of same-incident pairs fall inside the gate
+      under the error model of calls.yaml: see results/fusion/gate_k_synthetic.json (call-call
+      96.3 %, call-camera 96.3 %; k = 2 gives 88.3 % / 90.5 %). HONEST STATUS (D-029): the
+      criterion was written after a synthetic week showed the earlier gate splitting 25 of 48
+      same-incident call pairs, and it is evaluated on the same UNVERIFIED error model that
+      generates those calls, so it is in-sample by construction. It is not tuned on any outcome,
+      and it accompanies a genuine metric fix (the gate used road-graph distance, always >= the
+      straight-line displacement a caller's error actually is), but it is not independent
+      evidence that the gate is right.
   time_window_s: {value: 900.0, source: UNVERIFIED}
 
 camera:

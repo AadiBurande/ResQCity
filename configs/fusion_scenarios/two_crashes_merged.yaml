@@ -1,0 +1,17 @@
+# Scripted replay (SYNTHETIC). A DOCUMENTED LIMITATION, not a success: two genuinely separate
+# crashes 180 m apart, inside the 362 m gate for 50 m calls, are fused into ONE incident. The
+# model assumes at most one incident per candidate region and window (docs/models/fusion.md
+# section 5, assumption 3) and never splits a candidate later, so it cannot tell them apart.
+# The expectation below encodes that merge so the behaviour is pinned, not hidden.
+name: two_crashes_merged
+description: Two crashes 180 m apart (inside the gate) are fused into one incident - a limitation.
+start: "2026-03-03T09:00:00+05:30"
+end_s: 1200
+tick_s: 15
+evidence:
+  - {kind: call, id: CALL-A1, near: C04, offset_m: [0, 0], t: 120, error_m: 50, language: en,
+     text: "There has been an accident near the junction. Someone is injured and lying on the road."}
+  - {kind: call, id: CALL-B1, near: C04, offset_m: [150, 100], t: 200, error_m: 50, language: en,
+     text: "A car and a truck have collided near the junction. The truck has overturned."}
+expect:
+  groups: [[CALL-A1, CALL-B1]]

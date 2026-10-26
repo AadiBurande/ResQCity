@@ -1,6 +1,9 @@
-# Scripted replay (SYNTHETIC). Two crashes far apart at almost the same time: two incidents.
+# Scripted replay (SYNTHETIC). Two crashes 10.6 km apart: a sanity check only. At that
+# separation the gate (362 m for two 50 m calls) cannot possibly merge them, so this scenario
+# does NOT test discrimination - see two_crashes_near.yaml (600 m, just outside the gate) and
+# two_crashes_merged.yaml (180 m, inside it).
 name: two_crashes
-description: Crashes near C05 and C30 a minute apart; two calls each; handset (ELS) locations.
+description: Crashes near C05 and C30, 10.6 km apart; two calls each; handset (ELS) locations.
 start: "2026-03-03T09:00:00+05:30"
 end_s: 1200
 tick_s: 15
