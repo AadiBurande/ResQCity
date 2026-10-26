@@ -22,6 +22,7 @@ dependencies = [
     "opencv-python-headless>=4.10",  # video I/O, blur; also used by streams tooling
     "pypdf>=4.0",
     "lightgbm>=4.7.0",
+    "ortools>=9.15.6755",
 ]
 
 [tool.uv.sources]

@@ -1,0 +1,45 @@
+# Emergency fleet: how many units each agency has and where they are based (phase 6, D-031).
+# SYNTHETIC ROSTER built on REAL station locations (data/processed/facilities.json, OSM).
+#
+# No primary source gives Pune's fleet counts. The figures below come from press reports or are
+# derived from them, so every one is UNVERIFIED and is a phase-10 sensitivity factor. They are
+# recorded here rather than invented silently: see docs/decisions.md D-031.
+synthetic_roster: true
+
+counts:
+  police:
+    value: 39
+    source: UNVERIFIED
+    note: >
+      "39 CR mobile units ... across 39 police stations" - Pune City Police Motor Transport
+      department, reported May 2025 (punekarnews.in). Press report, not an official publication.
+      The same report lists 123 beat-marshalling vehicles; those patrol rather than answer
+      dispatch, so they are the phase-10 upper bound (39 -> 162), not the default.
+  fire:
+    value: 22
+    source: UNVERIFIED
+    note: >
+      "22 fire engines and 5 tankers" after retiring 27 over-age vehicles - PMC fire brigade,
+      press (thebridgechronicle.com). Tankers are support, so only the engines respond. Station
+      counts disagree across sources: OSM has 14, press says 20-25; units are placed on the 14
+      OSM stations, which concentrates them more than reality.
+  ambulance:
+    value: 30
+    source: UNVERIFIED
+    note: >
+      DERIVED, not cited. 937 Dial-108 ambulances across Maharashtra (press, Free Press Journal)
+      scaled by PMC's ~3.5 M share of Maharashtra's ~112 M gives ~29; the commonly quoted
+      1-per-100,000 norm gives ~35. 30 is the round figure between them.
+
+placement:
+  # Units are spread over the busiest stations of their agency, measured by the forecast incident
+  # mass of the station's ward (phase 5), so bases follow demand rather than alphabetical order.
+  # Each chosen station holds at least one unit; the remainder are allocated largest-remainder.
+  rule: demand_weighted
+  max_units_per_station: {value: 4, source: UNVERIFIED}
+  # Ambulance bases: OSM tags 590 "hospitals", most of them small nursing homes (D-013), so only
+  # hospitals with a trauma or burns capability, or the largest by ICU beds, hold an ambulance.
+  ambulance_bases:
+    prefer_capable: true
+    max_bases: {value: 30, source: UNVERIFIED}
+  seed: 20261027

@@ -338,15 +338,18 @@ class RoadNetwork:
         """Travel time (s) of the edge u -> v (OSM node ids) entered at time ``t``."""
         return float(self.edge_times(t, scenario, profile)[self.edge_index(u, v)])
 
-    def _matrix(self, t: datetime, scenario: "ScenarioState | None", profile: str) -> csr_matrix:
+    def _matrix(
+        self, t: datetime, scenario: "ScenarioState | None", profile: str, reverse: bool = False
+    ) -> csr_matrix:
         hour = t.hour if scenario is None else scenario.local_hour(t)
-        key = (hour, profile, None if scenario is None else scenario.state_key(t))
+        key = (hour, profile, None if scenario is None else scenario.state_key(t), reverse)
         cached = self._matrix_cache.get(key)
         if cached is None:
             times = self.edge_times(t, scenario, profile)
             ok = np.isfinite(times)
+            rows, cols = (self.v_idx, self.u_idx) if reverse else (self.u_idx, self.v_idx)
             cached = csr_matrix(
-                (times[ok], (self.u_idx[ok], self.v_idx[ok])), shape=(self.n_nodes, self.n_nodes)
+                (times[ok], (rows[ok], cols[ok])), shape=(self.n_nodes, self.n_nodes)
             )
             self._matrix_cache[key] = cached
         return cached
@@ -358,15 +361,20 @@ class RoadNetwork:
         scenario: "ScenarioState | None" = None,
         profile: str = "default",
         targets: Iterable[int] | None = None,
+        reverse: bool = False,
     ) -> np.ndarray:
         """Shortest travel times (s) from each source node id, using edge times at departure ``t``.
 
         Static-bucket approximation: every edge uses its time for the departure hour and scenario
         state. Exact time-dependent routing is phase 6. Returns shape (n_sources, n_targets) or
         (n_sources, n_nodes) when ``targets`` is None; unreachable = inf.
+
+        With ``reverse`` the graph is transposed, so the result is the time **to** each source
+        from every other node. Dispatch needs times from many units to a few incidents, and one
+        reversed search per incident is far cheaper than one forward search per unit.
         """
         src = [self.index_of(s) for s in sources]
-        dist = dijkstra(self._matrix(t, scenario, profile), directed=True, indices=src)
+        dist = dijkstra(self._matrix(t, scenario, profile, reverse), directed=True, indices=src)
         dist = np.atleast_2d(dist)
         if targets is None:
             return dist

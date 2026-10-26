@@ -1,0 +1,63 @@
+{
+  "status": "synthetic ETAs; measures solver time against instance size, not route quality",
+  "time_limit_s": 1.0,
+  "live_batch_within_limit": true,
+  "live_batch_median_s": 0.06178150000050664,
+  "sizes": [
+    {
+      "incidents": 2,
+      "units": 20,
+      "repeats": 5,
+      "median_solve_s": 0.0156561000039801,
+      "max_solve_s": 0.01807089999783784,
+      "statuses": [
+        "OPTIMAL"
+      ],
+      "within_limit": true
+    },
+    {
+      "incidents": 5,
+      "units": 45,
+      "repeats": 5,
+      "median_solve_s": 0.0307168000144884,
+      "max_solve_s": 0.0309758999501355,
+      "statuses": [
+        "OPTIMAL"
+      ],
+      "within_limit": true
+    },
+    {
+      "incidents": 10,
+      "units": 91,
+      "repeats": 5,
+      "median_solve_s": 0.06178150000050664,
+      "max_solve_s": 0.06405829999130219,
+      "statuses": [
+        "OPTIMAL"
+      ],
+      "within_limit": true
+    },
+    {
+      "incidents": 20,
+      "units": 91,
+      "repeats": 5,
+      "median_solve_s": 0.11140100000193343,
+      "max_solve_s": 0.12489940004888922,
+      "statuses": [
+        "OPTIMAL"
+      ],
+      "within_limit": true
+    },
+    {
+      "incidents": 40,
+      "units": 91,
+      "repeats": 5,
+      "median_solve_s": 1.0691478999797255,
+      "max_solve_s": 1.0734846999985166,
+      "statuses": [
+        "FEASIBLE"
+      ],
+      "within_limit": false
+    }
+  ]
+}

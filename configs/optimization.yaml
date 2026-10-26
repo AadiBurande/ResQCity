@@ -1,0 +1,65 @@
+# OR models of phase 6 (D-031). Formulations: docs/models/{routing,dispatch,preposition,
+# placement,erlang}.md. Every behavioural weight here is an assumption and a phase-10 factor.
+synthetic: true
+
+routing:
+  # ETA matrices are precomputed per hour bucket; a scenario's flooding and festival effects
+  # already enter through geo.scenario.ScenarioState.edge_factors.
+  hour_buckets: 24
+  profile: default
+  green_corridor:
+    # Speed multiplier on the ambulance's route while police hold the junctions ahead of it.
+    # rho = 1.0 means no assistance; the phase-10 ablation sets it to 1.0.
+    rho: {value: 0.85, source: UNVERIFIED}
+    note: >
+      Applied only when a police unit is assigned to the same incident and its ETA is at or
+      below the ambulance's, so the effect is data (a precomputed precedence), not a decision.
+
+dispatch:
+  # Objective: sum_i w(severity_i) * L[i] + lambda * coverage_loss + mu * shortfall, in seconds.
+  severity_weights:
+    value: {minor: 1.0, serious: 2.0, critical: 4.0}
+    source: UNVERIFIED
+    note: Relative value of a second saved per severity class, not a survival model.
+  lambda_coverage: {value: 60.0, source: UNVERIFIED}
+  mu_shortfall: {value: 3600.0, source: UNVERIFIED}
+  epsilon_ambulance: {value: 0.01, source: UNVERIFIED}
+  note_epsilon: >
+    Master plan section 6.1: minimising only the last arrival lets the solver delay an ambulance
+    that is not the critical path. A small secondary term on ambulance arrival breaks that tie.
+    A test asserts it never changes the last-arrival time.
+  solver:
+    time_limit_s: 1.0        # the phase's live-use acceptance criterion
+    workers: 8
+    greedy_fallback: true    # used when the solver returns no feasible solution in time
+
+preposition:
+  every_minutes: 30
+  busy_fraction: {value: 0.3, source: UNVERIFIED}   # MEXCLP q: chance a unit is unavailable
+  coverage_radius_s: {value: 480.0, source: UNVERIFIED}   # 8 minutes
+  fairness:
+    # Every ward must be reachable within t_ward with probability >= alpha. Solved with and
+    # without this constraint to report the price of fairness (RQ4).
+    enabled: true
+    alpha: {value: 0.8, source: UNVERIFIED}
+    t_ward_s: {value: 600.0, source: UNVERIFIED}
+  relocation:
+    max_moves: {value: 6, source: UNVERIFIED}
+    max_total_s: {value: 3600.0, source: UNVERIFIED}
+
+placement:
+  # MCLP for new camera sites: maximise risk-weighted coverage of incident locations.
+  coverage_radius_m: {value: 50.0, source: UNVERIFIED}   # matches fusion.yaml camera coverage
+  k_max: 50
+  note: >
+    Coverage is an UPPER BOUND on value: a covered incident is still only detected with the
+    measured effective probability of 0.31 (D-029), and every added camera also adds false
+    alarms at the measured rate.
+
+erlang:
+  # M/M/c sanity check against the simulator (phase 7).
+  service_time_s:
+    value: {ambulance: 2700.0, police: 1800.0, fire: 3600.0}
+    source: UNVERIFIED
+    note: Busy time per call including travel, on scene, transport and return. Assumed.
+  target_wait_s: {value: 60.0, source: UNVERIFIED}
