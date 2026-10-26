@@ -46,6 +46,18 @@ Faces and number plates are blurred before any frame is stored or shown; only ev
 `src/resqcity/vision/`. A phone IP camera works too: `--source http://<phone-ip>:8080/video`.
 Colab version of the training: [notebooks/vision/train.ipynb](notebooks/vision/train.ipynb).
 
+## Calls and fusion (phase 4)
+
+```bash
+make fusion                 # triage check, scripted fusion replays, synthetic-week model check
+make fusion REPS=3          # shorter week check (minutes)
+```
+
+Synthetic 112 calls (`configs/calls.yaml`, all parameters UNVERIFIED) and a statistical camera
+process built from the measured detector feed the Bayesian fusion in `src/resqcity/fusion/`
+(formulation: [docs/models/fusion.md](docs/models/fusion.md)). Posterior traces:
+[notebooks/04_fusion.ipynb](notebooks/04_fusion.ipynb).
+
 ## Layout
 
 ```

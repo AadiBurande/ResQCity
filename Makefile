@@ -4,8 +4,9 @@
 TASKS    := uv run python -m resqcity.tools.tasks
 SCENARIO ?= normal
 POLICY   ?= B0
+REPS     ?= 30
 
-.PHONY: setup lint format test types data vision streams api ui demo sim experiments figures reproduce
+.PHONY: setup lint format test types data vision fusion streams api ui demo sim experiments figures reproduce
 
 setup:
 	uv sync
@@ -13,6 +14,9 @@ setup:
 
 lint format test types data vision streams api ui demo experiments figures reproduce:
 	$(TASKS) $@
+
+fusion:
+	$(TASKS) fusion --scenario $(SCENARIO) --reps $(REPS)
 
 sim:
 	$(TASKS) sim --scenario $(SCENARIO) --policy $(POLICY)

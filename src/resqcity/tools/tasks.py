@@ -75,6 +75,16 @@ def data(_: argparse.Namespace) -> int:
     )
 
 
+def fusion(args: argparse.Namespace) -> int:
+    """Phase 4: triage check on the caller templates, scripted fusion replays (acceptance) and
+    the synthetic-week model check. Minutes; no GPU (the optional LLM triager stays off)."""
+    return _run(
+        _py("resqcity.fusion.eval_triage"),
+        _py("resqcity.sim.fusion_replay", "--all"),
+        _py("resqcity.sim.fusion_check", "--reps", str(args.reps), "--scenario", args.scenario),
+    )
+
+
 def streams(_: argparse.Namespace) -> int:
     """Start MediaMTX (Docker) and publish simulated cameras with scenario cues (Ctrl-C stops)."""
     return _run(_py("resqcity.streams.loop_cameras", "--start-server"))
@@ -168,6 +178,7 @@ TASKS: dict[str, Callable[[argparse.Namespace], int]] = {
     "data": data,
     "streams": streams,
     "vision": vision,
+    "fusion": fusion,
     "api": _stub(8, "start backend API"),
     "ui": _stub(9, "start dashboard"),
     "demo": _stub(9, "end-to-end live demo"),
@@ -183,6 +194,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("target", choices=sorted(TASKS))
     parser.add_argument("--scenario", default="normal")
     parser.add_argument("--policy", default="B0")
+    parser.add_argument("--reps", type=int, default=30, help="fusion: week-check replications")
     args = parser.parse_args(argv)
     return TASKS[args.target](args)
 
