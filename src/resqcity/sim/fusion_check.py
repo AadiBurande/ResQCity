@@ -54,6 +54,9 @@ from resqcity.sim.generator import IncidentGenerator, load_incidents_config
 
 OUT = PROJECT_ROOT / "results" / "fusion" / "week_check_synthetic.json"
 THRESHOLD = 0.5
+FUSED_KEYS = (
+    "n", "type_correct", "requirements_exact", "requirements_under", "requirements_over",
+)  # fmt: skip
 CAL_EDGES = [0.0, 1e-4, 1e-2, 0.1, 0.5, 0.9, 0.99, 1.0]
 EXPIRY_TICK = timedelta(minutes=5)
 log = logging.getLogger(__name__)
@@ -237,9 +240,12 @@ def pool(reps: list[dict]) -> dict:
         for k in (
             "incidents", "detectable_incidents", "incidents_in_camera_view",
             "expected_incidents_in_camera_view", "calls", "false_calls", "camera_events",
-            "true_camera_events", "candidates", "real_candidates_seeded_by_a_false_alarm", "days",
+            "true_camera_events", "candidates", "real_candidates_seeded_by_a_false_alarm",
+            "real_candidates_reaching_threshold", "duplicate_dispatch_candidates", "days",
         )
     }  # fmt: skip
+    total["camera_coverage_mass"] = reps[0]["camera_coverage_mass"]  # a property of the map
+    fused = {k: sum(r["fused_estimate"].get(k, 0) for r in reps) for k in FUSED_KEYS}
     paths: dict[str, list[float]] = defaultdict(list)
     by_path = Counter()
     for r in reps:
@@ -253,7 +259,9 @@ def pool(reps: list[dict]) -> dict:
     for j, (lo, hi) in enumerate(itertools.pairwise(CAL_EDGES)):
         n = sum(r["calibration"][j]["candidates"] for r in reps)
         real = sum(r["calibration"][j]["real"] for r in reps)
+        psum = sum(r["calibration"][j]["posterior_sum"] for r in reps)
         cal.append({"bin": [lo, hi], "candidates": n, "real": real,
+                    "mean_posterior": psum / n if n else None,
                     "share_real": real / n if n else None})  # fmt: skip
     return {
         "replications": len(reps),
@@ -264,6 +272,7 @@ def pool(reps: list[dict]) -> dict:
             **pairs,
         },
         "real_candidates_by_path": dict(by_path),
+        "fused_estimate": fused,
         "onset_to_threshold_s": {k: quantiles(v) for k, v in sorted(paths.items())},
         "real_incidents_reaching_threshold": sum(
             r["real_incidents_reaching_threshold"] for r in reps
@@ -282,17 +291,27 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--scenario", default="normal")
     parser.add_argument("--reps", type=int, default=1)
+    parser.add_argument(
+        "--repool",
+        action="store_true",
+        help="recompute the pooled summary from the replications already in the output file "
+        "(a pure function of them) instead of simulating again",
+    )
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     base = load_base_config()
-    network = RoadNetwork.load(base.paths.resolve("data_processed"), load_geo_config())
     seed_base = base.random.tuning_seed_base
-    reps = []
-    for r in range(args.reps):
-        reps.append(run(r, args.scenario, network, seed_base))
-        log.info("replication %d: %s", r, {k: v for k, v in reps[-1].items() if k in (
-            "incidents", "incidents_in_camera_view", "calls", "camera_events",
-            "candidates")})  # fmt: skip
+    if args.repool:
+        reps = json.loads(OUT.read_text(encoding="utf-8"))["replications"]
+        log.info("re-pooling %d stored replications; nothing is simulated", len(reps))
+    else:
+        network = RoadNetwork.load(base.paths.resolve("data_processed"), load_geo_config())
+        reps = []
+        for r in range(args.reps):
+            reps.append(run(r, args.scenario, network, seed_base))
+            log.info("replication %d: %s", r, {k: v for k, v in reps[-1].items() if k in (
+                "incidents", "incidents_in_camera_view", "calls", "camera_events",
+                "candidates")})  # fmt: skip
     detector = load_detector_model(PROJECT_ROOT / load_fusion_config().detector_inputs)
     masking = detector.masking()
     pooled = pool(reps)

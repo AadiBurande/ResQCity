@@ -1,14 +1,14 @@
 {
   "file": "results/fusion/week_check_synthetic.json",
-  "generated_at_utc": "2026-10-26T16:19:35+00:00",
-  "command": "fusion_check.py --reps 30",
+  "generated_at_utc": "2026-10-26T17:08:25+00:00",
+  "command": "fusion_check.py --repool",
   "synthetic": true,
   "git": {
-    "commit": "c611d6e95380e86c54cabde3dcf72631f233cd1d",
-    "dirty": false
+    "commit": "4198efaf269574bbf3a252f17f7317dd04a1e934",
+    "dirty": true
   },
   "configs_sha256": {
-    "configs/fusion.yaml": "82b31c768494253ada072306c0d0056f2d0a87a85103316487fba7fd72c367e5",
+    "configs/fusion.yaml": "e255088b989b1b3075d507fd7d1a0be2b3442816a8e42a18a82ee8760c944030",
     "configs/calls.yaml": "4e4ac487986505e76ce0d76bdc781e284c6c0991c19078fa8907919c7b8338a2",
     "configs/call_templates.yaml": "d36877fe92e9a13732dcfcf514a9610756103236b3fafd49b5eaa49748eb3be7",
     "configs/triage.yaml": "d36a862fe97d5f77a6faa42c526a7fb6f669ad10e2da44c032fb581048affeb8",

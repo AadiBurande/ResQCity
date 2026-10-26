@@ -652,54 +652,103 @@ Plan: `docs/plans/phase-4.md` (approved by the user before any phase-4 code).
 
 ## D-029 Phase 4 results: calls, triage and fusion on the Pune network  (2026-10-24…26)
 Plan: `docs/plans/phase-4.md`; design decisions and the user's choices: D-028. Formulation:
-`docs/models/fusion.md`. All numbers below come from `results/fusion/`
-(`triage_eval_synthetic.json`, `replay_*_synthetic.json`, `week_check_synthetic.json`) and are
-**synthetic**: the call process is UNVERIFIED throughout (L17), only the detector inputs are
-measured (D-027).
-1. **Acceptance (BUILD_PROMPT phase 4).** Five scripted scenarios on the real network and the 40
-   camera sites replay correctly: two camera views plus two callers merge into ONE incident; two
-   crashes a minute apart stay separate; a prank call, a rejected camera alarm and a
-   confirmed-then-called alarm each behave as scripted. Posterior traces:
-   `notebooks/04_fusion.ipynb`.
-2. **Triage (`triage_eval_synthetic.json`).** The keyword rules identify the incident type in
-   0.94 of the phrasings their lexicon was written from but only **0.33 of unseen paraphrases**;
-   the offline LLM (Qwen3-VL-2B, 4-bit, ~2.4 s per call) reaches 0.71–0.86 and 0.53–0.73 but
-   reports cues that are absent. Rules stay the deployed default (fast, deterministic); both
-   numbers are a tool check, not a research claim (templates and lexicon share an author, L18).
-3. **Synthetic weeks (30 replications, 210 days, tuning seeds).** 1,202 incidents, 2,349 calls
-   (385 of them false), **5,790,412 camera alarms**, 742,291 candidates.
-   - **Camera coverage is thin:** 2 % of the incident location mass lies within 50 m road-graph of
-     a camera junction, so only **10 incidents in 30 weeks fell in any camera's view**
-     (9.6 expected — the coverage computation checks out).
-   - **The detector masks itself.** At the measured 55 false alarms per armed hour with a 60 s
-     cooldown, a camera is armed only 65.3 s on average before it alarms, so it is **deaf 47.9 %
-     of the time**. Effective detection is therefore 0.587 × 0.521 = **0.31, not 0.59**; 3 of the
-     10 in-view incidents were detected (3.06 expected). n = 10, so the agreement is reassuring,
-     not precise. The cooldown is a design parameter (`configs/vision.yaml`), so this is a
-     trade-off phase 10 should sweep, not a fixed property.
-   - **Calls carry the system.** Of 1,156 candidates holding genuine evidence, **1,153 were
-     call-only**, 2 had a true camera event plus a call and 1 a true camera event alone. Median
-     time from onset to posterior >= 0.5 on the call path: **201 s** (p90 564 s). 949 of 1,202
-     incidents (79 %) reached 0.5 at all.
-   - **False alarms pollute real candidates.** Association recall is 0.82, but precision is 0.20:
-     3,284 false items were absorbed into candidates holding genuine evidence, and 396 real
-     candidates were *opened* by a false alarm. Pure-false candidates reaching 0.5 run at
-     **1.6 per day**, which matches the assumed 1.8 prank calls per day — i.e. the prank calls,
-     not the 27,600 daily camera alarms, are what produce false incidents at dispatch level.
-4. **Two bugs the synthetic week caught**, both fixed before any result was kept:
-   - a camera's recurring false alarms (~2 min apart) chained into one endless candidate; the
-     join window now runs from a candidate's FIRST evidence;
-   - the association gate used road-graph distance and only the larger of two location errors,
-     although a caller's error is a straight-line displacement. It now uses straight-line distance
-     with the errors in quadrature and k = 3 (a design rule covering >= 95 % of same-incident pairs
-     under the stated error model, not tuned on outcomes). Same-incident call pairs merged
-     correctly rose from 23/48 to 47/48.
-5. **Calibration is self-consistent, not external.** In the dominant bins the posterior tracks the
-   share of genuine candidates (0.5–0.9 bin: 0.59 real; 0.99–1.0 bin: 1.00), but fusion's prior
-   uses the SAME incident rate, hotspot weights and call parameters that generated the data, so
-   this checks the algebra, not the world (L19).
-6. **For phase 6 onwards.** `FusionEngine` is the single implementation for both live mode and the
-   simulator. Policies should treat a camera alarm as weak evidence (its likelihood ratio is at
-   most ~2 even in the top confidence bin) and expect the call path to dominate; the phase-10
-   break-even sweep (D-028) asks how much better the detector must be, and lowering the cooldown
-   is part of that sweep because of the self-masking above.
+`docs/models/fusion.md`. Every number below is read from a committed results file:
+`results/fusion/week_check_synthetic.json` (30 replications, 210 days, tuning seeds),
+`triage_eval_synthetic.json`, `gate_k_synthetic.json` and `replay_*_synthetic.json`. All of it is
+**synthetic**: the call process is UNVERIFIED throughout (L17); only the detector inputs are
+measured (D-027). Revised 2026-10-26 after an independent audit; the fixes are itemised in item 9.
+1. **Acceptance (BUILD_PROMPT phase 4).** Seven scripted scenarios on the real network and the 40
+   camera sites replay correctly. Two camera views plus two callers merge into ONE incident. Two
+   crashes **600 m** apart — the closest any two camera sites get, and just outside the 362 m gate
+   for handset-located calls — stay separate; that is the real discrimination test. Two crashes
+   **180 m** apart, inside the gate, are deliberately fused into one incident, which is a
+   limitation of the model, not a success (L19), and `two_crashes_merged` pins it. A third
+   scenario at 10.6 km is a sanity check only. A prank call, a rejected camera alarm and a
+   confirmed-then-called alarm each behave as scripted. Traces: `notebooks/04_fusion.ipynb`.
+2. **Triage.** The keyword rules identify the type in 0.94 of the phrasings their lexicon was
+   written from. On held-out paraphrases they score 0.33 — but that is **entirely the `other`
+   fallback class being right by default**, with cue recall exactly 0.0 in all three languages:
+   the rules do not generalise to unseen wording at all. The offline LLM (Qwen3-VL-2B, 4-bit,
+   2.48 s per call) does generalise (0.71–0.86 seen, 0.53–0.73 unseen) but reports cues that are
+   absent. Rules stay the deployed default; both figures are a tool check, not a research claim
+   (templates and lexicon share an author, L18).
+3. **Scale of the synthetic weeks.** 1,202 incidents, 2,349 calls (385 of them false),
+   **5,790,412 camera alarms** (27,573/day over 40 cameras), 742,291 candidates. The 30
+   replications are 30 draws of the *same* calendar week, so they resample one hour-of-week and
+   weekday profile.
+4. **The detector masks itself** (`detector_masking` in the results file). At the measured 55.1
+   false alarms per armed hour with a 60 s cooldown, a camera stays armed for only **65.3 s** on
+   average before it fires, so it is **deaf 47.9 % of the time**. By the alternating-renewal
+   argument (incident arrivals are independent of camera state, so PASTA applies), effective
+   detection is 0.587 × 0.521 = **0.306**, against 0.587 when armed. Carrying the committed CIs of
+   both measured inputs through gives **0.22–0.41**. Over 30 weeks only 10 incidents fell in any
+   camera's view and **3** were detected (3.06 expected); n = 10, so that agreement is reassuring,
+   not precise. Two caveats: the simulator gives a masked crash **no second chance** once the
+   cooldown lapses, although a real crash scene persists (L22), and this assumption is what turns
+   0.59 into 0.31. Independent support comes from the detector's own evaluation rather than from
+   n = 10: counting masked crashes as misses, D-027 measured 81/281 = **0.288** on all ACCIDENT
+   clips with lead time, close to the composed 0.306. The cooldown is a configured design
+   parameter, so phase 10 sweeps it with the false-alarm rate.
+5. **Camera coverage is thin.** 1.85 % of the incident location mass lies within 50 m road-graph
+   of a camera junction, so a week holds well under one incident in view (9.57 expected over 30
+   weeks, 10 observed — but that comparison uses the same ward weights that *placed* the
+   incidents, so it checks the generator's sampling, not the coverage geometry).
+6. **Calls carry the system.** Of 1,156 candidates holding genuine evidence, **1,153 were
+   call-only**, 2 had a true camera event plus a call and 1 a true camera event alone. Median time
+   from onset to posterior >= 0.5 on the call path is **201 s** — but a single call crosses 0.5 on
+   its own, so this largely restates the assumed lognormal first-call delay (median 180 s), and
+   the same property means **fusion cannot tell a lone genuine call from a lone prank**: 1.59 of
+   the 1.83 false calls per day (87 %) cross the threshold, and the `prank_call` replay ends at
+   posterior 0.47 with nothing ever confirming it. 949 of 1,202 incidents (79 %) reached 0.5.
+7. **Quality of what fusion hands to dispatch.** Association recall is 0.82 and precision 0.20:
+   3,284 false items were absorbed into candidates holding genuine evidence, and 396 real
+   candidates were *opened* by a false alarm. Recall falls short of the gate's own 95 % design
+   coverage because the gate is applied pairwise and is not transitive, and because later calls
+   can fall outside the 900 s window. 1,024 candidates crossed 0.5 but they map to only 949
+   distinct incidents, so **75 incidents (7.3 %) would be dispatched twice**. Of the 1,156 real
+   candidates the fused **type is right in 835 (72 %)** and the fused required services match
+   exactly in 761 (66 %), with **274 (24 %) under-dispatched** and 121 (10 %) over-dispatched —
+   driven by the rule triager's failure on unseen wording (item 2), since half the simulated calls
+   use held-out phrasings. Requirements drive dispatch from phase 6 on, so this is the number that
+   matters most downstream.
+8. **Calibration is self-consistent and not uniformly good.** All seven bins, mean posterior
+   against the share of candidates holding genuine evidence: `[0, 1e-4)` 0.000/0.00 (740,752
+   candidates); `[1e-4, 0.01)` 0.0003/**0.92** (26); `[0.01, 0.1)` 0.045/0.40 (5); `[0.1, 0.5)`
+   0.253/**0.72** (197); `[0.5, 0.9)` 0.688/0.59 (795); `[0.9, 0.99)` 0.986/1.00 (2);
+   `[0.99, 1]` 1.000/1.00 (514). So the posterior is **markedly under-confident below 0.5** and
+   slightly over-confident between 0.5 and 0.9. Three things to keep in mind: fusion's prior uses
+   the same incident rate, hotspot weights and call parameters that generated the data, so this
+   checks the algebra and not the world (L23); the posterior is evaluated at each candidate's last
+   evidence, not at the end of the horizon; and "real" here means "holds genuine evidence", which
+   is stricter than the hypothesis H1 (L19). A separate brute-force check against a simulation of
+   the generative process finds the posterior exact to 0.01 for 0, 2 and 3 calls but optimistic by
+   ~0.21 for a lone call arriving early in its window (L24).
+9. **Two bugs found by the synthetic week, and six corrections after the audit.** The bugs, both
+   fixed before any result was kept: a camera's recurring false alarms (~2 min apart) chained into
+   one endless candidate, so the join window now runs from a candidate's FIRST evidence; and the
+   association gate used road-graph distance with only the larger of two location errors, although
+   a caller's error is a straight-line displacement — it now uses straight-line distance with the
+   errors in quadrature, which raised correctly merged same-incident call pairs from 23/48 to
+   47/48. The audit then corrected: the self-masking arithmetic was hand-typed rather than emitted
+   (now in the results file); the fusion camera term used the unmasked 0.587, contradicting item 4
+   (now uses 0.306); "a camera alarm is worth a likelihood ratio of ~2" confused the likelihood of
+   a *confidence value* with that of the *alarm* — the alarmed LR is **1.02–1.07** across the
+   three bins; the "two separate crashes" scenario was 10.6 km apart and tested nothing; the
+   calibration table was quoted selectively; and the gate's k = 3 was defended as a rule "not
+   tuned on outcomes".
+10. **Gate k = 3, honest status.** The criterion (smallest half-step k covering >= 95 % of
+    same-incident pairs under the assumed error model) does select k = 3 — call-call 96.3 %,
+    call-camera 96.3 %, against 88.3 %/90.5 % at k = 2 (`gate_k_synthetic.json`). But it was
+    written *after* a synthetic week exposed the earlier gate, and it is evaluated on the same
+    UNVERIFIED error model that generates those calls, so it is **in-sample by construction**. It
+    accompanies a genuine metric fix and is not tuned on any outcome, but it is not independent
+    evidence that the gate is right.
+11. **For phase 6 onwards.** `FusionEngine` is the single implementation for live mode and the
+    simulator. Policies should treat a camera alarm as very weak evidence (LR 1.02–1.07), expect
+    the call path to dominate, and must not read a high posterior as "this incident is real *and*
+    its location, type and severity are right" — H1 is only "an incident occurred somewhere in
+    this region during this window", and a call-anchored region can have a 1,050 m radius (L19).
+    Plan for roughly a quarter of incidents arriving under-specified (item 7) and ~7 % duplicated.
+    The phase-10 break-even sweep (D-028) asks how much better the detector must be; it must also
+    sweep the cooldown (item 4) and decouple fusion's assumed parameters from the generator's,
+    because as wired the sweep cannot expose the circularity at all (L23).
