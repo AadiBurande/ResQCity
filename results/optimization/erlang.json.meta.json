@@ -1,11 +1,11 @@
 {
   "file": "results/optimization/erlang.json",
-  "generated_at_utc": "2026-10-26T21:47:31+00:00",
+  "generated_at_utc": "2026-10-26T21:47:50+00:00",
   "command": "optimize_run.py",
   "synthetic": true,
   "git": {
-    "commit": "b06d1afd251400ef75efbca9dd81a2429a09e185",
-    "dirty": true
+    "commit": "6ebefaf8c26e6a8bb94b95c9263f083bc0e092a5",
+    "dirty": false
   },
   "configs_sha256": {
     "configs/optimization.yaml": "f2ffdad3ea3d3c9a24e86457ba99dc878b8fad115cfac0d3be8096660a122bf4",
