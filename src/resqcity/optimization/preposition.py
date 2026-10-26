@@ -44,7 +44,12 @@ def required_units(alpha: float, q: float) -> int:
         return 1
     if alpha >= 1:
         raise ValueError("alpha = 1 would need infinitely many units")
-    return max(1, math.ceil(math.log(1.0 - alpha) / math.log(q)))
+    # ceil() on a floating ratio over-provisions at exact boundaries (alpha 0.9, q 0.1 gives
+    # 1.0000000000000002 -> 2, although one unit already satisfies it), so verify and step back.
+    n = max(1, math.ceil(math.log1p(-alpha) / math.log(q)))
+    while n > 1 and 1.0 - q ** (n - 1) >= alpha - 1e-12:
+        n -= 1
+    return n
 
 
 def expected_covered(
@@ -86,7 +91,13 @@ def solve(
     q = p.busy_fraction.value
     use_fairness = p.fairness.enabled if fairness is None else fairness
     caps = capacity or [n_units] * n_bases
-    max_cover = min(n_units, max(caps))
+    # L must be at least max_j n_j, where n_j sums the capacity of every base covering ward j.
+    # Capping at the largest SINGLE base capacity truncates the objective and makes the solver
+    # move units away from a ward served by several bases.
+    per_ward = [
+        sum(caps[k] for k in range(n_bases) if covers[j, k]) for j in range(demand.shape[0])
+    ]
+    max_cover = max(1, min(n_units, max(per_ward, default=1)))
     model = cp_model.CpModel()
 
     y = {(u, k): model.new_bool_var(f"y_{u}_{k}") for u in range(n_units) for k in range(n_bases)}

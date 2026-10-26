@@ -147,3 +147,27 @@ def test_thresholds_are_flagged_unverified():
 
     flagged = set(find_unverified(CFG))
     assert {"policy.tau_low", "policy.tau_high", "policy.t_review_s"} <= flagged
+
+
+def test_a_unit_committed_to_a_full_incident_cannot_also_verify_another():
+    """(C1) across tiers: the OR review found the same unit dispatched twice, because the
+    VERIFY path picked from the whole fleet including units the C1 solve had just taken."""
+    cfg = _cfg(tau_low=0.2, tau_high=0.7)
+    units = [_unit("P1", Agency.POLICE), _unit("A1", Agency.AMBULANCE)]
+    etas = _table(np.array([[100.0, 100.0], [100.0, 100.0]]))
+    result = decide([_incident("I_FULL", 0.9), _incident("I_VER", 0.5)], units, etas, cfg, NOW)
+    by_id = {d.incident_id: d for d in result.decision}
+    assert {a.unit_id for a in by_id["I_FULL"].assignments} == {"P1", "A1"}
+    assert by_id["I_VER"].assignments == []  # nothing left to send
+    every = [a.unit_id for d in result.decision for a in d.assignments]
+    assert len(every) == len(set(every))
+
+
+def test_a_spare_unit_still_verifies_when_one_is_free():
+    cfg = _cfg(tau_low=0.2, tau_high=0.7)
+    units = [_unit("P1", Agency.POLICE), _unit("P2", Agency.POLICE), _unit("A1", Agency.AMBULANCE)]
+    etas = _table(np.array([[100.0, 500.0], [400.0, 200.0], [100.0, 100.0]]))
+    result = decide([_incident("I_FULL", 0.9), _incident("I_VER", 0.5)], units, etas, cfg, NOW)
+    by_id = {d.incident_id: d for d in result.decision}
+    verify = {a.unit_id for a in by_id["I_VER"].assignments if a.role == AssignmentRole.VERIFY}
+    assert verify and not verify & {a.unit_id for a in by_id["I_FULL"].assignments}

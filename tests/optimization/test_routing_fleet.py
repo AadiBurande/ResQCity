@@ -64,9 +64,13 @@ def test_green_corridor_scales_only_eligible_ambulances():
 
 
 def test_green_corridor_never_beats_the_police_arrival():
+    """An ambulance whose sped-up arrival would precede the earliest police unit is not
+    eligible at all: there is no corridor to travel through, so it keeps its own time."""
     etas = EtaTable([1, 2], [1], np.array([[1200.0], [600.0]]))
     out = _router(0.1).green_corridor_etas(etas, [Agency.AMBULANCE, Agency.POLICE])
-    assert out[0, 0] == pytest.approx(600.0)  # not 120 s: the corridor cannot exist earlier
+    assert out[0, 0] == pytest.approx(1200.0)  # 0.1 * 1200 = 120 s is before any police arrive
+    helped = _router(0.6).green_corridor_etas(etas, [Agency.AMBULANCE, Agency.POLICE])
+    assert helped[0, 0] == pytest.approx(720.0)  # 0.6 * 1200 = 720 >= 600, so it is eligible
 
 
 def test_green_corridor_is_a_no_op_without_police_or_at_rho_one():

@@ -13,8 +13,13 @@ import pytest
 
 from resqcity.common.schemas import Agency, ServiceCounts, Unit, UnitState
 from resqcity.optimization.config import OptimizationConfig, load_optimization_config
-from resqcity.optimization.dispatch import DispatchIncident, greedy, solve
-from resqcity.optimization.routing import EtaTable
+from resqcity.optimization.dispatch import (
+    DispatchIncident,
+    effective_epsilon,
+    greedy,
+    solve,
+)
+from resqcity.optimization.routing import EtaTable, Router
 
 IST = ZoneInfo("Asia/Kolkata")
 NOW = datetime(2026, 3, 3, 9, 0, tzinfo=IST)
@@ -91,7 +96,8 @@ def brute_force(
             total += cfg.dispatch.weight(inc.severity_class) * last
             total += cfg.dispatch.mu_shortfall.value * short
             if Agency.AMBULANCE in per_agency:
-                total += cfg.dispatch.epsilon_ambulance.value * per_agency[Agency.AMBULANCE]
+                horizon = int(np.ceil(etas[np.isfinite(etas)].max()))
+                total += effective_epsilon(cfg, horizon) * per_agency[Agency.AMBULANCE]
         if feasible:
             best = min(best, total)
     return best
@@ -211,3 +217,58 @@ def test_greedy_fallback_is_feasible_and_no_better_than_the_solver():
     assert len(used) == len(set(used))  # no unit sent twice
     optimum = solve(incidents, units, _table(etas), cfg, NOW).objective_s
     assert optimum <= brute_force(incidents, units, etas, cfg) + 1e-6
+
+
+def test_the_corridor_is_not_credited_to_police_sent_elsewhere():
+    """The OR review found a fast police unit dispatched to another incident unlocking the
+    corridor here. Only a unit sent to THIS incident, fast enough to open it, may count."""
+    units = [_unit("A1", Agency.AMBULANCE), _unit("Pf", Agency.POLICE), _unit("Ps", Agency.POLICE)]
+    etas = np.array([[600.0, np.inf], [10.0, 10.0], [900.0, 900.0]])
+    incidents = [_incident("I1", amb=1, pol=1), _incident("I2", amb=0, pol=1)]
+    cfg = _cfg(rho=0.85)
+    router = Router.__new__(Router)
+    router.cfg = cfg
+    assisted = router.green_corridor_etas(_table(etas), [u.agency for u in units])
+    result = solve(incidents, units, _table(etas), cfg, NOW, assisted_etas=assisted)
+    by_id = {d.incident_id: d for d in result.decision}
+    amb = next(a for a in by_id["I1"].assignments if a.unit_id == "A1")
+    # the only police unit sent here (Ps, 900 s) cannot open a corridor for a 510 s arrival,
+    # so the ambulance keeps its unassisted time even though a faster police unit exists
+    assert amb.eta_s == pytest.approx(600.0)
+    assert "Pf" not in {a.unit_id for a in by_id["I1"].assignments}
+
+
+def test_the_corridor_applies_when_the_police_unit_here_is_fast_enough():
+    units = [_unit("A1", Agency.AMBULANCE), _unit("P1", Agency.POLICE)]
+    etas = np.array([[600.0], [400.0]])  # 0.85 * 600 = 510 >= 400, so P1 can open it
+    cfg = _cfg(rho=0.85)
+    router = Router.__new__(Router)
+    router.cfg = cfg
+    assisted = router.green_corridor_etas(_table(etas), [u.agency for u in units])
+    result = solve([_incident("I1", amb=1, pol=1)], units, _table(etas), cfg, NOW,
+                   assisted_etas=assisted)  # fmt: skip
+    amb = next(a for a in result.decision[0].assignments if a.unit_id == "A1")
+    assert amb.eta_s == pytest.approx(510.0)
+
+
+def test_epsilon_cannot_change_the_last_arrival_even_over_a_long_horizon():
+    """eps < min(weight) is not enough: arrivals differ by up to the horizon, so the guarantee
+    needs eps * horizon < min(weight). The review found a case where it failed."""
+    units = [_unit("A1", Agency.AMBULANCE), _unit("A2", Agency.AMBULANCE), _unit("F1", Agency.FIRE)]
+    incidents = [_incident("Ifire", amb=1, fire=1), _incident("Jamb", amb=1, pol=0)]
+    etas = np.array([[10.0, 1000.0], [500.0, 1001.0], [1000.0, np.inf]])
+    with_eps = solve(incidents, units, _table(etas), _cfg(rho=1.0), NOW)
+    without = solve(incidents, units, _table(etas), _cfg(rho=1.0, epsilon_ambulance=0.0), NOW)
+    assert with_eps.last_arrival_s == without.last_arrival_s
+
+
+def test_a_ward_no_unit_can_reach_is_reported_uncovered():
+    units = [_unit("P1", Agency.POLICE)]
+    incidents = [_incident("I1", pol=1)]
+    wards = {"W01": [0], "W02": []}
+    values = {"W01": 1.0, "W02": 5.0}
+    result = solve(
+        incidents, units, _table(np.array([[300.0]])), _cfg(rho=1.0), NOW,
+        ward_units=wards, ward_value=values,
+    )  # fmt: skip
+    assert "W02" in result.uncovered_wards  # unreachable, so permanently uncovered

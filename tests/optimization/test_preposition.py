@@ -167,3 +167,27 @@ def test_placement_respects_capacity():
     result = solve(unit_bases, move_seconds, demand, covers, covers, cfg, capacity=[1, 2])
     assert result.placement.count(0) <= 1
     assert result.placement.count(1) <= 2
+
+
+def test_cover_levels_reach_what_several_bases_can_stack():
+    """The OR review found the objective truncated at the largest SINGLE base capacity, so a
+    ward covered by two bases was under-valued and the solver moved units away from it."""
+    demand = np.array([10.0, 1.0])
+    covers = np.array([[1, 1, 0], [0, 0, 1]], dtype=bool)  # bases 0 and 1 both cover ward 0
+    move_seconds = np.zeros((4, 3))
+    cfg = _cfg(enabled=False, busy_fraction=0.5, max_moves=4, max_total_s=1e6)
+    result = solve([2, 2, 0, 0], move_seconds, demand, covers, covers, cfg, capacity=[2, 2, 2])
+    want = brute_force([2, 2, 0, 0], move_seconds, demand, covers, 0.5, 4, 1e6, [2, 2, 2])
+    assert result.expected_covered_demand == pytest.approx(want, rel=1e-6)
+    assert sorted(result.placement) == [0, 0, 1, 1]  # both bases serving the heavy ward
+
+
+def test_required_units_at_exact_probability_boundaries():
+    """alpha 0.9 with q 0.1 is satisfied by one unit exactly; floating point used to ask for two."""
+    assert required_units(0.9, 0.1) == 1
+    assert required_units(0.75, 0.5) == 2
+    assert required_units(0.875, 0.5) == 3
+    for alpha, q in ((0.9, 0.1), (0.75, 0.5), (0.875, 0.5), (0.99, 0.1)):
+        n = required_units(alpha, q)
+        assert 1 - q**n >= alpha - 1e-12
+        assert n == 1 or 1 - q ** (n - 1) < alpha - 1e-12

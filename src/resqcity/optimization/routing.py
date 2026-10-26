@@ -71,10 +71,14 @@ class Router:
     ) -> np.ndarray:
         """ETAs after the green corridor, as DATA for the solver.
 
-        For each incident, the fastest police ETA is the earliest a corridor could start. An
-        ambulance whose own ETA is at least that is eligible, and its time is scaled by ``rho``.
-        An ambulance that would arrive before any police unit is not helped. The scaled time can
-        never fall below the police ETA, which is when the corridor can first exist.
+        An ambulance is **eligible** when some police unit could reach the incident no later
+        than the ambulance's sped-up arrival, i.e. ``min_p eta_p <= rho * eta_u``. Its assisted
+        time is then ``rho * eta_u``, which that police unit is fast enough to make real.
+
+        Eligibility here is necessary but not sufficient: it asks only whether *some* police unit
+        could open the corridor. Whether one is actually **sent** to this incident, and is fast
+        enough, is decided in the dispatch model (docs/models/dispatch.md (C7)). Using the
+        fastest police ETA alone would credit a corridor to a unit dispatched elsewhere.
         """
         rho = self.cfg.routing.green_corridor.rho.value
         out = etas.seconds.copy()
@@ -90,8 +94,9 @@ class Router:
                 continue
             first_police = float(np.nanmin(np.where(np.isfinite(police), police, np.nan)))
             rows = np.flatnonzero(is_assisted & np.isfinite(out[:, j]))
-            eligible = rows[out[rows, j] >= first_police]
-            out[eligible, j] = np.maximum(out[eligible, j] * rho, first_police)
+            sped_up = out[rows, j] * rho
+            eligible = rows[sped_up >= first_police]
+            out[eligible, j] = out[eligible, j] * rho
         return out
 
 

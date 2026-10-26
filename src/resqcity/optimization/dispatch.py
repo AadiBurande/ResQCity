@@ -58,6 +58,20 @@ def _required(incident: DispatchIncident, agency: Agency) -> int:
     return int(getattr(incident.requirements, agency.value))
 
 
+def effective_epsilon(cfg: OptimizationConfig, horizon: int) -> float:
+    """The secondary ambulance weight actually used (docs/models/dispatch.md section 4).
+
+    The configured epsilon is only safe if it cannot outweigh one second of the lightest
+    incident's last arrival. ``eps < min(weight)`` is not enough, because two arrivals can differ
+    by the whole horizon; the condition is ``eps * horizon < min(weight)``. The horizon is a
+    property of the instance, not of the config, so the cap is applied here.
+    """
+    lightest = min(cfg.dispatch.severity_weights.value.values())
+    capped = min(cfg.dispatch.epsilon_ambulance.value, lightest / (2.0 * max(1, horizon)))
+    # the objective is built in integer units, so report the value the solver really uses
+    return round(capped * WEIGHT_SCALE) / WEIGHT_SCALE
+
+
 def _horizon(matrix: np.ndarray) -> int:
     """T: the slowest finite ETA in the instance -- a valid big-M (docs §2)."""
     finite = matrix[np.isfinite(matrix)]
@@ -158,24 +172,29 @@ def solve(
             model.add(sum(sent) + short[(i, a)] >= need)  # (C2) cover or pay
 
     # (C7) green corridor: g = x AND (some police sent here)
-    police_here: dict[int, list] = {
-        i: [x[(p, i)] for p in range(n_u) if units[p].agency == Agency.POLICE and (p, i) in x]
-        for i in range(n_i)
-    }
     g: dict[tuple[int, int], object] = {}
     for i in range(n_i):
-        if not police_here[i] or (i, Agency.AMBULANCE) not in arrival:
+        if (i, Agency.AMBULANCE) not in arrival:
             continue
-        any_police = model.new_bool_var(f"pol_{i}")
-        model.add_max_equality(any_police, police_here[i])
         for u in range(n_u):
             if units[u].agency != Agency.AMBULANCE or (u, i) not in x:
                 continue
             if assisted[u, i] >= base[u, i]:
                 continue  # not eligible: the corridor cannot help this ambulance
+            # only police that can arrive by the sped-up time realise this corridor; crediting
+            # any police unit would borrow one that was dispatched elsewhere
+            openers = [
+                x[(p, i)]
+                for p in range(n_u)
+                if units[p].agency == Agency.POLICE and (p, i) in x and base[p, i] <= assisted[u, i]
+            ]
+            if not openers:
+                continue
+            opened = model.new_bool_var(f"open_{u}_{i}")
+            model.add_max_equality(opened, openers)
             var = model.new_bool_var(f"g_{u}_{i}")
-            model.add_bool_and([x[(u, i)], any_police]).only_enforce_if(var)
-            model.add_bool_or([x[(u, i)].negated(), any_police.negated()]).only_enforce_if(
+            model.add_bool_and([x[(u, i)], opened]).only_enforce_if(var)
+            model.add_bool_or([x[(u, i)].negated(), opened.negated()]).only_enforce_if(
                 var.negated()
             )
             g[(u, i)] = var
@@ -207,8 +226,13 @@ def solve(
     # (C8) coverage loss: a ward is uncovered when this batch takes every unit that could reach it
     wards = sorted(ward_value or {})
     cover_sets = _coverage_sets(units, ward_units or {}, wards)
-    z = {w: model.new_bool_var(f"z_{w}") for w in wards if cover_sets[w]}
+    z = {w: model.new_bool_var(f"z_{w}") for w in wards}
+    for w in wards:
+        if not cover_sets[w]:
+            model.add(z[w] == 1)  # (C8) no unit can reach it: uncovered whatever we assign
     for w, var in z.items():
+        if not cover_sets[w]:
+            continue
         kept = []
         for u in cover_sets[w]:
             busy = [x[(u, i)] for i in range(n_i) if (u, i) in x]
@@ -223,7 +247,7 @@ def solve(
         model.add(sum(kept) == 0).only_enforce_if(var)
 
     weights = {i: round(d.weight(incidents[i].severity_class) * WEIGHT_SCALE) for i in range(n_i)}
-    eps = round(d.epsilon_ambulance.value * WEIGHT_SCALE)
+    eps = round(effective_epsilon(cfg, horizon) * WEIGHT_SCALE)  # integer units
     terms = [weights[i] * last[i] for i in range(n_i)]
     terms += [
         eps * arrival[(i, Agency.AMBULANCE)] for i in range(n_i) if (i, Agency.AMBULANCE) in arrival
@@ -277,12 +301,14 @@ def _build(
     last_arrival, shortfall = {}, {}
     for i, inc in enumerate(incidents):
         sent = chosen.get(i, [])
-        police_sent = any(units[u].agency == Agency.POLICE for u in sent)
+        police_etas = [etas.seconds[u, i] for u in sent if units[u].agency == Agency.POLICE]
+        police_sent = bool(police_etas)
         assignments, per_agency = [], {}
         for u in sent:
             agency = units[u].agency
             eta = etas.seconds[u, i]
-            if agency == Agency.AMBULANCE and police_sent:
+            # the corridor counts only if a police unit SENT HERE arrives by the sped-up time
+            if agency == Agency.AMBULANCE and any(p <= assisted[u, i] for p in police_etas):
                 eta = assisted[u, i]
             per_agency.setdefault(agency, []).append(eta)
             assignments.append(

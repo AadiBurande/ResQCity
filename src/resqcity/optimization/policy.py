@@ -88,10 +88,16 @@ def verify_decision(
     cfg: OptimizationConfig,
     now: datetime,
     policy: str,
+    taken: set[int] | None = None,
 ) -> tuple[DispatchDecision, Explanation]:
     """Send the nearest police unit to look; everything else the incident would need is
     pre-alerted so it can start moving the moment the look confirms it."""
     agencies = [u.agency for u in units]
+    # units already committed by the C1 solve are unavailable: one unit, one incident (C1)
+    free = EtaTable(etas.unit_nodes, etas.incident_nodes, etas.seconds.copy())
+    for u in taken or set():
+        free.seconds[u, :] = np.inf
+    etas = free
     chosen = nearest_unit(etas, agencies, Agency.POLICE, index)
     assignments = []
     if chosen is not None:
@@ -194,6 +200,7 @@ def decide(
     tiers = {d.incident_id: d.tier for d in classify(incidents, cfg, now)}
     full = [i for i in incidents if tiers[i.id] == DispatchTier.FULL]
     decisions, explanations = [], []
+    taken: set[int] = set()
     result = DispatchResult([], [], "NO_FULL_TIER", 0.0, 0.0)
     if full:
         keep = [k for k, inc in enumerate(incidents) if tiers[inc.id] == DispatchTier.FULL]
@@ -203,11 +210,21 @@ def decide(
         sub_assisted = None if assisted_etas is None else assisted_etas[:, keep]
         result = solve(full, units, sub, cfg, now, policy, sub_assisted, ward_units, ward_value)
         decisions, explanations = list(result.decision), list(result.explanation)
+        by_unit = {u.id: k for k, u in enumerate(units)}
+        taken = {
+            by_unit[a.unit_id]
+            for d in result.decision
+            for a in d.assignments
+            if a.unit_id in by_unit
+        }
     for index, inc in enumerate(incidents):
         if tiers[inc.id] == DispatchTier.FULL:
             continue
         if tiers[inc.id] == DispatchTier.VERIFY:
-            decision, why = verify_decision(inc, units, etas, index, cfg, now, policy)
+            decision, why = verify_decision(inc, units, etas, index, cfg, now, policy, taken)
+            taken |= {
+                k for k, u in enumerate(units) if u.id in {a.unit_id for a in decision.assignments}
+            }
         else:
             decision, why = review_decision(inc, cfg, now, policy)
         decisions.append(decision)
