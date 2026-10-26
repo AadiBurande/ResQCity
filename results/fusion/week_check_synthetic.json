@@ -23,6 +23,21 @@
     "expected_true_detections": 3.0592783183243197,
     "observed_true_detections": 3
   },
+  "camera_alarm_evidence": {
+    "basis": "one alarm, camera covering the whole candidate region (the most favourable case); uses the detection probability after self-masking",
+    "detectable_type_share": 0.427,
+    "gate_window_s": 900.0,
+    "alarmed_per_confidence_bin": [
+      1.007925527706735,
+      1.00982435205314,
+      1.0363253353225348
+    ],
+    "alarmed_range": [
+      1.007925527706735,
+      1.0363253353225348
+    ],
+    "silent": 0.8693688158075515
+  },
   "pooled": {
     "replications": 30,
     "incidents": 1202,

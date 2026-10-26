@@ -86,6 +86,16 @@ def fusion(args: argparse.Namespace) -> int:
     )
 
 
+def forecast(_: argparse.Namespace) -> int:
+    """Phase 5: write the history scenario, build the ward-hour panel and fit/score the
+    forecasters. Minutes; no GPU. Accuracy here is not a research claim (D-030)."""
+    return _run(
+        _py("resqcity.sim.make_history"),
+        _py("resqcity.sim.panel"),
+        _py("resqcity.sim.forecast_eval"),
+    )
+
+
 def streams(_: argparse.Namespace) -> int:
     """Start MediaMTX (Docker) and publish simulated cameras with scenario cues (Ctrl-C stops)."""
     return _run(_py("resqcity.streams.loop_cameras", "--start-server"))
@@ -180,6 +190,7 @@ TASKS: dict[str, Callable[[argparse.Namespace], int]] = {
     "streams": streams,
     "vision": vision,
     "fusion": fusion,
+    "forecast": forecast,
     "api": _stub(8, "start backend API"),
     "ui": _stub(9, "start dashboard"),
     "demo": _stub(9, "end-to-end live demo"),

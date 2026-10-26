@@ -1,10 +1,10 @@
 {
   "file": "results/fusion/week_check_synthetic.json",
-  "generated_at_utc": "2026-10-26T17:08:25+00:00",
+  "generated_at_utc": "2026-10-26T17:21:24+00:00",
   "command": "fusion_check.py --repool",
   "synthetic": true,
   "git": {
-    "commit": "4198efaf269574bbf3a252f17f7317dd04a1e934",
+    "commit": "c9f3e982da65efd63af131c8defbbd681a418f71",
     "dirty": true
   },
   "configs_sha256": {

@@ -1,0 +1,156 @@
+{
+  "status": "SYNTHETIC. Forecast accuracy is NOT a research claim: the training data comes from the project's own incident generator, so the 'informed' model recovers its intensity formula by construction. The claim is only how dispatch performance depends on forecast quality (phase 10).",
+  "panel": "panel_history_3y_synthetic.parquet",
+  "scenario": "history_3y",
+  "split_rows": {
+    "train": 2250864,
+    "valid": 760032,
+    "test": 1520064
+  },
+  "test_weeks": 52,
+  "feature_sets": {
+    "realistic": [
+      "hour",
+      "weekday",
+      "month",
+      "ward",
+      "type",
+      "festival",
+      "lags",
+      "rain_forecast"
+    ],
+    "informed": [
+      "hour",
+      "weekday",
+      "month",
+      "ward",
+      "type",
+      "festival",
+      "lags",
+      "rain_true",
+      "hotspot_mass"
+    ]
+  },
+  "metrics": [
+    {
+      "model": "uniform",
+      "cells": 1520064,
+      "observed": 2071.0,
+      "predicted": 2038.12987012987,
+      "poisson_deviance": 0.017987733278602622,
+      "mae": 0.0026996145732154555,
+      "poisson_deviance_daily": 0.2258212875384914,
+      "mae_daily": 0.06266439890829364,
+      "top_3_ward_hit_rate": 0.04828585224529213,
+      "top_5_ward_hit_rate": 0.08305166586190246,
+      "top_10_ward_hit_rate": 0.18252052148720424
+    },
+    {
+      "model": "climatology",
+      "cells": 1520064,
+      "observed": 2071.0,
+      "predicted": 2038.12987012987,
+      "poisson_deviance": 0.017937233011287856,
+      "mae": 0.002694675912861332,
+      "poisson_deviance_daily": 0.20286412895330586,
+      "mae_daily": 0.06062697251319074,
+      "top_3_ward_hit_rate": 0.14485755673587639,
+      "top_5_ward_hit_rate": 0.22694350555287301,
+      "top_10_ward_hit_rate": 0.38194109126026077
+    },
+    {
+      "model": "lightgbm_realistic",
+      "cells": 1520064,
+      "observed": 2071.0,
+      "predicted": 2067.3293966877163,
+      "poisson_deviance": 0.016591012012654154,
+      "mae": 0.0027141665203135558,
+      "poisson_deviance_daily": 0.19507545680453667,
+      "mae_daily": 0.06113728265034791,
+      "top_3_ward_hit_rate": 0.14196040560115886,
+      "top_5_ward_hit_rate": 0.21970062771607918,
+      "top_10_ward_hit_rate": 0.362143891839691
+    },
+    {
+      "model": "lightgbm_informed",
+      "cells": 1520064,
+      "observed": 2071.0,
+      "predicted": 2067.877464090349,
+      "poisson_deviance": 0.01661410323548269,
+      "mae": 0.002714384345056656,
+      "poisson_deviance_daily": 0.19536535352526746,
+      "mae_daily": 0.06110617637553931,
+      "top_3_ward_hit_rate": 0.13761467889908258,
+      "top_5_ward_hit_rate": 0.21632061805890873,
+      "top_10_ward_hit_rate": 0.3645581844519556
+    },
+    {
+      "model": "oracle",
+      "cells": 1520064,
+      "observed": 2071.0,
+      "predicted": 2047.15797040104,
+      "poisson_deviance": 0.016424782567199356,
+      "mae": 0.0027004564516603428,
+      "poisson_deviance_daily": 0.19418721455444554,
+      "mae_daily": 0.06068078716191396,
+      "top_3_ward_hit_rate": 0.16948334138097537,
+      "top_5_ward_hit_rate": 0.23708353452438435,
+      "top_10_ward_hit_rate": 0.3833896668276195
+    },
+    {
+      "model": "lightgbm_realistic+noise0.5",
+      "cells": 1520064,
+      "observed": 2071.0,
+      "predicted": 2067.6490818841653,
+      "poisson_deviance": 0.016931080428521685,
+      "mae": 0.0027144436197232887,
+      "poisson_deviance_daily": 0.19557794899612338,
+      "mae_daily": 0.06114379673364346,
+      "top_3_ward_hit_rate": 0.12892322549493,
+      "top_5_ward_hit_rate": 0.19217769193626266,
+      "top_10_ward_hit_rate": 0.33220666344760985
+    },
+    {
+      "model": "lightgbm_realistic+noise1",
+      "cells": 1520064,
+      "observed": 2071.0,
+      "predicted": 2067.7723862909957,
+      "poisson_deviance": 0.017952111776489938,
+      "mae": 0.0027147868450255615,
+      "poisson_deviance_daily": 0.19773317718675673,
+      "mae_daily": 0.06115725663329743,
+      "top_3_ward_hit_rate": 0.09850313858039594,
+      "top_5_ward_hit_rate": 0.15499758570738773,
+      "top_10_ward_hit_rate": 0.2786093674553356
+    }
+  ],
+  "lightgbm_gain_importance": {
+    "lightgbm_realistic": {
+      "type": 15927,
+      "ward": 11206,
+      "hour": 9736,
+      "rain_fc": 6677,
+      "lag_city_24h": 5050,
+      "weekday": 4329,
+      "month": 4099,
+      "lag_168h": 2021,
+      "lag_24h": 391,
+      "festival": 205,
+      "lag_1h": 78
+    },
+    "lightgbm_informed": {
+      "type": 16164,
+      "hour": 10125,
+      "hotspot_mass": 8676,
+      "ward": 8013,
+      "rain_mm_h": 6323,
+      "lag_city_24h": 5374,
+      "month": 4141,
+      "weekday": 3956,
+      "lag_168h": 1692,
+      "lag_24h": 405,
+      "festival": 224,
+      "lag_1h": 56
+    }
+  }
+}
