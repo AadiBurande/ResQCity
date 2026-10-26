@@ -21,6 +21,7 @@ dependencies = [
     "tzdata>=2024.1",  # IANA zones for zoneinfo on Windows
     "opencv-python-headless>=4.10",  # video I/O, blur; also used by streams tooling
     "pypdf>=4.0",
+    "lightgbm>=4.7.0",
 ]
 
 [tool.uv.sources]
