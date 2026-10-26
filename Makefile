@@ -6,13 +6,13 @@ SCENARIO ?= normal
 POLICY   ?= B0
 REPS     ?= 30
 
-.PHONY: setup lint format test types data vision fusion forecast streams api ui demo sim experiments figures reproduce
+.PHONY: setup lint format test types data vision fusion forecast optimize streams api ui demo sim experiments figures reproduce
 
 setup:
 	uv sync
 	$(TASKS) setup
 
-lint format test types data vision forecast streams api ui demo experiments figures reproduce:
+lint format test types data vision forecast optimize streams api ui demo experiments figures reproduce:
 	$(TASKS) $@
 
 fusion:

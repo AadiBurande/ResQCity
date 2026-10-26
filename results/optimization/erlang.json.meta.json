@@ -1,0 +1,29 @@
+{
+  "file": "results/optimization/erlang.json",
+  "generated_at_utc": "2026-10-26T21:47:31+00:00",
+  "command": "optimize_run.py",
+  "synthetic": true,
+  "git": {
+    "commit": "b06d1afd251400ef75efbca9dd81a2429a09e185",
+    "dirty": true
+  },
+  "configs_sha256": {
+    "configs/optimization.yaml": "f2ffdad3ea3d3c9a24e86457ba99dc878b8fad115cfac0d3be8096660a122bf4",
+    "configs/fleet.yaml": "4cf71eb9dcff50c5091d6d5d371fd83b132fa6672efdfdd0e72389dd41ebf8fe",
+    "configs/incidents.yaml": "54f245fe34f19dcfd8acba582925fa6f86a8d5bf35d0c3369a21c1b4011454d5"
+  },
+  "seeds": {},
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  }
+}

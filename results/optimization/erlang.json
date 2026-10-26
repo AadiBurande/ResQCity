@@ -1,0 +1,48 @@
+{
+  "status": "M/M/c with assumed service times (UNVERIFIED); the analytical cross-check for phase 7, not a result",
+  "incidents_per_day": 5.59,
+  "rows": [
+    {
+      "agency": "ambulance",
+      "share_of_incidents": 0.45,
+      "fleet": 30,
+      "service_time_s": 2700.0,
+      "servers": 30,
+      "offered_load_erlangs": 0.078609375,
+      "utilisation": 0.0026203125,
+      "p_wait": 2.556054375068022e-66,
+      "expected_wait_s": 2.3064926691333083e-64,
+      "stable": true,
+      "units_for_target_wait": 2,
+      "target_wait_s": 60.0
+    },
+    {
+      "agency": "fire",
+      "share_of_incidents": 0.3,
+      "fleet": 22,
+      "service_time_s": 3600.0,
+      "servers": 22,
+      "offered_load_erlangs": 0.06987499999999999,
+      "utilisation": 0.003176136363636363,
+      "p_wait": 3.1285904408229848e-47,
+      "expected_wait_s": 5.135823706870228e-45,
+      "stable": true,
+      "units_for_target_wait": 2,
+      "target_wait_s": 60.0
+    },
+    {
+      "agency": "police",
+      "share_of_incidents": 1.0,
+      "fleet": 39,
+      "service_time_s": 1800.0,
+      "servers": 39,
+      "offered_load_erlangs": 0.11645833333333333,
+      "utilisation": 0.002986111111111111,
+      "p_wait": 1.6664364380779646e-83,
+      "expected_wait_s": 7.714280798427792e-82,
+      "stable": true,
+      "units_for_target_wait": 2,
+      "target_wait_s": 60.0
+    }
+  ]
+}

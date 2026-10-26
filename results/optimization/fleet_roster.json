@@ -1,0 +1,563 @@
+{
+  "status": "SYNTHETIC roster on real OSM stations; counts are press-derived and UNVERIFIED (D-031)",
+  "units": [
+    {
+      "id": "AMB-AB-H-n10172914044-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172914044",
+      "node": 2279179531
+    },
+    {
+      "id": "AMB-AB-H-n10010729790-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10010729790",
+      "node": 7151874690
+    },
+    {
+      "id": "AMB-AB-H-n10172977859-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172977859",
+      "node": 1328250886
+    },
+    {
+      "id": "AMB-AB-H-n10172914029-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172914029",
+      "node": 2234729840
+    },
+    {
+      "id": "AMB-AB-H-n10172914030-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172914030",
+      "node": 679060766
+    },
+    {
+      "id": "AMB-AB-H-n10108645141-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10108645141",
+      "node": 4703442968
+    },
+    {
+      "id": "AMB-AB-H-n10172902304-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172902304",
+      "node": 2259729634
+    },
+    {
+      "id": "AMB-AB-H-n10172926367-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172926367",
+      "node": 247739731
+    },
+    {
+      "id": "AMB-AB-H-n10172942165-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172942165",
+      "node": 674918591
+    },
+    {
+      "id": "AMB-AB-H-n10172914048-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172914048",
+      "node": 10230456391
+    },
+    {
+      "id": "AMB-AB-H-n10172914027-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172914027",
+      "node": 1224905104
+    },
+    {
+      "id": "AMB-AB-H-n10172914028-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172914028",
+      "node": 2234729917
+    },
+    {
+      "id": "AMB-AB-H-n10172914043-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172914043",
+      "node": 11998166742
+    },
+    {
+      "id": "AMB-AB-H-n10172942175-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172942175",
+      "node": 7998539983
+    },
+    {
+      "id": "AMB-AB-H-n10172914042-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172914042",
+      "node": 2234838437
+    },
+    {
+      "id": "AMB-AB-H-n10172914045-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172914045",
+      "node": 692940349
+    },
+    {
+      "id": "AMB-AB-H-n10172914046-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172914046",
+      "node": 2235086626
+    },
+    {
+      "id": "AMB-AB-H-n10172914047-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172914047",
+      "node": 2235086579
+    },
+    {
+      "id": "AMB-AB-H-n10172914049-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172914049",
+      "node": 2235086464
+    },
+    {
+      "id": "AMB-AB-H-n10172942176-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172942176",
+      "node": 2265785093
+    },
+    {
+      "id": "AMB-AB-H-n10172942177-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172942177",
+      "node": 692940583
+    },
+    {
+      "id": "AMB-AB-H-n10172914040-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172914040",
+      "node": 4345398344
+    },
+    {
+      "id": "AMB-AB-H-n10172914032-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172914032",
+      "node": 10227027372
+    },
+    {
+      "id": "AMB-AB-H-n10172942167-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172942167",
+      "node": 10222793125
+    },
+    {
+      "id": "AMB-AB-H-n10172942168-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172942168",
+      "node": 6240992444
+    },
+    {
+      "id": "AMB-AB-H-n10172942169-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172942169",
+      "node": 10227016020
+    },
+    {
+      "id": "AMB-AB-H-n10172942170-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172942170",
+      "node": 10227016018
+    },
+    {
+      "id": "AMB-AB-H-n10172942172-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172942172",
+      "node": 678822933
+    },
+    {
+      "id": "AMB-AB-H-n10172925426-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172925426",
+      "node": 672165939
+    },
+    {
+      "id": "AMB-AB-H-n10172942164-0",
+      "agency": "ambulance",
+      "station": "AB-H-n10172942164",
+      "node": 2280884916
+    },
+    {
+      "id": "FIR-FS-w1275546893-0",
+      "agency": "fire",
+      "station": "FS-w1275546893",
+      "node": 7192825460
+    },
+    {
+      "id": "FIR-FS-w1275546893-1",
+      "agency": "fire",
+      "station": "FS-w1275546893",
+      "node": 7192825460
+    },
+    {
+      "id": "FIR-FS-w1275546893-2",
+      "agency": "fire",
+      "station": "FS-w1275546893",
+      "node": 7192825460
+    },
+    {
+      "id": "FIR-FS-w552183184-0",
+      "agency": "fire",
+      "station": "FS-w552183184",
+      "node": 9695088577
+    },
+    {
+      "id": "FIR-FS-w552183184-1",
+      "agency": "fire",
+      "station": "FS-w552183184",
+      "node": 9695088577
+    },
+    {
+      "id": "FIR-FS-w1346021103-0",
+      "agency": "fire",
+      "station": "FS-w1346021103",
+      "node": 3523908302
+    },
+    {
+      "id": "FIR-FS-w1346021103-1",
+      "agency": "fire",
+      "station": "FS-w1346021103",
+      "node": 3523908302
+    },
+    {
+      "id": "FIR-FS-w218697330-0",
+      "agency": "fire",
+      "station": "FS-w218697330",
+      "node": 2164185832
+    },
+    {
+      "id": "FIR-FS-w218697330-1",
+      "agency": "fire",
+      "station": "FS-w218697330",
+      "node": 2164185832
+    },
+    {
+      "id": "FIR-FS-n10725036852-0",
+      "agency": "fire",
+      "station": "FS-n10725036852",
+      "node": 4700837763
+    },
+    {
+      "id": "FIR-FS-n10725036852-1",
+      "agency": "fire",
+      "station": "FS-n10725036852",
+      "node": 4700837763
+    },
+    {
+      "id": "FIR-FS-w261258201-0",
+      "agency": "fire",
+      "station": "FS-w261258201",
+      "node": 2185649277
+    },
+    {
+      "id": "FIR-FS-w261258201-1",
+      "agency": "fire",
+      "station": "FS-w261258201",
+      "node": 2185649277
+    },
+    {
+      "id": "FIR-FS-n1304723072-0",
+      "agency": "fire",
+      "station": "FS-n1304723072",
+      "node": 1304706133
+    },
+    {
+      "id": "FIR-FS-n1304723072-1",
+      "agency": "fire",
+      "station": "FS-n1304723072",
+      "node": 1304706133
+    },
+    {
+      "id": "FIR-FS-n4204725189-0",
+      "agency": "fire",
+      "station": "FS-n4204725189",
+      "node": 2282978045
+    },
+    {
+      "id": "FIR-FS-w380417657-0",
+      "agency": "fire",
+      "station": "FS-w380417657",
+      "node": 3385751216
+    },
+    {
+      "id": "FIR-FS-n671451162-0",
+      "agency": "fire",
+      "station": "FS-n671451162",
+      "node": 672683101
+    },
+    {
+      "id": "FIR-FS-n2192111450-0",
+      "agency": "fire",
+      "station": "FS-n2192111450",
+      "node": 13769439234
+    },
+    {
+      "id": "FIR-FS-w515129936-0",
+      "agency": "fire",
+      "station": "FS-w515129936",
+      "node": 13769439234
+    },
+    {
+      "id": "FIR-FS-n11942759805-0",
+      "agency": "fire",
+      "station": "FS-n11942759805",
+      "node": 4342415703
+    },
+    {
+      "id": "FIR-FS-w218881239-0",
+      "agency": "fire",
+      "station": "FS-w218881239",
+      "node": 673352025
+    },
+    {
+      "id": "POL-PS-n10219198246-0",
+      "agency": "police",
+      "station": "PS-n10219198246",
+      "node": 2836385107
+    },
+    {
+      "id": "POL-PS-n10219198248-0",
+      "agency": "police",
+      "station": "PS-n10219198248",
+      "node": 10246072024
+    },
+    {
+      "id": "POL-PS-n10219230643-0",
+      "agency": "police",
+      "station": "PS-n10219230643",
+      "node": 2836384994
+    },
+    {
+      "id": "POL-PS-n10219230644-0",
+      "agency": "police",
+      "station": "PS-n10219230644",
+      "node": 10246072037
+    },
+    {
+      "id": "POL-PS-w1430470190-0",
+      "agency": "police",
+      "station": "PS-w1430470190",
+      "node": 1315244860
+    },
+    {
+      "id": "POL-PS-w218691368-0",
+      "agency": "police",
+      "station": "PS-w218691368",
+      "node": 10994322230
+    },
+    {
+      "id": "POL-PS-w652054928-0",
+      "agency": "police",
+      "station": "PS-w652054928",
+      "node": 2807777076
+    },
+    {
+      "id": "POL-PS-n13616220311-0",
+      "agency": "police",
+      "station": "PS-n13616220311",
+      "node": 10215244938
+    },
+    {
+      "id": "POL-PS-n4547351989-0",
+      "agency": "police",
+      "station": "PS-n4547351989",
+      "node": 11335285852
+    },
+    {
+      "id": "POL-PS-n10725513809-0",
+      "agency": "police",
+      "station": "PS-n10725513809",
+      "node": 763407089
+    },
+    {
+      "id": "POL-PS-n1534465625-0",
+      "agency": "police",
+      "station": "PS-n1534465625",
+      "node": 2265580236
+    },
+    {
+      "id": "POL-PS-n2289023583-0",
+      "agency": "police",
+      "station": "PS-n2289023583",
+      "node": 2258420141
+    },
+    {
+      "id": "POL-PS-n3386030401-0",
+      "agency": "police",
+      "station": "PS-n3386030401",
+      "node": 248155938
+    },
+    {
+      "id": "POL-PS-n10219230645-0",
+      "agency": "police",
+      "station": "PS-n10219230645",
+      "node": 2984636312
+    },
+    {
+      "id": "POL-PS-n10054125792-0",
+      "agency": "police",
+      "station": "PS-n10054125792",
+      "node": 2848157437
+    },
+    {
+      "id": "POL-PS-n13955649584-0",
+      "agency": "police",
+      "station": "PS-n13955649584",
+      "node": 313794637
+    },
+    {
+      "id": "POL-PS-n6116290226-0",
+      "agency": "police",
+      "station": "PS-n6116290226",
+      "node": 2171089304
+    },
+    {
+      "id": "POL-PS-n2509520919-0",
+      "agency": "police",
+      "station": "PS-n2509520919",
+      "node": 1224083791
+    },
+    {
+      "id": "POL-PS-n2868930215-0",
+      "agency": "police",
+      "station": "PS-n2868930215",
+      "node": 2088125783
+    },
+    {
+      "id": "POL-PS-n14017739061-0",
+      "agency": "police",
+      "station": "PS-n14017739061",
+      "node": 6265107164
+    },
+    {
+      "id": "POL-PS-n14160120803-0",
+      "agency": "police",
+      "station": "PS-n14160120803",
+      "node": 7590063592
+    },
+    {
+      "id": "POL-PS-n2694489803-0",
+      "agency": "police",
+      "station": "PS-n2694489803",
+      "node": 7016025854
+    },
+    {
+      "id": "POL-PS-w641670813-0",
+      "agency": "police",
+      "station": "PS-w641670813",
+      "node": 670336134
+    },
+    {
+      "id": "POL-PS-n13629443264-0",
+      "agency": "police",
+      "station": "PS-n13629443264",
+      "node": 14069906168
+    },
+    {
+      "id": "POL-PS-n2183543117-0",
+      "agency": "police",
+      "station": "PS-n2183543117",
+      "node": 245648341
+    },
+    {
+      "id": "POL-PS-n10219138027-0",
+      "agency": "police",
+      "station": "PS-n10219138027",
+      "node": 10972414767
+    },
+    {
+      "id": "POL-PS-w1032594150-0",
+      "agency": "police",
+      "station": "PS-w1032594150",
+      "node": 9170972032
+    },
+    {
+      "id": "POL-PS-n2935676185-0",
+      "agency": "police",
+      "station": "PS-n2935676185",
+      "node": 8036470949
+    },
+    {
+      "id": "POL-PS-n11330878781-0",
+      "agency": "police",
+      "station": "PS-n11330878781",
+      "node": 2210912554
+    },
+    {
+      "id": "POL-PS-n4405664297-0",
+      "agency": "police",
+      "station": "PS-n4405664297",
+      "node": 7980673766
+    },
+    {
+      "id": "POL-PS-w365655187-0",
+      "agency": "police",
+      "station": "PS-w365655187",
+      "node": 2558562780
+    },
+    {
+      "id": "POL-PS-n13851770436-0",
+      "agency": "police",
+      "station": "PS-n13851770436",
+      "node": 8006345270
+    },
+    {
+      "id": "POL-PS-n10610500277-0",
+      "agency": "police",
+      "station": "PS-n10610500277",
+      "node": 10242088802
+    },
+    {
+      "id": "POL-PS-n5302827826-0",
+      "agency": "police",
+      "station": "PS-n5302827826",
+      "node": 9695129819
+    },
+    {
+      "id": "POL-PS-w1041721250-0",
+      "agency": "police",
+      "station": "PS-w1041721250",
+      "node": 1224903559
+    },
+    {
+      "id": "POL-PS-n11786140865-0",
+      "agency": "police",
+      "station": "PS-n11786140865",
+      "node": 4703535708
+    },
+    {
+      "id": "POL-PS-w1028611648-0",
+      "agency": "police",
+      "station": "PS-w1028611648",
+      "node": 2181205619
+    },
+    {
+      "id": "POL-PS-n2289023585-0",
+      "agency": "police",
+      "station": "PS-n2289023585",
+      "node": 6261109796
+    },
+    {
+      "id": "POL-PS-n3337848240-0",
+      "agency": "police",
+      "station": "PS-n3337848240",
+      "node": 248436597
+    }
+  ],
+  "by_agency": {
+    "ambulance": 30,
+    "fire": 22,
+    "police": 39
+  },
+  "stations_used": 83,
+  "max_units_at_one_station": 3,
+  "counts_configured": {
+    "police": 39,
+    "fire": 22,
+    "ambulance": 30
+  }
+}

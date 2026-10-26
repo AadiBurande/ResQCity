@@ -96,6 +96,15 @@ def forecast(_: argparse.Namespace) -> int:
     )
 
 
+def optimize(_: argparse.Namespace) -> int:
+    """Phase 6: solver benchmark, fleet roster, MCLP camera placement and the Erlang-C table.
+    Seconds; no GPU."""
+    return _run(
+        _py("resqcity.optimization.bench_dispatch"),
+        _py("resqcity.sim.optimize_run"),
+    )
+
+
 def streams(_: argparse.Namespace) -> int:
     """Start MediaMTX (Docker) and publish simulated cameras with scenario cues (Ctrl-C stops)."""
     return _run(_py("resqcity.streams.loop_cameras", "--start-server"))
@@ -191,6 +200,7 @@ TASKS: dict[str, Callable[[argparse.Namespace], int]] = {
     "vision": vision,
     "fusion": fusion,
     "forecast": forecast,
+    "optimize": optimize,
     "api": _stub(8, "start backend API"),
     "ui": _stub(9, "start dashboard"),
     "demo": _stub(9, "end-to-end live demo"),

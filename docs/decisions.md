@@ -819,3 +819,60 @@ performance depends on forecast quality, which phase 10 sweeps.
    ablation in `sim.oracle_forecast`, never an achievable forecast; `tests/test_architecture.py`
    caught the evaluation driver importing `sim` from `forecasting` and it was split into
    `forecasting.metrics` (pure) and `sim.forecast_eval` (driver).
+
+## D-031 Phase 6: the OR models, and two findings that reshape the experiments  (2026-10-27)
+Plan: `docs/plans/phase-6.md`. Formulations: `docs/models/{dispatch,preposition}.md`. Code:
+`src/resqcity/optimization/`. Results: `results/optimization/`. Every behavioural weight is
+UNVERIFIED and listed by `find_unverified`; the fleet counts are press-derived (item 2).
+1. **What was built.** C1 joint multi-agency dispatch (CP-SAT over integer seconds), C2
+   confidence tiers, C3 pre-positioning (MEXCLP) with a fairness constraint, MCLP camera
+   placement, Erlang-C fleet sizing, and the routing layer with the green corridor. Every model
+   has a tiny-instance test checked against **brute force** (CLAUDE.md), and the solver's optimum
+   is compared with exhaustive enumeration rather than with itself.
+   - **Acceptance criterion met:** a live batch of 10 incidents across the whole 91-unit fleet
+     solves OPTIMAL in **0.062 s** median against the 1 s limit
+     (`results/optimization/solver_bench.json`). At 40 incidents the limit binds and the solver
+     returns FEASIBLE, which is the designed behaviour and is reported, not hidden.
+   - Two guards the brief did not ask for but the model needed: (C6), without which an incident
+     left short of units would report a *faster* completion and shortfall would be rewarded; and
+     the epsilon term of master plan §6.1, which stops the solver parking an ambulance off the
+     critical path. A test asserts epsilon never changes any last-arrival time.
+2. **Fleet sizes are press-derived, not cited.** No primary source gives Pune's fleet. Defaults:
+   **39 police** (CR mobile units, Pune City Police MT department, press, May 2025), **22 fire**
+   engines (PMC, press; note OSM has 14 stations against the press's 20-25), **30 ambulances**
+   (DERIVED: 937 Dial-108 vehicles statewide scaled by PMC's population share gives ~29; a
+   1-per-100,000 norm gives ~35). All UNVERIFIED and swept in phase 10.
+3. **FINDING - the simulated city has no queueing, and that changes what phase 10 can claim.**
+   At the cited incident rate (5.59/day, D-018) the 91-unit fleet runs at **0.26-0.32 %
+   utilisation**; Erlang-C says **2 units per agency** would meet a 60 s wait target
+   (`results/optimization/erlang.json`). The cause is a scope mismatch, not an error in either
+   number: the fleet serves each agency's *entire* workload, while the generator models only the
+   multi-agency subset in scope. Against the verified Pune figure of 23,887 Dial-112 calls in
+   July 2026 (771/day), the modelled rate is **1/138 of the real police workload**; at the real
+   volume those same 39 units would run at a plausible 41 % utilisation. Consequences, which are
+   design decisions rather than observations:
+   - RQ2 gains from joint dispatch will come from **coordination and travel, not from capacity**.
+     D-018 anticipated this; it is now quantified.
+   - **Phase 7 must add a background-workload process** that makes units busy with the
+     out-of-scope calls, or the simulator will report unrealistically free fleets.
+   - Phase 10 must include a scarce-fleet regime; sweeping the incident rate 0.5x-4x as planned
+     leaves utilisation near 1 % and would not probe capacity at all.
+4. **FINDING - cameras see very little of the city, however they are placed.** The 40 phase-2
+   camera sites cover **3.95 %** of risk-weighted incident demand. Even 50 sites chosen optimally
+   by MCLP cover only **13.27 %**, and 10 optimal sites (4.08 %) match all 40 existing ones -- the
+   phase-2 siting rule was about four times less efficient than placement against demand.
+   Multiplying by the measured effective detection of 0.31 (D-029), the ceiling on
+   camera-detected incidents is roughly **4 %** at 50 optimally placed cameras. Coverage is an
+   upper bound in another way too: every added camera also adds false alarms at ~29 per
+   camera-hour.
+5. **C2 inherits D-029's verdict.** A camera-only candidate has a posterior of order 1e-5, far
+   below any sensible `tau_low`, so it lands in REVIEW. Confidence tiering therefore does **not**
+   turn CCTV into a dispatch trigger; its only route to value is upgrading a candidate the
+   moment a call or a human review corroborates it, which phase 10 measures. VERIFY and REVIEW
+   incidents are deliberately kept out of the MILP so an unconfirmed candidate cannot take the
+   unit a known incident needs.
+6. **Price of fairness (RQ4) is measured, not asserted.** C3 is solved twice, with and without
+   the per-ward availability constraint, and the relative loss in expected covered demand is
+   reported. An impossible fairness requirement (a ward no base can reach in time) is relaxed to
+   a per-ward shortfall and reported: a city that cannot cover its wards is a finding, not an
+   exception.
