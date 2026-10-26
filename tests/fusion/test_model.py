@@ -142,3 +142,17 @@ def test_no_call_yet_lowers_the_posterior_over_time():
     early, _ = MODEL.posterior(_ev(now_s=710.0))
     late, _ = MODEL.posterior(_ev(now_s=1600.0))
     assert late < early
+
+
+def test_the_emitted_alarm_likelihood_ratios_match_the_engine():
+    """The LRs written to results/ (and quoted to phase 6) must be the ones the engine uses."""
+    from resqcity.fusion.model import camera_alarm_likelihood_ratios
+
+    emitted = camera_alarm_likelihood_ratios(DET, MODEL.window_s, MODEL.detectable_share)
+    for b, lr in enumerate(emitted["alarmed_per_confidence_bin"]):
+        engine = math.exp(MODEL.camera_log_lr(CameraObservation("C1", 0.01, b), 0.01))
+        assert lr == pytest.approx(engine), b
+    silent = math.exp(MODEL.camera_log_lr(CameraObservation("C1", 0.01, None), 0.01))
+    assert emitted["silent"] == pytest.approx(silent)
+    assert emitted["alarmed_range"] == [min(emitted["alarmed_per_confidence_bin"]),
+                                        max(emitted["alarmed_per_confidence_bin"])]  # fmt: skip

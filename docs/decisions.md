@@ -680,14 +680,14 @@ measured (D-027). Revised 2026-10-26 after an independent audit; the fixes are i
    false alarms per armed hour with a 60 s cooldown, a camera stays armed for only **65.3 s** on
    average before it fires, so it is **deaf 47.9 % of the time**. By the alternating-renewal
    argument (incident arrivals are independent of camera state, so PASTA applies), effective
-   detection is 0.587 × 0.521 = **0.306**, against 0.587 when armed. Carrying the committed CIs of
+   detection is 0.587 × 0.521 = **0.31**, against 0.587 when armed. Carrying the committed CIs of
    both measured inputs through gives **0.22–0.41**. Over 30 weeks only 10 incidents fell in any
    camera's view and **3** were detected (3.06 expected); n = 10, so that agreement is reassuring,
    not precise. Two caveats: the simulator gives a masked crash **no second chance** once the
    cooldown lapses, although a real crash scene persists (L22), and this assumption is what turns
    0.59 into 0.31. Independent support comes from the detector's own evaluation rather than from
    n = 10: counting masked crashes as misses, D-027 measured 81/281 = **0.288** on all ACCIDENT
-   clips with lead time, close to the composed 0.306. The cooldown is a configured design
+   clips with lead time, close to the composed 0.31. The cooldown is a configured design
    parameter, so phase 10 sweeps it with the false-alarm rate.
 5. **Camera coverage is thin.** 1.85 % of the incident location mass lies within 50 m road-graph
    of a camera junction, so a week holds well under one incident in view (9.57 expected over 30
@@ -705,7 +705,9 @@ measured (D-027). Revised 2026-10-26 after an independent audit; the fixes are i
    candidates were *opened* by a false alarm. Recall falls short of the gate's own 95 % design
    coverage because the gate is applied pairwise and is not transitive, and because later calls
    can fall outside the 900 s window. 1,024 candidates crossed 0.5 but they map to only 949
-   distinct incidents, so **75 incidents (7.3 %) would be dispatched twice**. Of the 1,156 real
+   distinct incidents, so **at least 75 incidents (7.9 % of those reaching the threshold)
+   would be dispatched more than once** (the count is of surplus candidates, so a three-way
+   split contributes two). Of the 1,156 real
    candidates the fused **type is right in 835 (72 %)** and the fused required services match
    exactly in 761 (66 %), with **274 (24 %) under-dispatched** and 121 (10 %) over-dispatched —
    driven by the rule triager's failure on unseen wording (item 2), since half the simulated calls
@@ -731,9 +733,9 @@ measured (D-027). Revised 2026-10-26 after an independent audit; the fixes are i
    errors in quadrature, which raised correctly merged same-incident call pairs from 23/48 to
    47/48. The audit then corrected: the self-masking arithmetic was hand-typed rather than emitted
    (now in the results file); the fusion camera term used the unmasked 0.587, contradicting item 4
-   (now uses 0.306); "a camera alarm is worth a likelihood ratio of ~2" confused the likelihood of
-   a *confidence value* with that of the *alarm* — the alarmed LR is **1.02–1.07** across the
-   three bins; the "two separate crashes" scenario was 10.6 km apart and tested nothing; the
+   (now uses 0.31); "a camera alarm is worth a likelihood ratio of ~2" confused the likelihood of
+   a *confidence value* with that of the *alarm* — the alarmed LR is **1.01–1.04** across the
+   three bins (emitted as `camera_alarm_evidence`); the "two separate crashes" scenario was 10.6 km apart and tested nothing; the
    calibration table was quoted selectively; and the gate's k = 3 was defended as a rule "not
    tuned on outcomes".
 10. **Gate k = 3, honest status.** The criterion (smallest half-step k covering >= 95 % of
@@ -744,7 +746,8 @@ measured (D-027). Revised 2026-10-26 after an independent audit; the fixes are i
     accompanies a genuine metric fix and is not tuned on any outcome, but it is not independent
     evidence that the gate is right.
 11. **For phase 6 onwards.** `FusionEngine` is the single implementation for live mode and the
-    simulator. Policies should treat a camera alarm as very weak evidence (LR 1.02–1.07), expect
+    simulator. Policies should treat a camera alarm as very weak evidence (LR **1.01–1.04**, emitted as
+    `camera_alarm_evidence`), expect
     the call path to dominate, and must not read a high posterior as "this incident is real *and*
     its location, type and severity are right" — H1 is only "an incident occurred somewhere in
     this region during this window", and a call-anchored region can have a 1,050 m radius (L19).

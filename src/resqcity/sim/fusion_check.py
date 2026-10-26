@@ -42,6 +42,7 @@ from resqcity.fusion.config import (
     load_triage_config,
 )
 from resqcity.fusion.engine import FusionEngine
+from resqcity.fusion.model import camera_alarm_likelihood_ratios
 from resqcity.fusion.triage import RuleTriager
 from resqcity.geo.cameras import camera_coverage, load_cameras
 from resqcity.geo.config import load_geo_config
@@ -319,6 +320,12 @@ def main(argv: list[str] | None = None) -> int:
         pooled["incidents_in_camera_view"] * detector.effective_p_detect
     )
     masking["observed_true_detections"] = pooled["true_camera_events"]
+    fusion_cfg = load_fusion_config()
+    mix = load_incidents_config().type_mix.value
+    detectable = sum(mix[k] for k in fusion_cfg.camera.detected_types) / sum(mix.values())
+    alarm_evidence = camera_alarm_likelihood_ratios(
+        detector, fusion_cfg.gate.time_window_s.value, detectable
+    )
     report = {
         "status": "synthetic model check (UNVERIFIED call and review parameters; measured "
         "detector); not a research result",
@@ -332,6 +339,7 @@ def main(argv: list[str] | None = None) -> int:
         "is stricter than the hypothesis H1 (an incident occurred anywhere in its region during "
         "its window)",
         "detector_masking": masking,
+        "camera_alarm_evidence": alarm_evidence,
         "pooled": pooled,
         "replications": reps,
     }

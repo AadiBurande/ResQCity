@@ -96,6 +96,32 @@ def _lognormal_cdf(x: float, median: float, sigma: float) -> float:
     return 0.5 * (1.0 + math.erf(math.log(x / median) / (sigma * math.sqrt(2.0))))
 
 
+def camera_alarm_likelihood_ratios(
+    det: DetectorModel, window_s: float, detectable_share: float
+) -> dict[str, object]:
+    """What ONE camera alarm is worth, per confidence bin, in the most favourable case: the
+    camera covers the whole candidate region (q = detectable_share).
+
+    Emitted to the results file because phase 6 is told to rely on it (D-029). Same algebra as
+    :meth:`EvidenceModel.camera_log_lr`, which a test pins against this function.
+    """
+    mu = det.long_run_false_rate_per_h / 3600.0
+    p_eff = det.effective_p_detect
+    alarmed = [
+        1.0 + detectable_share * p_eff * real / (window_s * mu * false)
+        for real, false in zip(det.real_shares, det.false_shares, strict=True)
+    ]
+    return {
+        "basis": "one alarm, camera covering the whole candidate region (the most favourable "
+        "case); uses the detection probability after self-masking",
+        "detectable_type_share": detectable_share,
+        "gate_window_s": window_s,
+        "alarmed_per_confidence_bin": alarmed,
+        "alarmed_range": [min(alarmed), max(alarmed)],
+        "silent": 1.0 - detectable_share * p_eff,
+    }
+
+
 class EvidenceModel:
     def __init__(
         self,

@@ -80,6 +80,7 @@ def fusion(args: argparse.Namespace) -> int:
     the synthetic-week model check. Minutes; no GPU (the optional LLM triager stays off)."""
     return _run(
         _py("resqcity.fusion.eval_triage"),
+        _py("resqcity.sim.gate_coverage"),
         _py("resqcity.sim.fusion_replay", "--all"),
         _py("resqcity.sim.fusion_check", "--reps", str(args.reps), "--scenario", args.scenario),
     )

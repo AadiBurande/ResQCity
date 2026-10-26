@@ -70,9 +70,12 @@ exploratory; D-028).
 
 Both terms use $p_{\text{eff}} = p \cdot P(\text{armed})$, the detection probability **after**
 self-masking (D-029): a camera silenced by its own last false alarm cannot alarm on a crash
-either. With the measured inputs $p_{\text{eff}} = 0.587 \times 0.521 = 0.306$. With those same
-inputs a single alarm is weak evidence — the alarmed $\mathrm{LR}_c$ is only **1.02–1.07** across
-the three confidence bins, even when the camera covers the whole candidate region.
+either. With the measured inputs $p_{	ext{eff}} = 0.587 	imes 0.521 = 0.31$. $P(	ext{armed})$
+is the STATIONARY fraction: the engine does not ask whether this particular camera is in a
+cooldown at this instant, although it sees the alarm stream and could. With those same
+inputs a single alarm is weak evidence — the alarmed $\mathrm{LR}_c$ is only **1.01–1.04** across
+the three confidence bins, even when the camera covers the whole candidate region
+(emitted as `camera_alarm_evidence` in `results/fusion/week_check_synthetic.json`).
 
 ### 3.2 Calls
 
@@ -138,7 +141,7 @@ add units. Type = confidence-weighted vote of the triaged calls, else the camera
 5. **Average camera.** The model uses the measured average false-alarm rate; cameras that
    trigger persistently (simulated in phase 10) are a deliberate model mismatch.
 6. **Scale.** With the measured detector (≈29 false alarms per camera-hour) and a camera seeing
-   a real crash about once a year, $\mathrm{LR}_c - 1$ is of order $10^{-1}$ even in the top
+   a real crash about once a year, $\mathrm{LR}_c - 1$ is of order $10^{-2}$ even in the top
    confidence bin and the prior for a camera's coverage is of order $10^{-5}$: a camera alarm
    alone stays far below any dispatch threshold (D-028). This is a property of the inputs, not
    of the formula; phase 10 sweeps detector quality to find the break-even point.
