@@ -1,0 +1,56 @@
+# Ward-hour demand forecasting (phase 5, D-030). EVERYTHING HERE IS SYNTHETIC.
+# The training data comes from the incident generator, whose intensity is a formula this project
+# wrote, so forecast ACCURACY is not a research claim (master plan section 5). The claim is only
+# how dispatch performance depends on forecast quality, which phase 10 sweeps.
+synthetic: true
+history_scenario: history_3y
+
+# Crowd is ~0.4 % of incidents, too rare to forecast on its own, so it is folded into "other".
+targets:
+  types: [accident, fire_smoke, other]
+  fold_into_other: [crowd]
+
+split:
+  # Time-based, never shuffled: the last test_weeks of the horizon are held out, and the model
+  # selects its stopping point on the last validation_weeks of the TRAINING part only.
+  test_weeks: 52
+  validation_weeks: 26
+
+features:
+  # Counts in the same ward and type over the previous N hours, and citywide over 24 h. Every lag
+  # ends at the hour BEFORE the one being predicted, so no future information enters.
+  ward_lags_h: [1, 24, 168]
+  citywide_lag_h: 24
+
+# What each model is allowed to see. "informed" gets the generator's own inputs and therefore
+# recovers the formula almost exactly (circular, and labelled as such); "realistic" must learn
+# each ward's base rate from its own history and sees only a noisy rain forecast.
+feature_sets:
+  realistic: [hour, weekday, month, ward, type, festival, lags, rain_forecast]
+  informed: [hour, weekday, month, ward, type, festival, lags, rain_true, hotspot_mass]
+
+rain_forecast:
+  # A short-horizon forecast, not the truth: the hourly rate is multiplied by lognormal error and,
+  # with probability p_mixup, the day is confused with another day of the same month (so the
+  # forecast can be wrong about whether it rains at all, which a pure multiplicative error cannot).
+  sigma: {value: 0.5, source: UNVERIFIED}
+  p_mixup: {value: 0.15, source: UNVERIFIED}
+  seed: 20260126
+
+lightgbm:
+  objective: poisson
+  learning_rate: 0.05
+  num_leaves: 63
+  min_data_in_leaf: 200
+  feature_fraction: 0.9
+  bagging_fraction: 0.8
+  bagging_freq: 1
+  num_boost_round: 600
+  early_stopping_rounds: 40
+  seed: 20260126
+  num_threads: 8
+
+# Phase-10 knob: multiply any forecaster's prediction by lognormal noise of this sigma.
+# 0 means the forecaster is used as fitted.
+noise_knob:
+  sigma: {value: 0.0, source: UNVERIFIED}
