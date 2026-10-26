@@ -106,6 +106,22 @@ class DispatchConfig(ConfigModel):
         return self.severity_weights.value[severity_class]
 
 
+class PolicyConfig(ConfigModel):
+    tau_low: SourcedValue[float]
+    tau_high: SourcedValue[float]
+    t_review_s: SourcedValue[float]
+    escalate_on_timeout: bool
+    note: str = ""
+
+    @model_validator(mode="after")
+    def _ordered(self) -> Self:
+        if not 0 <= self.tau_low.value <= self.tau_high.value <= 1:
+            raise ValueError("thresholds must satisfy 0 <= tau_low <= tau_high <= 1")
+        if self.t_review_s.value < 0:
+            raise ValueError("t_review_s must not be negative")
+        return self
+
+
 class Fairness(ConfigModel):
     enabled: bool
     alpha: SourcedValue[float]
@@ -158,6 +174,7 @@ class OptimizationConfig(ConfigModel):
     synthetic: bool
     routing: RoutingConfig
     dispatch: DispatchConfig
+    policy: PolicyConfig
     preposition: PrepositionConfig
     placement: PlacementConfig
     erlang: ErlangConfig

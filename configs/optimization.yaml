@@ -33,6 +33,19 @@ dispatch:
     workers: 8
     greedy_fallback: true    # used when the solver returns no feasible solution in time
 
+policy:
+  # C2 confidence tiers on the fused posterior. Phase 10 searches over these three.
+  # NOTE (D-029): a camera alarm alone multiplies the odds by only 1.01-1.04, so a camera-only
+  # candidate sits far below tau_low and lands in REVIEW. CCTV earns its place by arriving early
+  # once a call or a human review corroborates it, not by triggering dispatch on its own.
+  tau_low: {value: 0.2, source: UNVERIFIED}
+  tau_high: {value: 0.7, source: UNVERIFIED}
+  t_review_s: {value: 120.0, source: UNVERIFIED}
+  escalate_on_timeout: true
+  note: >
+    On timeout the REVIEW tier escalates to VERIFY rather than to a full dispatch: an unconfirmed
+    candidate that nobody looked at should cost one police unit, not the whole requirement.
+
 preposition:
   every_minutes: 30
   busy_fraction: {value: 0.3, source: UNVERIFIED}   # MEXCLP q: chance a unit is unavailable
