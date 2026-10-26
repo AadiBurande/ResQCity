@@ -2,25 +2,18 @@
 
 import pytest
 
+from resqcity.common.config import PROJECT_ROOT
 from resqcity.tools.tasks import NOT_IMPLEMENTED_EXIT, TASKS, main
 
-MAKEFILE_TARGETS = {
-    "setup",
-    "lint",
-    "format",
-    "test",
-    "types",
-    "data",
-    "vision",
-    "streams",
-    "api",
-    "ui",
-    "demo",
-    "sim",
-    "experiments",
-    "figures",
-    "reproduce",
-}
+
+def _makefile_targets() -> set[str]:
+    """Targets declared .PHONY in the Makefile (parsed, so the two cannot drift apart)."""
+    text = (PROJECT_ROOT / "Makefile").read_text(encoding="utf-8")
+    line = next(ln for ln in text.splitlines() if ln.startswith(".PHONY:"))
+    return set(line.removeprefix(".PHONY:").split())
+
+
+MAKEFILE_TARGETS = _makefile_targets()
 
 
 def test_every_make_target_has_a_task():
