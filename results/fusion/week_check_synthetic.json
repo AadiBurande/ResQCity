@@ -317,7 +317,7 @@
       "real_incidents_reaching_threshold": 32,
       "false_candidates_per_day": 3528.1428571428573,
       "false_candidates_reaching_threshold_per_day": 1.7142857142857142,
-      "fusion_seconds": 46.47768500001985
+      "fusion_seconds": 54.351033500017365
     },
     {
       "replication": 1,
@@ -459,7 +459,7 @@
       "real_incidents_reaching_threshold": 20,
       "false_candidates_per_day": 3528.714285714286,
       "false_candidates_reaching_threshold_per_day": 1.8571428571428572,
-      "fusion_seconds": 47.05698909997591
+      "fusion_seconds": 57.22224570001708
     },
     {
       "replication": 2,
@@ -622,7 +622,7 @@
       "real_incidents_reaching_threshold": 36,
       "false_candidates_per_day": 3529.5714285714284,
       "false_candidates_reaching_threshold_per_day": 2.2857142857142856,
-      "fusion_seconds": 45.80641540000215
+      "fusion_seconds": 56.21173330000602
     },
     {
       "replication": 3,
@@ -776,7 +776,7 @@
       "real_incidents_reaching_threshold": 29,
       "false_candidates_per_day": 3528.4285714285716,
       "false_candidates_reaching_threshold_per_day": 1.8571428571428572,
-      "fusion_seconds": 43.45351630001096
+      "fusion_seconds": 45.197214899992105
     },
     {
       "replication": 4,
@@ -927,7 +927,7 @@
       "real_incidents_reaching_threshold": 26,
       "false_candidates_per_day": 3531.5714285714284,
       "false_candidates_reaching_threshold_per_day": 1.1428571428571428,
-      "fusion_seconds": 46.54667040001368
+      "fusion_seconds": 42.85206449998077
     },
     {
       "replication": 5,
@@ -1088,7 +1088,7 @@
       "real_incidents_reaching_threshold": 34,
       "false_candidates_per_day": 3529.4285714285716,
       "false_candidates_reaching_threshold_per_day": 1.5714285714285714,
-      "fusion_seconds": 43.80799760000082
+      "fusion_seconds": 43.51348059999873
     },
     {
       "replication": 6,
@@ -1248,7 +1248,7 @@
       "real_incidents_reaching_threshold": 36,
       "false_candidates_per_day": 3530.0,
       "false_candidates_reaching_threshold_per_day": 1.2857142857142858,
-      "fusion_seconds": 43.27231890000985
+      "fusion_seconds": 44.23953449999681
     },
     {
       "replication": 7,
@@ -1406,7 +1406,7 @@
       "real_incidents_reaching_threshold": 31,
       "false_candidates_per_day": 3529.8571428571427,
       "false_candidates_reaching_threshold_per_day": 1.4285714285714286,
-      "fusion_seconds": 43.532566899986705
+      "fusion_seconds": 43.99918240000261
     },
     {
       "replication": 8,
@@ -1560,7 +1560,7 @@
       "real_incidents_reaching_threshold": 32,
       "false_candidates_per_day": 3528.5714285714284,
       "false_candidates_reaching_threshold_per_day": 1.5714285714285714,
-      "fusion_seconds": 42.3399787999806
+      "fusion_seconds": 43.404491399996914
     },
     {
       "replication": 9,
@@ -1719,7 +1719,7 @@
       "real_incidents_reaching_threshold": 33,
       "false_candidates_per_day": 3529.8571428571427,
       "false_candidates_reaching_threshold_per_day": 1.2857142857142858,
-      "fusion_seconds": 43.97472650001873
+      "fusion_seconds": 42.990984000003664
     },
     {
       "replication": 10,
@@ -1874,7 +1874,7 @@
       "real_incidents_reaching_threshold": 30,
       "false_candidates_per_day": 3529.8571428571427,
       "false_candidates_reaching_threshold_per_day": 1.1428571428571428,
-      "fusion_seconds": 42.68035959999543
+      "fusion_seconds": 41.86035910001374
     },
     {
       "replication": 11,
@@ -2039,7 +2039,7 @@
       "real_incidents_reaching_threshold": 41,
       "false_candidates_per_day": 3528.1428571428573,
       "false_candidates_reaching_threshold_per_day": 1.1428571428571428,
-      "fusion_seconds": 43.78266920000897
+      "fusion_seconds": 40.780506700015394
     },
     {
       "replication": 12,
@@ -2195,7 +2195,7 @@
       "real_incidents_reaching_threshold": 29,
       "false_candidates_per_day": 3527.8571428571427,
       "false_candidates_reaching_threshold_per_day": 0.8571428571428571,
-      "fusion_seconds": 44.16187529999297
+      "fusion_seconds": 39.99780140002258
     },
     {
       "replication": 13,
@@ -2360,7 +2360,7 @@
       "real_incidents_reaching_threshold": 42,
       "false_candidates_per_day": 3528.1428571428573,
       "false_candidates_reaching_threshold_per_day": 1.7142857142857142,
-      "fusion_seconds": 43.2271048000257
+      "fusion_seconds": 41.275681600003736
     },
     {
       "replication": 14,
@@ -2512,7 +2512,7 @@
       "real_incidents_reaching_threshold": 29,
       "false_candidates_per_day": 3528.8571428571427,
       "false_candidates_reaching_threshold_per_day": 1.4285714285714286,
-      "fusion_seconds": 45.50028969999403
+      "fusion_seconds": 39.49894940000377
     },
     {
       "replication": 15,
@@ -2661,7 +2661,7 @@
       "real_incidents_reaching_threshold": 26,
       "false_candidates_per_day": 3529.5714285714284,
       "false_candidates_reaching_threshold_per_day": 1.1428571428571428,
-      "fusion_seconds": 45.83388489999925
+      "fusion_seconds": 40.130812999996124
     },
     {
       "replication": 16,
@@ -2824,7 +2824,7 @@
       "real_incidents_reaching_threshold": 38,
       "false_candidates_per_day": 3528.8571428571427,
       "false_candidates_reaching_threshold_per_day": 2.142857142857143,
-      "fusion_seconds": 45.19969339997624
+      "fusion_seconds": 41.259456200001296
     },
     {
       "replication": 17,
@@ -2978,7 +2978,7 @@
       "real_incidents_reaching_threshold": 32,
       "false_candidates_per_day": 3528.5714285714284,
       "false_candidates_reaching_threshold_per_day": 1.8571428571428572,
-      "fusion_seconds": 45.234176700003445
+      "fusion_seconds": 40.893355399981374
     },
     {
       "replication": 18,
@@ -3138,7 +3138,7 @@
       "real_incidents_reaching_threshold": 35,
       "false_candidates_per_day": 3526.285714285714,
       "false_candidates_reaching_threshold_per_day": 1.1428571428571428,
-      "fusion_seconds": 45.42768709998927
+      "fusion_seconds": 41.2023213999928
     },
     {
       "replication": 19,
@@ -3286,7 +3286,7 @@
       "real_incidents_reaching_threshold": 24,
       "false_candidates_per_day": 3526.8571428571427,
       "false_candidates_reaching_threshold_per_day": 1.8571428571428572,
-      "fusion_seconds": 43.65072829998098
+      "fusion_seconds": 43.736909899977036
     },
     {
       "replication": 20,
@@ -3428,7 +3428,7 @@
       "real_incidents_reaching_threshold": 19,
       "false_candidates_per_day": 3530.8571428571427,
       "false_candidates_reaching_threshold_per_day": 1.2857142857142858,
-      "fusion_seconds": 43.15467069999431
+      "fusion_seconds": 42.40066680000746
     },
     {
       "replication": 21,
@@ -3585,7 +3585,7 @@
       "real_incidents_reaching_threshold": 33,
       "false_candidates_per_day": 3527.8571428571427,
       "false_candidates_reaching_threshold_per_day": 1.5714285714285714,
-      "fusion_seconds": 41.48865890002344
+      "fusion_seconds": 44.96670930000255
     },
     {
       "replication": 22,
@@ -3751,7 +3751,7 @@
       "real_incidents_reaching_threshold": 34,
       "false_candidates_per_day": 3529.4285714285716,
       "false_candidates_reaching_threshold_per_day": 2.0,
-      "fusion_seconds": 43.1362814999884
+      "fusion_seconds": 41.132115399988834
     },
     {
       "replication": 23,
@@ -3906,7 +3906,7 @@
       "real_incidents_reaching_threshold": 29,
       "false_candidates_per_day": 3530.5714285714284,
       "false_candidates_reaching_threshold_per_day": 1.8571428571428572,
-      "fusion_seconds": 42.65055890000076
+      "fusion_seconds": 44.88494059999357
     },
     {
       "replication": 24,
@@ -4067,7 +4067,7 @@
       "real_incidents_reaching_threshold": 36,
       "false_candidates_per_day": 3530.0,
       "false_candidates_reaching_threshold_per_day": 2.2857142857142856,
-      "fusion_seconds": 44.05154839999159
+      "fusion_seconds": 42.15074630000163
     },
     {
       "replication": 25,
@@ -4235,7 +4235,7 @@
       "real_incidents_reaching_threshold": 39,
       "false_candidates_per_day": 3528.5714285714284,
       "false_candidates_reaching_threshold_per_day": 1.1428571428571428,
-      "fusion_seconds": 44.869420300005004
+      "fusion_seconds": 40.47994740001741
     },
     {
       "replication": 26,
@@ -4399,7 +4399,7 @@
       "real_incidents_reaching_threshold": 41,
       "false_candidates_per_day": 3529.0,
       "false_candidates_reaching_threshold_per_day": 1.1428571428571428,
-      "fusion_seconds": 45.94017030001851
+      "fusion_seconds": 43.22863399999915
     },
     {
       "replication": 27,
@@ -4546,7 +4546,7 @@
       "real_incidents_reaching_threshold": 23,
       "false_candidates_per_day": 3531.1428571428573,
       "false_candidates_reaching_threshold_per_day": 1.7142857142857142,
-      "fusion_seconds": 45.145678300003055
+      "fusion_seconds": 47.8507219000021
     },
     {
       "replication": 28,
@@ -4699,7 +4699,7 @@
       "real_incidents_reaching_threshold": 30,
       "false_candidates_per_day": 3530.4285714285716,
       "false_candidates_reaching_threshold_per_day": 1.5714285714285714,
-      "fusion_seconds": 45.2172481000016
+      "fusion_seconds": 44.66772359999595
     },
     {
       "replication": 29,
@@ -4852,7 +4852,7 @@
       "real_incidents_reaching_threshold": 30,
       "false_candidates_per_day": 3531.4285714285716,
       "false_candidates_reaching_threshold_per_day": 2.5714285714285716,
-      "fusion_seconds": 46.18137220002245
+      "fusion_seconds": 43.83389030001126
     }
   ]
 }

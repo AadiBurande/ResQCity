@@ -1,11 +1,11 @@
 {
   "file": "results/fusion/week_check_synthetic.json",
-  "generated_at_utc": "2026-10-26T17:21:24+00:00",
-  "command": "fusion_check.py --repool",
+  "generated_at_utc": "2026-10-26T17:51:20+00:00",
+  "command": "fusion_check.py --reps 30",
   "synthetic": true,
   "git": {
-    "commit": "c9f3e982da65efd63af131c8defbbd681a418f71",
-    "dirty": true
+    "commit": "c79e3d0faed5262ae77938d0b7249fa418a3cf74",
+    "dirty": false
   },
   "configs_sha256": {
     "configs/fusion.yaml": "e255088b989b1b3075d507fd7d1a0be2b3442816a8e42a18a82ee8760c944030",
