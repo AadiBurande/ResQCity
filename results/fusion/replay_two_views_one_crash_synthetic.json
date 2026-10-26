@@ -57,7 +57,7 @@
           "ref_id": "CALL-2"
         }
       ],
-      "posterior": 0.9999891973483975,
+      "posterior": 0.9999751881191766,
       "severity": 0.5,
       "status": "candidate",
       "requirements": {
@@ -66,12 +66,12 @@
         "fire": 0
       },
       "evidence_log_odds": {
-        "prior": -8.2932,
-        "camera:C01": 0.0096,
-        "camera:C01b": 0.0096,
-        "camera:C03": -0.0299,
-        "camera:C04": -0.015,
-        "calls": 19.7546
+        "prior": -7.4464,
+        "camera:C01": 0.0041,
+        "camera:C01b": 0.0041,
+        "camera:C03": -0.0127,
+        "camera:C04": -0.0064,
+        "calls": 18.0614
       }
     }
   },
@@ -149,457 +149,457 @@
     {
       "t_s": 170.0,
       "candidate": "INC-000001",
-      "posterior": 0.8637404334094979
+      "posterior": 0.8657618328785849
     },
     {
       "t_s": 180.0,
       "candidate": "INC-000001",
-      "posterior": 0.8575205361440513
+      "posterior": 0.8596192326614839
     },
     {
       "t_s": 195.0,
       "candidate": "INC-000001",
-      "posterior": 0.8481482493718481
+      "posterior": 0.8503609347857439
     },
     {
       "t_s": 210.0,
       "candidate": "INC-000001",
-      "posterior": 0.8387899050423697
+      "posterior": 0.8411134280752619
     },
     {
       "t_s": 225.0,
       "candidate": "INC-000001",
-      "posterior": 0.8295179489824174
+      "posterior": 0.831948345715133
     },
     {
       "t_s": 240.0,
       "candidate": "INC-000001",
-      "posterior": 0.8204021718649644
+      "posterior": 0.8229347860282675
     },
     {
       "t_s": 255.0,
       "candidate": "INC-000001",
-      "posterior": 0.8115076575215696
+      "posterior": 0.814137275996603
     },
     {
       "t_s": 260.0,
       "candidate": "INC-000001",
-      "posterior": 0.999993712941739
+      "posterior": 0.9999855596223838
     },
     {
       "t_s": 270.0,
       "candidate": "INC-000001",
-      "posterior": 0.999993495542267
+      "posterior": 0.9999850602931064
     },
     {
       "t_s": 285.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999931765159719
+      "posterior": 0.9999843275448084
     },
     {
       "t_s": 300.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999928678052096
+      "posterior": 0.9999836184899042
     },
     {
       "t_s": 315.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999925712009443
+      "posterior": 0.9999829372418856
     },
     {
       "t_s": 330.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999922881761478
+      "posterior": 0.9999822871838623
     },
     {
       "t_s": 345.0,
       "candidate": "INC-000001",
-      "posterior": 0.999992019871018
+      "posterior": 0.9999816709346194
     },
     {
       "t_s": 360.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999917670936185
+      "posterior": 0.9999810903500853
     },
     {
       "t_s": 375.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999915303339025
+      "posterior": 0.999980546555547
     },
     {
       "t_s": 390.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999913097884165
+      "posterior": 0.9999800400023885
     },
     {
       "t_s": 405.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999911053926698
+      "posterior": 0.9999795705424435
     },
     {
       "t_s": 420.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999909168581897
+      "posterior": 0.999979137513101
     },
     {
       "t_s": 435.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999907437115461
+      "posterior": 0.9999787398269427
     },
     {
       "t_s": 450.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999905853330798
+      "posterior": 0.9999783760606937
     },
     {
       "t_s": 465.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999904409935801
+      "posterior": 0.9999780445394617
     },
     {
       "t_s": 480.0,
       "candidate": "INC-000001",
-      "posterior": 0.99999030988768
+      "posterior": 0.9999777434134429
     },
     {
       "t_s": 495.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999901911632262
+      "posterior": 0.9999774707253782
     },
     {
       "t_s": 510.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999900839462805
+      "posterior": 0.9999772244679771
     },
     {
       "t_s": 525.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999899873617354
+      "posterior": 0.999977002631264
     },
     {
       "t_s": 540.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999899005497495
+      "posterior": 0.9999768032403317
     },
     {
       "t_s": 555.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999898226783723
+      "posterior": 0.9999766243843362
     },
     {
       "t_s": 570.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999897529528065
+      "posterior": 0.9999764642377673
     },
     {
       "t_s": 585.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999896906217901
+      "posterior": 0.9999763210751105
     },
     {
       "t_s": 600.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999896349815824
+      "posterior": 0.9999761932800003
     },
     {
       "t_s": 615.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999895853780083
+      "posterior": 0.9999760793499146
     },
     {
       "t_s": 630.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999895412069656
+      "posterior": 0.9999759778973409
     },
     {
       "t_s": 645.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999895019137597
+      "posterior": 0.999975887648247
     },
     {
       "t_s": 660.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999894669915659
+      "posterior": 0.99997580743855
     },
     {
       "t_s": 675.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999894359792775
+      "posterior": 0.9999757362091725
     },
     {
       "t_s": 690.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999894084589417
+      "posterior": 0.9999756730001553
     },
     {
       "t_s": 705.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999893840529522
+      "posterior": 0.9999756169442066
     },
     {
       "t_s": 720.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999893624211229
+      "posterior": 0.9999755672599817
     },
     {
       "t_s": 735.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999893432577411
+      "posterior": 0.9999755232453157
     },
     {
       "t_s": 750.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999893262886725
+      "posterior": 0.9999754842705738
     },
     {
       "t_s": 765.0,
       "candidate": "INC-000001",
-      "posterior": 0.99998931126857
+      "posterior": 0.9999754497722393
     },
     {
       "t_s": 780.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892979782187
+      "posterior": 0.9999754192468168
     },
     {
       "t_s": 795.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892862220413
+      "posterior": 0.9999753922451022
     },
     {
       "t_s": 810.0,
       "candidate": "INC-000001",
-      "posterior": 0.999989275825776
+      "posterior": 0.999975368366849
     },
     {
       "t_s": 825.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892666343305
+      "posterior": 0.9999753472558385
     },
     {
       "t_s": 840.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892585098107
+      "posterior": 0.9999753285953555
     },
     {
       "t_s": 855.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892513297239
+      "posterior": 0.9999753121040559
     },
     {
       "t_s": 870.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892449853415
+      "posterior": 0.9999752975322111
     },
     {
       "t_s": 885.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892393802193
+      "posterior": 0.9999752846583073
     },
     {
       "t_s": 900.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892344288611
+      "posterior": 0.9999752732859754
     },
     {
       "t_s": 915.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892300555162
+      "posterior": 0.9999752632412312
     },
     {
       "t_s": 930.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892261931006
+      "posterior": 0.9999752543699941
     },
     {
       "t_s": 945.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892227822286
+      "posterior": 0.9999752465358678
     },
     {
       "t_s": 960.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892197703504
+      "posterior": 0.9999752396181539
     },
     {
       "t_s": 975.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892171109784
+      "posterior": 0.9999752335100807
     },
     {
       "t_s": 990.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892147630008
+      "posterior": 0.999975228117221
     },
     {
       "t_s": 1005.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892126900682
+      "posterior": 0.9999752233560878
     },
     {
       "t_s": 1020.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892108600498
+      "posterior": 0.9999752191528821
     },
     {
       "t_s": 1035.0,
       "candidate": "INC-000001",
-      "posterior": 0.999989209244548
+      "posterior": 0.9999752154423811
     },
     {
       "t_s": 1050.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892078184711
+      "posterior": 0.9999752121669526
     },
     {
       "t_s": 1065.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892065596495
+      "posterior": 0.9999752092756777
     },
     {
       "t_s": 1080.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892054484992
+      "posterior": 0.9999752067235763
     },
     {
       "t_s": 1095.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892044677225
+      "posterior": 0.999975204470918
     },
     {
       "t_s": 1110.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892036020421
+      "posterior": 0.9999752024826143
     },
     {
       "t_s": 1125.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892028379666
+      "posterior": 0.9999752007276772
     },
     {
       "t_s": 1140.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892021635823
+      "posterior": 0.9999751991787447
     },
     {
       "t_s": 1155.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892015683705
+      "posterior": 0.9999751978116554
     },
     {
       "t_s": 1170.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892010430431
+      "posterior": 0.9999751966050783
     },
     {
       "t_s": 1185.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892005794011
+      "posterior": 0.9999751955401803
     },
     {
       "t_s": 1200.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999892001702053
+      "posterior": 0.999975194600335
     },
     {
       "t_s": 1215.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891998090655
+      "posterior": 0.9999751937708655
     },
     {
       "t_s": 1230.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891994903407
+      "posterior": 0.999975193038815
     },
     {
       "t_s": 1245.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891992090514
+      "posterior": 0.9999751923927467
     },
     {
       "t_s": 1260.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891989608024
+      "posterior": 0.9999751918225656
     },
     {
       "t_s": 1275.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891987417138
+      "posterior": 0.9999751913193606
     },
     {
       "t_s": 1290.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891985483615
+      "posterior": 0.9999751908752671
     },
     {
       "t_s": 1305.0,
       "candidate": "INC-000001",
-      "posterior": 0.999989198377723
+      "posterior": 0.9999751904833425
     },
     {
       "t_s": 1320.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891982271305
+      "posterior": 0.9999751901374601
     },
     {
       "t_s": 1335.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891980942295
+      "posterior": 0.9999751898322119
     },
     {
       "t_s": 1350.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891979769423
+      "posterior": 0.9999751895628249
     },
     {
       "t_s": 1365.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891978734344
+      "posterior": 0.999975189325087
     },
     {
       "t_s": 1380.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891977820873
+      "posterior": 0.99997518911528
     },
     {
       "t_s": 1395.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891977014725
+      "posterior": 0.9999751889301234
     },
     {
       "t_s": 1410.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891976303295
+      "posterior": 0.9999751887667209
     },
     {
       "t_s": 1425.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891975675448
+      "posterior": 0.9999751886225168
     },
     {
       "t_s": 1440.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891975121372
+      "posterior": 0.9999751884952557
     },
     {
       "t_s": 1455.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891974632397
+      "posterior": 0.9999751883829472
     },
     {
       "t_s": 1470.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891974200873
+      "posterior": 0.9999751882838342
     },
     {
       "t_s": 1485.0,
       "candidate": "INC-000001",
-      "posterior": 0.999989197382005
+      "posterior": 0.999975188196367
     },
     {
       "t_s": 1500.0,
       "candidate": "INC-000001",
-      "posterior": 0.9999891973483975
+      "posterior": 0.9999751881191766
     }
   ]
 }

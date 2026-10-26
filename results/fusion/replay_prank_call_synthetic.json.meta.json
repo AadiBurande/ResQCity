@@ -1,15 +1,15 @@
 {
   "file": "results/fusion/replay_prank_call_synthetic.json",
-  "generated_at_utc": "2026-10-24T10:05:44+00:00",
+  "generated_at_utc": "2026-10-26T15:55:37+00:00",
   "command": "fusion_replay.py --all",
   "synthetic": true,
   "git": {
-    "commit": "c89e20f01eca23ee2df5746153bd3940a7600cfa",
+    "commit": "e0fdf765e85602b82787c984180bfd40a04c6b57",
     "dirty": false
   },
   "configs_sha256": {
     "configs/fusion_scenarios/prank_call.yaml": "3f4ea2094ce978202163cf9b7f8e96326614b412c9348d4174e3db6f834da725",
-    "configs/fusion.yaml": "4145d7b988348f36201b208c6cefdf278dd65d835bc47ccdc319471d2772507d",
+    "configs/fusion.yaml": "82b31c768494253ada072306c0d0056f2d0a87a85103316487fba7fd72c367e5",
     "configs/calls.yaml": "4e4ac487986505e76ce0d76bdc781e284c6c0991c19078fa8907919c7b8338a2",
     "configs/triage.yaml": "d36a862fe97d5f77a6faa42c526a7fb6f669ad10e2da44c032fb581048affeb8",
     "configs/cameras.yaml": "fdfbfdd81597195281364bcae4b0b086a8562f12c05345c5515b26d4ba360cb6",
