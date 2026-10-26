@@ -63,10 +63,16 @@ exploratory; D-028).
 
 - Camera alarmed (first alarm in bin $b$): the alarm time is a density event; under $H_1$ the
   onset is uniform in the window, so
-  $$\mathrm{LR}_c = \frac{q_c\, p\, s_1(b)/W + \mu_c s_0(b)}{\mu_c s_0(b)} = 1 + \frac{q_c\, p\, s_1(b)}{W\, \mu_c\, s_0(b)} \;\ge 1 .$$
+  $$\mathrm{LR}_c = \frac{q_c\, p_{\text{eff}}\, s_1(b)/W + \mu_c s_0(b)}{\mu_c s_0(b)} = 1 + \frac{q_c\, p_{\text{eff}}\, s_1(b)}{W\, \mu_c\, s_0(b)} \;\ge 1 .$$
   For small values the window cancels in $\text{prior}\times(\mathrm{LR}_c-1)$, as it should.
 - Camera silent (no alarm, counted only after the detector delay has passed):
-  $\mathrm{LR}_c = 1 - q_c\, p \le 1$ (masking by a running cooldown is ignored here).
+  $\mathrm{LR}_c = 1 - q_c\, p_{\text{eff}} \le 1$.
+
+Both terms use $p_{\text{eff}} = p \cdot P(\text{armed})$, the detection probability **after**
+self-masking (D-029): a camera silenced by its own last false alarm cannot alarm on a crash
+either. With the measured inputs $p_{\text{eff}} = 0.587 \times 0.521 = 0.306$. With those same
+inputs a single alarm is weak evidence — the alarmed $\mathrm{LR}_c$ is only **1.02–1.07** across
+the three confidence bins, even when the camera covers the whole candidate region.
 
 ### 3.2 Calls
 
@@ -99,6 +105,13 @@ without a camera, and a candidate without calls loses belief as time passes ($G_
 Adding a call (the latest in time) adds the non-negative term $G_{n+1} b^{-(n+1)}$ and leaves the
 others unchanged, so a confirming call never lowers the posterior (tested). $G_0, G_1, G_2$ are
 checked against a brute-force simulation of `sim.calls` (`tests/fusion/test_model.py`).
+
+That unpinned onset prior is an approximation, and `tests/fusion/test_posterior_calibration.py`
+measures its cost against a brute-force simulation of the whole generative process: with no camera
+to pin the onset, a lone call arriving late in the window is calibrated to within 0.01, but one
+arriving early is optimistic by about **0.21**, because the prior reaches back before the window
+began and gives $H_1$ onset positions that could not have produced that call. Buckets with 0, 2 or
+3 calls agree to within 0.01. A camera alarm pins the onset and removes the approximation.
 
 ### 3.3 Operator review
 
