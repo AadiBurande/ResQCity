@@ -35,6 +35,10 @@ it is solved twice, with and without, and the difference is the **price of fairn
 | $n_k$ | $\mathbb{Z}_{\ge 0}$ | units stationed at base $k$ (defined by $y$) |
 | $z_{j,\ell}$ | $\{0,1\}$ | zone $j$ is covered by **at least** $\ell$ units, $\ell = 1 \dots L$ |
 
+$L = \min\big(|U|,\ \max_j \sum_{k \in N_j} \mathrm{cap}_k\big)$ — the largest cover any zone can
+actually receive. Capping $L$ at the largest *single* base capacity truncates the objective and
+makes the solver move units away from a zone served by several bases (found by the OR review).
+
 ## 3. Objective
 
 $$

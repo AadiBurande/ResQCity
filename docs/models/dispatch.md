@@ -61,8 +61,15 @@ $$
 The first term is the research quantity: severity-weighted time to full response. The second
 exists because the first does not constrain an ambulance that is not on the critical path —
 without it the solver may send a distant ambulance "because fire is late anyway", which costs
-lives (master plan §6.1). $\varepsilon$ is required to be far below the smallest severity weight
-(enforced in `config.py`), and a test asserts it never changes any $L_i$.
+lives (master plan §6.1).
+
+$\varepsilon$ must not outweigh one second of the lightest incident's last arrival. The config
+check $\varepsilon < \min_i \omega_i$ is **not sufficient**, because two arrivals can differ by
+the whole horizon; the condition is $\varepsilon\,T < \min_i \omega_i$. Since $T$ belongs to the
+instance rather than the configuration, the effective value is capped at solve time
+(`dispatch.effective_epsilon`, which also quantises it to the integer units the objective is
+built in). A test asserts the capped $\varepsilon$ leaves every $L_i$ unchanged over a long
+horizon; the OR review found a case where the unconstrained value did not.
 
 ## 5. Constraints
 
@@ -113,7 +120,9 @@ $$
 z_w \;\ge\; 1 - \sum_{u \in U_w^{\text{idle}}} \Big(1 - \sum_{i} x_{u,i}\Big) \tag{C8}
 $$
 A ward counts as uncovered if this batch consumes every unit that could reach it within the
-coverage radius. $U_w^{\text{idle}}$ is precomputed from the ETA table.
+coverage radius. $U_w^{\text{idle}}$ is precomputed from the ETA table. A ward whose reachable
+set is **empty** is fixed to $z_w = 1$: no assignment can cover it, so it is priced and reported
+rather than silently dropped.
 
 ## 6. The green corridor as data
 
@@ -122,13 +131,24 @@ an optimisation decision needs pairwise variables over (police, ambulance, incid
 precedence is settled before solving (`Router.green_corridor_etas`):
 
 - $\pi_i = \min_{p \in P} \eta_{p,i}$ — the earliest any police unit could reach $i$;
-- ambulance $u$ is **eligible** at $i$ when $\eta_{u,i} \ge \pi_i$;
-- for an eligible pair, $\tilde\eta_{u,i} = \max(\rho\,\eta_{u,i},\; \pi_i)$, so the ambulance can
-  never be helped to arrive before the corridor exists;
-- otherwise $\tilde\eta_{u,i} = \eta_{u,i}$.
+- ambulance $u$ is **eligible** at $i$ when $\rho\,\eta_{u,i} \ge \pi_i$, i.e. some police unit
+  could reach $i$ by the time the sped-up ambulance would;
+- for an eligible pair, $\tilde\eta_{u,i} = \rho\,\eta_{u,i}$; otherwise
+  $\tilde\eta_{u,i} = \eta_{u,i}$.
 
-$\tilde\eta$ is used in (C4) only when $g_{u,i} = 1$; when no police unit is sent, the ambulance
-travels at $\eta$. In code this is the pair of indicator constraints
+Eligibility is necessary but **not sufficient**: it asks only whether *some* police unit could
+open the corridor. (C7) additionally requires that a police unit **actually sent to this
+incident** is fast enough to realise it,
+$$
+g_{u,i} \;\le\; \sum_{p \in P\,:\,\eta_{p,i} \le \tilde\eta_{u,i}} x_{p,i},
+$$
+so a fast police unit dispatched to a *different* incident cannot lend its speed here. An earlier
+version used "any police unit sent to $i$" together with a $\max(\cdot,\pi_i)$ floor; the OR
+review found that it credited corridors across incidents, and that the reported ambulance ETA
+could beat every police unit actually present.
+
+$\tilde\eta$ is used in (C4) only when $g_{u,i} = 1$; otherwise the ambulance travels at $\eta$.
+In code this is the pair of indicator constraints
 $A_{i,\text{amb}} \ge \tilde\eta_{u,i}$ under $g_{u,i}$ and $A_{i,\text{amb}} \ge \eta_{u,i}$
 under $x_{u,i} \wedge \neg g_{u,i}$.
 
