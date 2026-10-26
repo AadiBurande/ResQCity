@@ -1,4 +1,4 @@
-Status: IN PROGRESS (started 2026-10-24). Approved by the user before any Phase 4 code.
+Status: DONE (2026-10-26). Approved by the user before any Phase 4 code; results and findings in D-029.
 
 # Phase 4 plan: simulated 112 calls + Bayesian fusion
 

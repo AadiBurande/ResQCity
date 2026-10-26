@@ -1,0 +1,36 @@
+{
+  "file": "results/fusion/week_check_synthetic.json",
+  "generated_at_utc": "2026-10-26T16:19:35+00:00",
+  "command": "fusion_check.py --reps 30",
+  "synthetic": true,
+  "git": {
+    "commit": "c611d6e95380e86c54cabde3dcf72631f233cd1d",
+    "dirty": false
+  },
+  "configs_sha256": {
+    "configs/fusion.yaml": "82b31c768494253ada072306c0d0056f2d0a87a85103316487fba7fd72c367e5",
+    "configs/calls.yaml": "4e4ac487986505e76ce0d76bdc781e284c6c0991c19078fa8907919c7b8338a2",
+    "configs/call_templates.yaml": "d36877fe92e9a13732dcfcf514a9610756103236b3fafd49b5eaa49748eb3be7",
+    "configs/triage.yaml": "d36a862fe97d5f77a6faa42c526a7fb6f669ad10e2da44c032fb581048affeb8",
+    "configs/incidents.yaml": "54f245fe34f19dcfd8acba582925fa6f86a8d5bf35d0c3369a21c1b4011454d5",
+    "configs/requirements.yaml": "2fda472dd46e2a6b2999751b5ba7d77f9090e25794d496eefe723598a8ab08ff",
+    "configs/cameras.yaml": "fdfbfdd81597195281364bcae4b0b086a8562f12c05345c5515b26d4ba360cb6",
+    "configs/scenarios/normal.yaml": "a32c924e703a6d1c93014d2e76dd6884637ac07dd6f2ac23cfb51b857d2705e5"
+  },
+  "seeds": {
+    "tuning_seed_base": 31102026
+  },
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  }
+}

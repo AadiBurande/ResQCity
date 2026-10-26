@@ -1,0 +1,4326 @@
+{
+  "status": "synthetic model check (UNVERIFIED call and review parameters; measured detector); not a research result",
+  "scenario": "normal",
+  "seed_base": "tuning_seed_base",
+  "threshold": 0.5,
+  "pooled": {
+    "replications": 30,
+    "incidents": 1202,
+    "detectable_incidents": 518,
+    "incidents_in_camera_view": 10,
+    "expected_incidents_in_camera_view": 9.568158484782543,
+    "calls": 2349,
+    "false_calls": 385,
+    "camera_events": 5790412,
+    "true_camera_events": 3,
+    "candidates": 742291,
+    "real_candidates_seeded_by_a_false_alarm": 396,
+    "days": 210.0,
+    "association": {
+      "pair_precision": 0.19537986009435496,
+      "pair_recall": 0.8192360163710778,
+      "pairs_together": 1201,
+      "pairs_in_candidates": 6147,
+      "same_incident_pairs": 1466,
+      "false_items_in_real_candidates": 3284
+    },
+    "real_candidates_by_path": {
+      "call only": 1153,
+      "true camera + call": 2,
+      "true camera only": 1
+    },
+    "onset_to_threshold_s": {
+      "call only": {
+        "n": 1022,
+        "median": 201.0,
+        "p90": 563.5999999999999
+      },
+      "true camera + call": {
+        "n": 2,
+        "median": 367.0,
+        "p90": 531.8
+      }
+    },
+    "real_incidents_reaching_threshold": 949,
+    "false_candidates_per_day": 3529.214285714286,
+    "false_candidates_reaching_threshold_per_day": 1.5857142857142856,
+    "calibration": [
+      {
+        "bin": [
+          0.0,
+          0.0001
+        ],
+        "candidates": 740752,
+        "real": 2,
+        "share_real": 2.6999589606237985e-06
+      },
+      {
+        "bin": [
+          0.0001,
+          0.01
+        ],
+        "candidates": 26,
+        "real": 24,
+        "share_real": 0.9230769230769231
+      },
+      {
+        "bin": [
+          0.01,
+          0.1
+        ],
+        "candidates": 5,
+        "real": 2,
+        "share_real": 0.4
+      },
+      {
+        "bin": [
+          0.1,
+          0.5
+        ],
+        "candidates": 197,
+        "real": 141,
+        "share_real": 0.7157360406091371
+      },
+      {
+        "bin": [
+          0.5,
+          0.9
+        ],
+        "candidates": 795,
+        "real": 471,
+        "share_real": 0.5924528301886792
+      },
+      {
+        "bin": [
+          0.9,
+          0.99
+        ],
+        "candidates": 2,
+        "real": 2,
+        "share_real": 1.0
+      },
+      {
+        "bin": [
+          0.99,
+          1.0
+        ],
+        "candidates": 514,
+        "real": 514,
+        "share_real": 1.0
+      }
+    ]
+  },
+  "replications": [
+    {
+      "replication": 0,
+      "incidents": 41,
+      "detectable_incidents": 15,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.277070226393317,
+      "calls": 83,
+      "false_calls": 14,
+      "camera_events": 193199,
+      "true_camera_events": 0,
+      "candidates": 24739,
+      "association": {
+        "pair_precision": 0.19282511210762332,
+        "pair_recall": 0.8958333333333334,
+        "pairs_together": 43,
+        "pairs_in_candidates": 223,
+        "same_incident_pairs": 48,
+        "false_items_in_real_candidates": 146
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24683,
+          "real": 0,
+          "mean_posterior": 8.929272106025216e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 11,
+          "real": 9,
+          "mean_posterior": 0.27361100754404666,
+          "share_real": 0.8181818181818182
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 29,
+          "real": 17,
+          "mean_posterior": 0.7037249990819134,
+          "share_real": 0.5862068965517241
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 16,
+          "real": 16,
+          "mean_posterior": 0.9998689027825968,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 42
+      },
+      "real_candidates_seeded_by_a_false_alarm": 19,
+      "onset_to_threshold_s": {
+        "call only": [
+          56,
+          58,
+          69,
+          75,
+          87,
+          94,
+          125,
+          128,
+          130,
+          131,
+          134,
+          145,
+          148,
+          152,
+          161,
+          168,
+          185,
+          191,
+          251,
+          256,
+          264,
+          268,
+          271,
+          288,
+          306,
+          306,
+          320,
+          378,
+          395,
+          446,
+          503,
+          573,
+          801,
+          1372
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 32,
+      "false_candidates_per_day": 3528.1428571428573,
+      "false_candidates_reaching_threshold_per_day": 1.7142857142857142,
+      "fusion_seconds": 42.9686328000098
+    },
+    {
+      "replication": 1,
+      "incidents": 26,
+      "detectable_incidents": 13,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.24012752954087474,
+      "calls": 51,
+      "false_calls": 14,
+      "camera_events": 193195,
+      "true_camera_events": 0,
+      "candidates": 24722,
+      "association": {
+        "pair_precision": 0.2231404958677686,
+        "pair_recall": 1.0,
+        "pairs_together": 27,
+        "pairs_in_candidates": 121,
+        "same_incident_pairs": 27,
+        "false_items_in_real_candidates": 37
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24687,
+          "real": 0,
+          "mean_posterior": 8.943585038438376e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 1,
+          "real": 1,
+          "mean_posterior": 0.00035126058918153846,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 3,
+          "real": 1,
+          "mean_posterior": 0.338983295978242,
+          "share_real": 0.3333333333333333
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 23,
+          "real": 11,
+          "mean_posterior": 0.672798642600838,
+          "share_real": 0.4782608695652174
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 8,
+          "real": 8,
+          "mean_posterior": 0.9998309371922123,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 21
+      },
+      "real_candidates_seeded_by_a_false_alarm": 4,
+      "onset_to_threshold_s": {
+        "call only": [
+          48,
+          89,
+          101,
+          102,
+          110,
+          131,
+          140,
+          147,
+          149,
+          156,
+          161,
+          181,
+          194,
+          199,
+          213,
+          250,
+          252,
+          254,
+          341,
+          603
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 20,
+      "false_candidates_per_day": 3528.714285714286,
+      "false_candidates_reaching_threshold_per_day": 1.8571428571428572,
+      "fusion_seconds": 44.355265999998664
+    },
+    {
+      "replication": 2,
+      "incidents": 43,
+      "detectable_incidents": 16,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.29554157481953813,
+      "calls": 86,
+      "false_calls": 16,
+      "camera_events": 192868,
+      "true_camera_events": 0,
+      "candidates": 24753,
+      "association": {
+        "pair_precision": 0.14659685863874344,
+        "pair_recall": 0.6829268292682927,
+        "pairs_together": 28,
+        "pairs_in_candidates": 191,
+        "same_incident_pairs": 41,
+        "false_items_in_real_candidates": 127
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24691,
+          "real": 0,
+          "mean_posterior": 8.933882570707652e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 1,
+          "real": 1,
+          "mean_posterior": 0.0003514872481618066,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 6,
+          "real": 6,
+          "mean_posterior": 0.2569182155265541,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 34,
+          "real": 18,
+          "mean_posterior": 0.6918269060368113,
+          "share_real": 0.5294117647058824
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 21,
+          "real": 21,
+          "mean_posterior": 0.9996959517152506,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 46
+      },
+      "real_candidates_seeded_by_a_false_alarm": 16,
+      "onset_to_threshold_s": {
+        "call only": [
+          39,
+          43,
+          52,
+          83,
+          84,
+          90,
+          91,
+          95,
+          95,
+          107,
+          121,
+          132,
+          140,
+          148,
+          174,
+          187,
+          197,
+          210,
+          213,
+          217,
+          233,
+          234,
+          236,
+          243,
+          256,
+          267,
+          268,
+          269,
+          284,
+          287,
+          287,
+          304,
+          314,
+          317,
+          323,
+          393,
+          425,
+          535,
+          710,
+          729,
+          944
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 36,
+      "false_candidates_per_day": 3529.5714285714284,
+      "false_candidates_reaching_threshold_per_day": 2.2857142857142856,
+      "fusion_seconds": 40.03367909998633
+    },
+    {
+      "replication": 3,
+      "incidents": 36,
+      "detectable_incidents": 16,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 2,
+      "expected_incidents_in_camera_view": 0.29554157481953813,
+      "calls": 76,
+      "false_calls": 14,
+      "camera_events": 192809,
+      "true_camera_events": 0,
+      "candidates": 24737,
+      "association": {
+        "pair_precision": 0.12403100775193798,
+        "pair_recall": 0.7272727272727273,
+        "pairs_together": 32,
+        "pairs_in_candidates": 258,
+        "same_incident_pairs": 44,
+        "false_items_in_real_candidates": 138
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24685,
+          "real": 0,
+          "mean_posterior": 8.944118294610372e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 8,
+          "real": 6,
+          "mean_posterior": 0.2341434238241606,
+          "share_real": 0.75
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 27,
+          "real": 15,
+          "mean_posterior": 0.7137890694978308,
+          "share_real": 0.5555555555555556
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 17,
+          "real": 17,
+          "mean_posterior": 0.9998012730374635,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 38
+      },
+      "real_candidates_seeded_by_a_false_alarm": 19,
+      "onset_to_threshold_s": {
+        "call only": [
+          49,
+          75,
+          77,
+          83,
+          86,
+          107,
+          116,
+          120,
+          146,
+          157,
+          162,
+          179,
+          184,
+          193,
+          224,
+          242,
+          249,
+          283,
+          295,
+          305,
+          333,
+          355,
+          369,
+          385,
+          388,
+          453,
+          478,
+          605,
+          684,
+          728,
+          734,
+          786
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 29,
+      "false_candidates_per_day": 3528.4285714285716,
+      "false_candidates_reaching_threshold_per_day": 1.8571428571428572,
+      "fusion_seconds": 38.87143769999966
+    },
+    {
+      "replication": 4,
+      "incidents": 35,
+      "detectable_incidents": 18,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 1,
+      "expected_incidents_in_camera_view": 0.3324842716719804,
+      "calls": 69,
+      "false_calls": 12,
+      "camera_events": 192684,
+      "true_camera_events": 0,
+      "candidates": 24754,
+      "association": {
+        "pair_precision": 0.1702127659574468,
+        "pair_recall": 0.7804878048780488,
+        "pairs_together": 32,
+        "pairs_in_candidates": 188,
+        "same_incident_pairs": 41,
+        "false_items_in_real_candidates": 106
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24709,
+          "real": 0,
+          "mean_posterior": 8.939903887502842e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 1,
+          "real": 1,
+          "mean_posterior": 0.00030724747361510104,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 8,
+          "real": 4,
+          "mean_posterior": 0.2489981542298602,
+          "share_real": 0.5
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 20,
+          "real": 12,
+          "mean_posterior": 0.6957078573114892,
+          "share_real": 0.6
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 16,
+          "real": 16,
+          "mean_posterior": 0.9996058892276791,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 33
+      },
+      "real_candidates_seeded_by_a_false_alarm": 13,
+      "onset_to_threshold_s": {
+        "call only": [
+          77,
+          82,
+          91,
+          96,
+          111,
+          121,
+          134,
+          136,
+          142,
+          143,
+          148,
+          156,
+          168,
+          177,
+          178,
+          193,
+          195,
+          218,
+          264,
+          276,
+          324,
+          326,
+          390,
+          464,
+          493,
+          499,
+          708,
+          982,
+          990
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 26,
+      "false_candidates_per_day": 3531.5714285714284,
+      "false_candidates_reaching_threshold_per_day": 1.1428571428571428,
+      "fusion_seconds": 40.3570461999916
+    },
+    {
+      "replication": 5,
+      "incidents": 41,
+      "detectable_incidents": 16,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.29554157481953813,
+      "calls": 86,
+      "false_calls": 12,
+      "camera_events": 192989,
+      "true_camera_events": 0,
+      "candidates": 24749,
+      "association": {
+        "pair_precision": 0.2422680412371134,
+        "pair_recall": 0.7704918032786885,
+        "pairs_together": 47,
+        "pairs_in_candidates": 194,
+        "same_incident_pairs": 61,
+        "false_items_in_real_candidates": 116
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24694,
+          "real": 0,
+          "mean_posterior": 8.944736717015703e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 8,
+          "real": 7,
+          "mean_posterior": 0.3026888701027102,
+          "share_real": 0.875
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 28,
+          "real": 17,
+          "mean_posterior": 0.6873023000974328,
+          "share_real": 0.6071428571428571
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 19,
+          "real": 19,
+          "mean_posterior": 0.9999131696627932,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 43
+      },
+      "real_candidates_seeded_by_a_false_alarm": 15,
+      "onset_to_threshold_s": {
+        "call only": [
+          33,
+          38,
+          44,
+          55,
+          76,
+          84,
+          89,
+          105,
+          108,
+          113,
+          113,
+          120,
+          120,
+          124,
+          126,
+          126,
+          133,
+          135,
+          141,
+          156,
+          169,
+          190,
+          194,
+          205,
+          225,
+          228,
+          235,
+          239,
+          244,
+          263,
+          272,
+          273,
+          323,
+          330,
+          415,
+          560,
+          669,
+          951,
+          1445
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 34,
+      "false_candidates_per_day": 3529.4285714285716,
+      "false_candidates_reaching_threshold_per_day": 1.5714285714285714,
+      "fusion_seconds": 45.213733000011416
+    },
+    {
+      "replication": 6,
+      "incidents": 44,
+      "detectable_incidents": 16,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.29554157481953813,
+      "calls": 96,
+      "false_calls": 9,
+      "camera_events": 193164,
+      "true_camera_events": 0,
+      "candidates": 24756,
+      "association": {
+        "pair_precision": 0.3177083333333333,
+        "pair_recall": 0.7721518987341772,
+        "pairs_together": 61,
+        "pairs_in_candidates": 192,
+        "same_incident_pairs": 79,
+        "false_items_in_real_candidates": 98
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24701,
+          "real": 0,
+          "mean_posterior": 8.937963339772852e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 8,
+          "real": 8,
+          "mean_posterior": 0.20843850131058175,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 22,
+          "real": 13,
+          "mean_posterior": 0.6889926676632574,
+          "share_real": 0.5909090909090909
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 25,
+          "real": 25,
+          "mean_posterior": 0.9998745437463628,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 46
+      },
+      "real_candidates_seeded_by_a_false_alarm": 12,
+      "onset_to_threshold_s": {
+        "call only": [
+          21,
+          39,
+          51,
+          61,
+          63,
+          72,
+          81,
+          82,
+          94,
+          95,
+          100,
+          102,
+          118,
+          122,
+          127,
+          161,
+          166,
+          180,
+          184,
+          194,
+          196,
+          203,
+          223,
+          224,
+          224,
+          233,
+          251,
+          252,
+          265,
+          272,
+          341,
+          344,
+          357,
+          358,
+          431,
+          471,
+          1072,
+          1202
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 36,
+      "false_candidates_per_day": 3530.0,
+      "false_candidates_reaching_threshold_per_day": 1.2857142857142858,
+      "fusion_seconds": 43.878203200001735
+    },
+    {
+      "replication": 7,
+      "incidents": 35,
+      "detectable_incidents": 10,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 1,
+      "expected_incidents_in_camera_view": 0.18471348426221135,
+      "calls": 67,
+      "false_calls": 12,
+      "camera_events": 193492,
+      "true_camera_events": 1,
+      "candidates": 24746,
+      "association": {
+        "pair_precision": 0.11392405063291139,
+        "pair_recall": 0.8181818181818182,
+        "pairs_together": 27,
+        "pairs_in_candidates": 237,
+        "same_incident_pairs": 33,
+        "false_items_in_real_candidates": 117
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24697,
+          "real": 0,
+          "mean_posterior": 8.934100945015267e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 1,
+          "real": 1,
+          "mean_posterior": 0.00020818109952266294,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 6,
+          "real": 4,
+          "mean_posterior": 0.2296269290000168,
+          "share_real": 0.6666666666666666
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 29,
+          "real": 19,
+          "mean_posterior": 0.682735055219564,
+          "share_real": 0.6551724137931034
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 13,
+          "real": 13,
+          "mean_posterior": 0.9990987773893942,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 36,
+        "true camera + call": 1
+      },
+      "real_candidates_seeded_by_a_false_alarm": 14,
+      "onset_to_threshold_s": {
+        "call only": [
+          30,
+          53,
+          58,
+          72,
+          73,
+          85,
+          107,
+          127,
+          131,
+          152,
+          167,
+          174,
+          174,
+          182,
+          184,
+          188,
+          194,
+          196,
+          210,
+          211,
+          216,
+          219,
+          221,
+          250,
+          263,
+          292,
+          328,
+          344,
+          347,
+          350,
+          464,
+          525
+        ],
+        "true camera + call": [
+          573
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 31,
+      "false_candidates_per_day": 3529.8571428571427,
+      "false_candidates_reaching_threshold_per_day": 1.4285714285714286,
+      "fusion_seconds": 43.249705299997004
+    },
+    {
+      "replication": 8,
+      "incidents": 41,
+      "detectable_incidents": 20,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.3694269685244227,
+      "calls": 84,
+      "false_calls": 14,
+      "camera_events": 192793,
+      "true_camera_events": 0,
+      "candidates": 24739,
+      "association": {
+        "pair_precision": 0.21176470588235294,
+        "pair_recall": 0.8,
+        "pairs_together": 36,
+        "pairs_in_candidates": 170,
+        "same_incident_pairs": 45,
+        "false_items_in_real_candidates": 101
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24686,
+          "real": 0,
+          "mean_posterior": 8.949390202500348e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 1,
+          "real": 1,
+          "mean_posterior": 0.00030530648703900795,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 10,
+          "real": 7,
+          "mean_posterior": 0.23545979553150648,
+          "share_real": 0.7
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 18,
+          "real": 7,
+          "mean_posterior": 0.6747325520198657,
+          "share_real": 0.3888888888888889
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 24,
+          "real": 24,
+          "mean_posterior": 0.9996425368059073,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 39
+      },
+      "real_candidates_seeded_by_a_false_alarm": 12,
+      "onset_to_threshold_s": {
+        "call only": [
+          -110,
+          38,
+          55,
+          68,
+          86,
+          122,
+          140,
+          148,
+          152,
+          154,
+          167,
+          173,
+          193,
+          197,
+          224,
+          247,
+          260,
+          262,
+          264,
+          272,
+          303,
+          337,
+          389,
+          475,
+          488,
+          523,
+          530,
+          587,
+          726,
+          835,
+          903,
+          910
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 32,
+      "false_candidates_per_day": 3528.5714285714284,
+      "false_candidates_reaching_threshold_per_day": 1.5714285714285714,
+      "fusion_seconds": 41.38430700000026
+    },
+    {
+      "replication": 9,
+      "incidents": 37,
+      "detectable_incidents": 14,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.25859887796709585,
+      "calls": 73,
+      "false_calls": 9,
+      "camera_events": 193046,
+      "true_camera_events": 0,
+      "candidates": 24749,
+      "association": {
+        "pair_precision": 0.19886363636363635,
+        "pair_recall": 0.7291666666666666,
+        "pairs_together": 35,
+        "pairs_in_candidates": 176,
+        "same_incident_pairs": 48,
+        "false_items_in_real_candidates": 88
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24700,
+          "real": 0,
+          "mean_posterior": 8.93728631344225e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 1,
+          "real": 1,
+          "mean_posterior": 0.00031213936220957664,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 4,
+          "real": 3,
+          "mean_posterior": 0.2737129793214963,
+          "share_real": 0.75
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 29,
+          "real": 21,
+          "mean_posterior": 0.685400679636318,
+          "share_real": 0.7241379310344828
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 15,
+          "real": 15,
+          "mean_posterior": 0.9998256093537734,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 40
+      },
+      "real_candidates_seeded_by_a_false_alarm": 10,
+      "onset_to_threshold_s": {
+        "call only": [
+          27,
+          32,
+          86,
+          92,
+          96,
+          113,
+          113,
+          114,
+          126,
+          140,
+          157,
+          186,
+          188,
+          196,
+          212,
+          221,
+          229,
+          242,
+          262,
+          272,
+          273,
+          276,
+          286,
+          291,
+          297,
+          326,
+          348,
+          384,
+          412,
+          435,
+          439,
+          448,
+          511,
+          548,
+          612,
+          662,
+          672
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 33,
+      "false_candidates_per_day": 3529.8571428571427,
+      "false_candidates_reaching_threshold_per_day": 1.2857142857142858,
+      "fusion_seconds": 41.06866230000742
+    },
+    {
+      "replication": 10,
+      "incidents": 36,
+      "detectable_incidents": 16,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.29554157481953813,
+      "calls": 65,
+      "false_calls": 9,
+      "camera_events": 192851,
+      "true_camera_events": 0,
+      "candidates": 24745,
+      "association": {
+        "pair_precision": 0.17159763313609466,
+        "pair_recall": 0.7837837837837838,
+        "pairs_together": 29,
+        "pairs_in_candidates": 169,
+        "same_incident_pairs": 37,
+        "false_items_in_real_candidates": 116
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24700,
+          "real": 0,
+          "mean_posterior": 8.93702416195202e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 1,
+          "real": 1,
+          "mean_posterior": 0.020486133507517584,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 5,
+          "real": 4,
+          "mean_posterior": 0.3741718648218642,
+          "share_real": 0.8
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 25,
+          "real": 17,
+          "mean_posterior": 0.6980092072728603,
+          "share_real": 0.68
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 14,
+          "real": 14,
+          "mean_posterior": 0.9996258557449862,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 36
+      },
+      "real_candidates_seeded_by_a_false_alarm": 15,
+      "onset_to_threshold_s": {
+        "call only": [
+          41,
+          42,
+          43,
+          46,
+          64,
+          68,
+          69,
+          74,
+          76,
+          79,
+          89,
+          101,
+          115,
+          124,
+          147,
+          155,
+          161,
+          165,
+          166,
+          174,
+          178,
+          191,
+          204,
+          220,
+          230,
+          298,
+          325,
+          349,
+          355,
+          390,
+          390,
+          464,
+          575
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 30,
+      "false_candidates_per_day": 3529.8571428571427,
+      "false_candidates_reaching_threshold_per_day": 1.1428571428571428,
+      "fusion_seconds": 42.81104190001497
+    },
+    {
+      "replication": 11,
+      "incidents": 50,
+      "detectable_incidents": 23,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.4248410138030861,
+      "calls": 91,
+      "false_calls": 9,
+      "camera_events": 192798,
+      "true_camera_events": 0,
+      "candidates": 24745,
+      "association": {
+        "pair_precision": 0.2014388489208633,
+        "pair_recall": 0.8888888888888888,
+        "pairs_together": 56,
+        "pairs_in_candidates": 278,
+        "same_incident_pairs": 63,
+        "false_items_in_real_candidates": 141
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24688,
+          "real": 0,
+          "mean_posterior": 8.938359161922452e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 1,
+          "real": 1,
+          "mean_posterior": 0.00027292523374425435,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 8,
+          "real": 6,
+          "mean_posterior": 0.2688541940803867,
+          "share_real": 0.75
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 28,
+          "real": 21,
+          "mean_posterior": 0.6770632813617165,
+          "share_real": 0.75
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 1,
+          "real": 1,
+          "mean_posterior": 0.9831148497294347,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 19,
+          "real": 19,
+          "mean_posterior": 0.9998027193804002,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 48
+      },
+      "real_candidates_seeded_by_a_false_alarm": 17,
+      "onset_to_threshold_s": {
+        "call only": [
+          46,
+          49,
+          50,
+          58,
+          59,
+          65,
+          79,
+          85,
+          105,
+          109,
+          112,
+          113,
+          119,
+          124,
+          129,
+          135,
+          139,
+          153,
+          174,
+          184,
+          185,
+          196,
+          197,
+          223,
+          242,
+          266,
+          268,
+          269,
+          291,
+          343,
+          369,
+          393,
+          423,
+          424,
+          442,
+          457,
+          569,
+          796,
+          813,
+          925,
+          958,
+          1164,
+          1608
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 41,
+      "false_candidates_per_day": 3528.1428571428573,
+      "false_candidates_reaching_threshold_per_day": 1.1428571428571428,
+      "fusion_seconds": 43.01937260001432
+    },
+    {
+      "replication": 12,
+      "incidents": 42,
+      "detectable_incidents": 18,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.3324842716719804,
+      "calls": 68,
+      "false_calls": 7,
+      "camera_events": 193095,
+      "true_camera_events": 0,
+      "candidates": 24736,
+      "association": {
+        "pair_precision": 0.09523809523809523,
+        "pair_recall": 0.631578947368421,
+        "pairs_together": 24,
+        "pairs_in_candidates": 252,
+        "same_incident_pairs": 38,
+        "false_items_in_real_candidates": 151
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24688,
+          "real": 0,
+          "mean_posterior": 8.939036754619732e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 1,
+          "real": 1,
+          "mean_posterior": 0.00027470689988539796,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 1,
+          "real": 1,
+          "mean_posterior": 0.06200809823151367,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 8,
+          "real": 7,
+          "mean_posterior": 0.26933425727733984,
+          "share_real": 0.875
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 23,
+          "real": 17,
+          "mean_posterior": 0.6917299419104905,
+          "share_real": 0.7391304347826086
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 15,
+          "real": 15,
+          "mean_posterior": 0.9995531057032457,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 41
+      },
+      "real_candidates_seeded_by_a_false_alarm": 19,
+      "onset_to_threshold_s": {
+        "call only": [
+          26,
+          27,
+          32,
+          51,
+          56,
+          64,
+          66,
+          66,
+          68,
+          68,
+          113,
+          123,
+          132,
+          141,
+          151,
+          200,
+          201,
+          219,
+          236,
+          257,
+          283,
+          294,
+          321,
+          323,
+          327,
+          337,
+          364,
+          396,
+          415,
+          638,
+          672,
+          705,
+          754,
+          984
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 29,
+      "false_candidates_per_day": 3527.8571428571427,
+      "false_candidates_reaching_threshold_per_day": 0.8571428571428571,
+      "fusion_seconds": 40.94551409999258
+    },
+    {
+      "replication": 13,
+      "incidents": 55,
+      "detectable_incidents": 25,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.4617837106555283,
+      "calls": 111,
+      "false_calls": 13,
+      "camera_events": 192802,
+      "true_camera_events": 0,
+      "candidates": 24745,
+      "association": {
+        "pair_precision": 0.3392070484581498,
+        "pair_recall": 0.9625,
+        "pairs_together": 77,
+        "pairs_in_candidates": 227,
+        "same_incident_pairs": 80,
+        "false_items_in_real_candidates": 80
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24684,
+          "real": 0,
+          "mean_posterior": 8.935459943587436e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 1,
+          "real": 1,
+          "mean_posterior": 0.0005138148183185803,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 7,
+          "real": 6,
+          "mean_posterior": 0.27297781156856543,
+          "share_real": 0.8571428571428571
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 25,
+          "real": 13,
+          "mean_posterior": 0.6748287458919762,
+          "share_real": 0.52
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 28,
+          "real": 28,
+          "mean_posterior": 0.999905082005378,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 48
+      },
+      "real_candidates_seeded_by_a_false_alarm": 9,
+      "onset_to_threshold_s": {
+        "call only": [
+          75,
+          76,
+          76,
+          79,
+          85,
+          92,
+          101,
+          107,
+          118,
+          125,
+          134,
+          135,
+          136,
+          137,
+          174,
+          181,
+          184,
+          187,
+          189,
+          193,
+          200,
+          201,
+          218,
+          221,
+          223,
+          231,
+          234,
+          274,
+          288,
+          310,
+          334,
+          341,
+          359,
+          416,
+          482,
+          531,
+          607,
+          609,
+          617,
+          618,
+          817,
+          909,
+          1362
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 42,
+      "false_candidates_per_day": 3528.1428571428573,
+      "false_candidates_reaching_threshold_per_day": 1.7142857142857142,
+      "fusion_seconds": 41.63246160000563
+    },
+    {
+      "replication": 14,
+      "incidents": 38,
+      "detectable_incidents": 14,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 1,
+      "expected_incidents_in_camera_view": 0.25859887796709585,
+      "calls": 78,
+      "false_calls": 11,
+      "camera_events": 192962,
+      "true_camera_events": 0,
+      "candidates": 24734,
+      "association": {
+        "pair_precision": 0.28365384615384615,
+        "pair_recall": 0.9672131147540983,
+        "pairs_together": 59,
+        "pairs_in_candidates": 208,
+        "same_incident_pairs": 61,
+        "false_items_in_real_candidates": 91
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24691,
+          "real": 0,
+          "mean_posterior": 8.945311514206776e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 3,
+          "real": 2,
+          "mean_posterior": 0.1628150447277764,
+          "share_real": 0.6666666666666666
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 20,
+          "real": 10,
+          "mean_posterior": 0.682076523114892,
+          "share_real": 0.5
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 20,
+          "real": 20,
+          "mean_posterior": 0.9998433297835805,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 32
+      },
+      "real_candidates_seeded_by_a_false_alarm": 11,
+      "onset_to_threshold_s": {
+        "call only": [
+          37,
+          56,
+          56,
+          74,
+          87,
+          89,
+          90,
+          92,
+          95,
+          101,
+          106,
+          135,
+          142,
+          148,
+          149,
+          174,
+          182,
+          187,
+          188,
+          199,
+          221,
+          223,
+          230,
+          254,
+          263,
+          313,
+          470,
+          487,
+          766,
+          1226
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 29,
+      "false_candidates_per_day": 3528.8571428571427,
+      "false_candidates_reaching_threshold_per_day": 1.4285714285714286,
+      "fusion_seconds": 40.226467900007265
+    },
+    {
+      "replication": 15,
+      "incidents": 37,
+      "detectable_incidents": 15,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.277070226393317,
+      "calls": 59,
+      "false_calls": 8,
+      "camera_events": 193180,
+      "true_camera_events": 0,
+      "candidates": 24737,
+      "association": {
+        "pair_precision": 0.20422535211267606,
+        "pair_recall": 0.9666666666666667,
+        "pairs_together": 29,
+        "pairs_in_candidates": 142,
+        "same_incident_pairs": 30,
+        "false_items_in_real_candidates": 83
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24699,
+          "real": 0,
+          "mean_posterior": 8.939898547293432e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 2,
+          "real": 2,
+          "mean_posterior": 0.00023508454165778605,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 3,
+          "real": 3,
+          "mean_posterior": 0.31879821579274675,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 19,
+          "real": 11,
+          "mean_posterior": 0.6707662172829989,
+          "share_real": 0.5789473684210527
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 14,
+          "real": 14,
+          "mean_posterior": 0.9998404498597331,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 30
+      },
+      "real_candidates_seeded_by_a_false_alarm": 9,
+      "onset_to_threshold_s": {
+        "call only": [
+          80,
+          93,
+          101,
+          103,
+          126,
+          127,
+          134,
+          135,
+          142,
+          146,
+          154,
+          156,
+          160,
+          163,
+          192,
+          194,
+          204,
+          205,
+          221,
+          239,
+          261,
+          293,
+          336,
+          426,
+          458,
+          544,
+          548
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 26,
+      "false_candidates_per_day": 3529.5714285714284,
+      "false_candidates_reaching_threshold_per_day": 1.1428571428571428,
+      "fusion_seconds": 41.07013549999101
+    },
+    {
+      "replication": 16,
+      "incidents": 49,
+      "detectable_incidents": 26,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 1,
+      "expected_incidents_in_camera_view": 0.4802550590817495,
+      "calls": 97,
+      "false_calls": 20,
+      "camera_events": 193143,
+      "true_camera_events": 0,
+      "candidates": 24747,
+      "association": {
+        "pair_precision": 0.19078947368421054,
+        "pair_recall": 0.8787878787878788,
+        "pairs_together": 58,
+        "pairs_in_candidates": 304,
+        "same_incident_pairs": 66,
+        "false_items_in_real_candidates": 149
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24682,
+          "real": 0,
+          "mean_posterior": 8.940387746471801e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 2,
+          "real": 2,
+          "mean_posterior": 0.0003639310156874717,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 1,
+          "real": 0,
+          "mean_posterior": 0.05616609333834948,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 8,
+          "real": 4,
+          "mean_posterior": 0.27883646796499906,
+          "share_real": 0.5
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 38,
+          "real": 23,
+          "mean_posterior": 0.7060948250972489,
+          "share_real": 0.6052631578947368
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 16,
+          "real": 16,
+          "mean_posterior": 0.999684077331271,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 45
+      },
+      "real_candidates_seeded_by_a_false_alarm": 18,
+      "onset_to_threshold_s": {
+        "call only": [
+          16,
+          25,
+          29,
+          37,
+          51,
+          55,
+          63,
+          83,
+          85,
+          97,
+          100,
+          102,
+          103,
+          115,
+          152,
+          173,
+          177,
+          178,
+          179,
+          194,
+          195,
+          200,
+          205,
+          243,
+          257,
+          277,
+          292,
+          335,
+          343,
+          368,
+          380,
+          386,
+          387,
+          430,
+          442,
+          644,
+          976,
+          1103,
+          1138,
+          1358,
+          1868
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 38,
+      "false_candidates_per_day": 3528.8571428571427,
+      "false_candidates_reaching_threshold_per_day": 2.142857142857143,
+      "fusion_seconds": 42.264602400013246
+    },
+    {
+      "replication": 17,
+      "incidents": 38,
+      "detectable_incidents": 13,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.24012752954087474,
+      "calls": 75,
+      "false_calls": 17,
+      "camera_events": 192896,
+      "true_camera_events": 0,
+      "candidates": 24735,
+      "association": {
+        "pair_precision": 0.23684210526315788,
+        "pair_recall": 0.9230769230769231,
+        "pairs_together": 36,
+        "pairs_in_candidates": 152,
+        "same_incident_pairs": 39,
+        "false_items_in_real_candidates": 89
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24683,
+          "real": 0,
+          "mean_posterior": 8.938801642111265e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 1,
+          "real": 1,
+          "mean_posterior": 0.0001805712146523403,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 8,
+          "real": 3,
+          "mean_posterior": 0.19819091599736405,
+          "share_real": 0.375
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 30,
+          "real": 18,
+          "mean_posterior": 0.6911410758560461,
+          "share_real": 0.6
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 13,
+          "real": 13,
+          "mean_posterior": 0.9997100162660402,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 35
+      },
+      "real_candidates_seeded_by_a_false_alarm": 11,
+      "onset_to_threshold_s": {
+        "call only": [
+          60,
+          65,
+          81,
+          87,
+          92,
+          113,
+          117,
+          119,
+          128,
+          150,
+          151,
+          167,
+          184,
+          187,
+          209,
+          235,
+          236,
+          260,
+          262,
+          263,
+          267,
+          289,
+          292,
+          310,
+          385,
+          386,
+          403,
+          445,
+          645,
+          648,
+          704,
+          740
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 32,
+      "false_candidates_per_day": 3528.5714285714284,
+      "false_candidates_reaching_threshold_per_day": 1.8571428571428572,
+      "fusion_seconds": 41.363142399990465
+    },
+    {
+      "replication": 18,
+      "incidents": 43,
+      "detectable_incidents": 17,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 1,
+      "expected_incidents_in_camera_view": 0.31401292324575925,
+      "calls": 84,
+      "false_calls": 10,
+      "camera_events": 193463,
+      "true_camera_events": 0,
+      "candidates": 24727,
+      "association": {
+        "pair_precision": 0.16541353383458646,
+        "pair_recall": 0.7719298245614035,
+        "pairs_together": 44,
+        "pairs_in_candidates": 266,
+        "same_incident_pairs": 57,
+        "false_items_in_real_candidates": 141
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24674,
+          "real": 0,
+          "mean_posterior": 8.940446491770006e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 2,
+          "real": 2,
+          "mean_posterior": 0.0003515039463141063,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 9,
+          "real": 7,
+          "mean_posterior": 0.26860994465285215,
+          "share_real": 0.7777777777777778
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 22,
+          "real": 14,
+          "mean_posterior": 0.6949090930387416,
+          "share_real": 0.6363636363636364
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 20,
+          "real": 20,
+          "mean_posterior": 0.9997290332957929,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 43
+      },
+      "real_candidates_seeded_by_a_false_alarm": 16,
+      "onset_to_threshold_s": {
+        "call only": [
+          39,
+          50,
+          76,
+          82,
+          91,
+          103,
+          146,
+          153,
+          158,
+          181,
+          188,
+          199,
+          204,
+          206,
+          208,
+          224,
+          232,
+          237,
+          249,
+          267,
+          291,
+          310,
+          311,
+          313,
+          323,
+          330,
+          392,
+          393,
+          416,
+          435,
+          471,
+          472,
+          505,
+          580,
+          922,
+          923,
+          1121,
+          2359
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 35,
+      "false_candidates_per_day": 3526.285714285714,
+      "false_candidates_reaching_threshold_per_day": 1.1428571428571428,
+      "fusion_seconds": 41.37975229998119
+    },
+    {
+      "replication": 19,
+      "incidents": 30,
+      "detectable_incidents": 14,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.25859887796709585,
+      "calls": 68,
+      "false_calls": 15,
+      "camera_events": 192786,
+      "true_camera_events": 0,
+      "candidates": 24718,
+      "association": {
+        "pair_precision": 0.20238095238095238,
+        "pair_recall": 0.7727272727272727,
+        "pairs_together": 34,
+        "pairs_in_candidates": 168,
+        "same_incident_pairs": 44,
+        "false_items_in_real_candidates": 86
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24673,
+          "real": 0,
+          "mean_posterior": 8.93510058652862e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 3,
+          "real": 2,
+          "mean_posterior": 0.0007006772997918211,
+          "share_real": 0.6666666666666666
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 6,
+          "real": 4,
+          "mean_posterior": 0.27742125279370955,
+          "share_real": 0.6666666666666666
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 22,
+          "real": 10,
+          "mean_posterior": 0.6654816125566239,
+          "share_real": 0.45454545454545453
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 14,
+          "real": 14,
+          "mean_posterior": 0.9992543194428957,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 30
+      },
+      "real_candidates_seeded_by_a_false_alarm": 10,
+      "onset_to_threshold_s": {
+        "call only": [
+          67,
+          96,
+          104,
+          112,
+          119,
+          127,
+          133,
+          139,
+          144,
+          144,
+          150,
+          193,
+          194,
+          209,
+          212,
+          224,
+          239,
+          267,
+          278,
+          326,
+          364,
+          420,
+          434,
+          477,
+          512,
+          1104
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 24,
+      "false_candidates_per_day": 3526.8571428571427,
+      "false_candidates_reaching_threshold_per_day": 1.8571428571428572,
+      "fusion_seconds": 41.81902550000814
+    },
+    {
+      "replication": 20,
+      "incidents": 27,
+      "detectable_incidents": 15,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.277070226393317,
+      "calls": 50,
+      "false_calls": 10,
+      "camera_events": 192782,
+      "true_camera_events": 0,
+      "candidates": 24737,
+      "association": {
+        "pair_precision": 0.2926829268292683,
+        "pair_recall": 0.9230769230769231,
+        "pairs_together": 24,
+        "pairs_in_candidates": 82,
+        "same_incident_pairs": 26,
+        "false_items_in_real_candidates": 34
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24706,
+          "real": 0,
+          "mean_posterior": 8.945617819746553e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 2,
+          "real": 1,
+          "mean_posterior": 0.30032072248136144,
+          "share_real": 0.5
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 15,
+          "real": 6,
+          "mean_posterior": 0.7217053135305612,
+          "share_real": 0.4
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 14,
+          "real": 14,
+          "mean_posterior": 0.9998155002068518,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 21
+      },
+      "real_candidates_seeded_by_a_false_alarm": 4,
+      "onset_to_threshold_s": {
+        "call only": [
+          46,
+          60,
+          67,
+          72,
+          82,
+          83,
+          90,
+          142,
+          146,
+          163,
+          178,
+          202,
+          209,
+          266,
+          273,
+          310,
+          432,
+          567,
+          651,
+          698
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 19,
+      "false_candidates_per_day": 3530.8571428571427,
+      "false_candidates_reaching_threshold_per_day": 1.2857142857142858,
+      "fusion_seconds": 41.987676199991256
+    },
+    {
+      "replication": 21,
+      "incidents": 40,
+      "detectable_incidents": 23,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.4248410138030861,
+      "calls": 78,
+      "false_calls": 13,
+      "camera_events": 192877,
+      "true_camera_events": 0,
+      "candidates": 24732,
+      "association": {
+        "pair_precision": 0.26618705035971224,
+        "pair_recall": 0.925,
+        "pairs_together": 37,
+        "pairs_in_candidates": 139,
+        "same_incident_pairs": 40,
+        "false_items_in_real_candidates": 69
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24682,
+          "real": 0,
+          "mean_posterior": 8.945126782259973e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 5,
+          "real": 2,
+          "mean_posterior": 0.2665256534585046,
+          "share_real": 0.4
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 25,
+          "real": 15,
+          "mean_posterior": 0.6771701582965173,
+          "share_real": 0.6
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 20,
+          "real": 20,
+          "mean_posterior": 0.9996308586886468,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 37
+      },
+      "real_candidates_seeded_by_a_false_alarm": 8,
+      "onset_to_threshold_s": {
+        "call only": [
+          19,
+          26,
+          75,
+          75,
+          77,
+          87,
+          88,
+          93,
+          107,
+          108,
+          112,
+          120,
+          129,
+          133,
+          141,
+          160,
+          185,
+          193,
+          196,
+          219,
+          224,
+          251,
+          274,
+          282,
+          287,
+          325,
+          360,
+          364,
+          378,
+          395,
+          397,
+          422,
+          422,
+          451,
+          550
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 33,
+      "false_candidates_per_day": 3527.8571428571427,
+      "false_candidates_reaching_threshold_per_day": 1.5714285714285714,
+      "fusion_seconds": 43.32945300001302
+    },
+    {
+      "replication": 22,
+      "incidents": 39,
+      "detectable_incidents": 16,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 1,
+      "expected_incidents_in_camera_view": 0.29554157481953813,
+      "calls": 83,
+      "false_calls": 15,
+      "camera_events": 193070,
+      "true_camera_events": 1,
+      "candidates": 24749,
+      "association": {
+        "pair_precision": 0.2,
+        "pair_recall": 0.7142857142857143,
+        "pairs_together": 45,
+        "pairs_in_candidates": 225,
+        "same_incident_pairs": 63,
+        "false_items_in_real_candidates": 115
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24691,
+          "real": 0,
+          "mean_posterior": 8.942549738295584e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 3,
+          "real": 3,
+          "mean_posterior": 0.00028265292555349993,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 3,
+          "real": 2,
+          "mean_posterior": 0.22495142316972286,
+          "share_real": 0.6666666666666666
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 39,
+          "real": 25,
+          "mean_posterior": 0.6803858563742694,
+          "share_real": 0.6410256410256411
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 13,
+          "real": 13,
+          "mean_posterior": 0.9995454820601737,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 42,
+        "true camera + call": 1
+      },
+      "real_candidates_seeded_by_a_false_alarm": 10,
+      "onset_to_threshold_s": {
+        "call only": [
+          36,
+          60,
+          61,
+          83,
+          84,
+          92,
+          94,
+          95,
+          111,
+          113,
+          125,
+          127,
+          134,
+          138,
+          150,
+          157,
+          158,
+          180,
+          183,
+          204,
+          206,
+          208,
+          209,
+          232,
+          236,
+          261,
+          274,
+          303,
+          311,
+          315,
+          336,
+          342,
+          423,
+          434,
+          475,
+          477,
+          577,
+          683,
+          729,
+          1099
+        ],
+        "true camera + call": [
+          161
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 34,
+      "false_candidates_per_day": 3529.4285714285716,
+      "false_candidates_reaching_threshold_per_day": 2.0,
+      "fusion_seconds": 41.29859620000934
+    },
+    {
+      "replication": 23,
+      "incidents": 44,
+      "detectable_incidents": 19,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.3509556200982015,
+      "calls": 81,
+      "false_calls": 14,
+      "camera_events": 193471,
+      "true_camera_events": 0,
+      "candidates": 24753,
+      "association": {
+        "pair_precision": 0.21978021978021978,
+        "pair_recall": 0.6779661016949152,
+        "pairs_together": 40,
+        "pairs_in_candidates": 182,
+        "same_incident_pairs": 59,
+        "false_items_in_real_candidates": 108
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24700,
+          "real": 0,
+          "mean_posterior": 8.931923129409063e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 1,
+          "real": 1,
+          "mean_posterior": 0.00012619466604657395,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 7,
+          "real": 6,
+          "mean_posterior": 0.2681691373944822,
+          "share_real": 0.8571428571428571
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 26,
+          "real": 13,
+          "mean_posterior": 0.6839804379713443,
+          "share_real": 0.5
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 19,
+          "real": 19,
+          "mean_posterior": 0.9998202988302739,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 39
+      },
+      "real_candidates_seeded_by_a_false_alarm": 13,
+      "onset_to_threshold_s": {
+        "call only": [
+          18,
+          33,
+          33,
+          49,
+          92,
+          100,
+          111,
+          112,
+          128,
+          129,
+          135,
+          144,
+          162,
+          171,
+          174,
+          180,
+          190,
+          200,
+          219,
+          232,
+          234,
+          277,
+          327,
+          347,
+          354,
+          401,
+          413,
+          469,
+          484,
+          623,
+          661,
+          798,
+          1755
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 29,
+      "false_candidates_per_day": 3530.5714285714284,
+      "false_candidates_reaching_threshold_per_day": 1.8571428571428572,
+      "fusion_seconds": 43.5889451999974
+    },
+    {
+      "replication": 24,
+      "incidents": 43,
+      "detectable_incidents": 17,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.31401292324575925,
+      "calls": 97,
+      "false_calls": 17,
+      "camera_events": 192904,
+      "true_camera_events": 0,
+      "candidates": 24756,
+      "association": {
+        "pair_precision": 0.21138211382113822,
+        "pair_recall": 0.7761194029850746,
+        "pairs_together": 52,
+        "pairs_in_candidates": 246,
+        "same_incident_pairs": 67,
+        "false_items_in_real_candidates": 140
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24693,
+          "real": 0,
+          "mean_posterior": 8.938614035487368e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 1,
+          "real": 0,
+          "mean_posterior": 0.00026893233672580023,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 8,
+          "real": 7,
+          "mean_posterior": 0.15679812036679946,
+          "share_real": 0.875
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 34,
+          "real": 19,
+          "mean_posterior": 0.6859012784184495,
+          "share_real": 0.5588235294117647
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 20,
+          "real": 20,
+          "mean_posterior": 0.9997023290391629,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 46
+      },
+      "real_candidates_seeded_by_a_false_alarm": 17,
+      "onset_to_threshold_s": {
+        "call only": [
+          25,
+          35,
+          45,
+          54,
+          79,
+          85,
+          90,
+          91,
+          92,
+          112,
+          126,
+          130,
+          140,
+          143,
+          159,
+          159,
+          162,
+          176,
+          184,
+          205,
+          244,
+          264,
+          271,
+          285,
+          312,
+          327,
+          337,
+          347,
+          370,
+          393,
+          397,
+          447,
+          529,
+          537,
+          604,
+          615,
+          630,
+          630,
+          641
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 36,
+      "false_candidates_per_day": 3530.0,
+      "false_candidates_reaching_threshold_per_day": 2.2857142857142856,
+      "fusion_seconds": 41.62636179997935
+    },
+    {
+      "replication": 25,
+      "incidents": 44,
+      "detectable_incidents": 19,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.3509556200982015,
+      "calls": 99,
+      "false_calls": 13,
+      "camera_events": 193083,
+      "true_camera_events": 0,
+      "candidates": 24748,
+      "association": {
+        "pair_precision": 0.14127423822714683,
+        "pair_recall": 0.7846153846153846,
+        "pairs_together": 51,
+        "pairs_in_candidates": 361,
+        "same_incident_pairs": 65,
+        "false_items_in_real_candidates": 164
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24687,
+          "real": 0,
+          "mean_posterior": 8.937282275413583e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 7,
+          "real": 2,
+          "mean_posterior": 0.28642708879971784,
+          "share_real": 0.2857142857142857
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 28,
+          "real": 20,
+          "mean_posterior": 0.6945060326923985,
+          "share_real": 0.7142857142857143
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 1,
+          "real": 1,
+          "mean_posterior": 0.9881801284025121,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 25,
+          "real": 25,
+          "mean_posterior": 0.9998776160909004,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 48
+      },
+      "real_candidates_seeded_by_a_false_alarm": 21,
+      "onset_to_threshold_s": {
+        "call only": [
+          34,
+          42,
+          63,
+          92,
+          104,
+          108,
+          113,
+          129,
+          148,
+          152,
+          153,
+          153,
+          159,
+          163,
+          185,
+          197,
+          199,
+          202,
+          203,
+          221,
+          230,
+          234,
+          266,
+          293,
+          297,
+          313,
+          318,
+          319,
+          346,
+          356,
+          365,
+          376,
+          468,
+          485,
+          519,
+          527,
+          527,
+          545,
+          558,
+          564,
+          565,
+          584,
+          648,
+          711,
+          758,
+          917
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 39,
+      "false_candidates_per_day": 3528.5714285714284,
+      "false_candidates_reaching_threshold_per_day": 1.1428571428571428,
+      "fusion_seconds": 40.1201432000089
+    },
+    {
+      "replication": 26,
+      "incidents": 52,
+      "detectable_incidents": 21,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 1,
+      "expected_incidents_in_camera_view": 0.3878983169506438,
+      "calls": 89,
+      "false_calls": 11,
+      "camera_events": 193301,
+      "true_camera_events": 0,
+      "candidates": 24751,
+      "association": {
+        "pair_precision": 0.21608040201005024,
+        "pair_recall": 0.86,
+        "pairs_together": 43,
+        "pairs_in_candidates": 199,
+        "same_incident_pairs": 50,
+        "false_items_in_real_candidates": 120
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24693,
+          "real": 1,
+          "mean_posterior": 8.935913423959388e-06,
+          "share_real": 4.0497306929089216e-05
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 1,
+          "real": 0,
+          "mean_posterior": 0.020300549977914726,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 9,
+          "real": 6,
+          "mean_posterior": 0.26010757023435344,
+          "share_real": 0.6666666666666666
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 29,
+          "real": 22,
+          "mean_posterior": 0.6938510298471586,
+          "share_real": 0.7586206896551724
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 19,
+          "real": 19,
+          "mean_posterior": 0.9998748623329902,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 48
+      },
+      "real_candidates_seeded_by_a_false_alarm": 15,
+      "onset_to_threshold_s": {
+        "call only": [
+          29,
+          38,
+          47,
+          52,
+          53,
+          54,
+          68,
+          75,
+          76,
+          101,
+          103,
+          117,
+          123,
+          138,
+          141,
+          142,
+          154,
+          165,
+          166,
+          173,
+          178,
+          182,
+          204,
+          248,
+          272,
+          280,
+          295,
+          302,
+          317,
+          328,
+          396,
+          416,
+          448,
+          480,
+          489,
+          577,
+          592,
+          665,
+          718,
+          831,
+          1033,
+          1874
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 41,
+      "false_candidates_per_day": 3529.0,
+      "false_candidates_reaching_threshold_per_day": 1.1428571428571428,
+      "fusion_seconds": 41.57915589999175
+    },
+    {
+      "replication": 27,
+      "incidents": 34,
+      "detectable_incidents": 19,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 1,
+      "expected_incidents_in_camera_view": 0.3509556200982015,
+      "calls": 61,
+      "false_calls": 13,
+      "camera_events": 192831,
+      "true_camera_events": 1,
+      "candidates": 24747,
+      "association": {
+        "pair_precision": 0.18468468468468469,
+        "pair_recall": 0.8367346938775511,
+        "pairs_together": 41,
+        "pairs_in_candidates": 222,
+        "same_incident_pairs": 49,
+        "false_items_in_real_candidates": 108
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24706,
+          "real": 1,
+          "mean_posterior": 8.940890714104452e-06,
+          "share_real": 4.0475997733344126e-05
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 5,
+          "real": 4,
+          "mean_posterior": 0.22750415673962054,
+          "share_real": 0.8
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 25,
+          "real": 13,
+          "mean_posterior": 0.6800467486932077,
+          "share_real": 0.52
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 11,
+          "real": 11,
+          "mean_posterior": 0.9997670119559174,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 28,
+        "true camera only": 1
+      },
+      "real_candidates_seeded_by_a_false_alarm": 13,
+      "onset_to_threshold_s": {
+        "call only": [
+          83,
+          96,
+          101,
+          111,
+          141,
+          142,
+          156,
+          175,
+          181,
+          207,
+          214,
+          216,
+          226,
+          259,
+          268,
+          304,
+          329,
+          383,
+          408,
+          448,
+          461,
+          725,
+          814,
+          999
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 23,
+      "false_candidates_per_day": 3531.1428571428573,
+      "false_candidates_reaching_threshold_per_day": 1.7142857142857142,
+      "fusion_seconds": 41.843461499986006
+    },
+    {
+      "replication": 28,
+      "incidents": 41,
+      "detectable_incidents": 15,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.277070226393317,
+      "calls": 71,
+      "false_calls": 14,
+      "camera_events": 192940,
+      "true_camera_events": 0,
+      "candidates": 24753,
+      "association": {
+        "pair_precision": 0.09569377990430622,
+        "pair_recall": 0.6896551724137931,
+        "pairs_together": 20,
+        "pairs_in_candidates": 209,
+        "same_incident_pairs": 29,
+        "false_items_in_real_candidates": 141
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24699,
+          "real": 0,
+          "mean_posterior": 8.939255507588727e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 2,
+          "real": 2,
+          "mean_posterior": 0.0003210761674028936,
+          "share_real": 1.0
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 12,
+          "real": 9,
+          "mean_posterior": 0.2015268827619042,
+          "share_real": 0.75
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 26,
+          "real": 15,
+          "mean_posterior": 0.6888759073794865,
+          "share_real": 0.5769230769230769
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 14,
+          "real": 14,
+          "mean_posterior": 0.9996085530508356,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 40
+      },
+      "real_candidates_seeded_by_a_false_alarm": 16,
+      "onset_to_threshold_s": {
+        "call only": [
+          48,
+          74,
+          76,
+          93,
+          96,
+          98,
+          105,
+          124,
+          142,
+          163,
+          167,
+          173,
+          176,
+          205,
+          206,
+          231,
+          239,
+          270,
+          272,
+          273,
+          277,
+          337,
+          345,
+          365,
+          379,
+          405,
+          420,
+          539,
+          543,
+          596,
+          1841
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 30,
+      "false_candidates_per_day": 3530.4285714285716,
+      "false_candidates_reaching_threshold_per_day": 1.5714285714285714,
+      "fusion_seconds": 41.6697863000154
+    },
+    {
+      "replication": 29,
+      "incidents": 41,
+      "detectable_incidents": 19,
+      "camera_coverage_mass": 0.018471348426221133,
+      "incidents_in_camera_view": 0,
+      "expected_incidents_in_camera_view": 0.3509556200982015,
+      "calls": 73,
+      "false_calls": 20,
+      "camera_events": 192938,
+      "true_camera_events": 0,
+      "candidates": 24752,
+      "association": {
+        "pair_precision": 0.20481927710843373,
+        "pair_recall": 0.9444444444444444,
+        "pairs_together": 34,
+        "pairs_in_candidates": 166,
+        "same_incident_pairs": 36,
+        "false_items_in_real_candidates": 84
+      },
+      "calibration": [
+        {
+          "bin": [
+            0.0,
+            0.0001
+          ],
+          "candidates": 24700,
+          "real": 0,
+          "mean_posterior": 8.93591162873254e-06,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.0001,
+            0.01
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.01,
+            0.1
+          ],
+          "candidates": 1,
+          "real": 0,
+          "mean_posterior": 0.0647517087127442,
+          "share_real": 0.0
+        },
+        {
+          "bin": [
+            0.1,
+            0.5
+          ],
+          "candidates": 2,
+          "real": 1,
+          "mean_posterior": 0.14917246444538496,
+          "share_real": 0.5
+        },
+        {
+          "bin": [
+            0.5,
+            0.9
+          ],
+          "candidates": 37,
+          "real": 19,
+          "mean_posterior": 0.6815758676548935,
+          "share_real": 0.5135135135135135
+        },
+        {
+          "bin": [
+            0.9,
+            0.99
+          ],
+          "candidates": 0,
+          "real": 0,
+          "mean_posterior": null,
+          "share_real": null
+        },
+        {
+          "bin": [
+            0.99,
+            1.0
+          ],
+          "candidates": 12,
+          "real": 12,
+          "mean_posterior": 0.9998747821385273,
+          "share_real": 1.0
+        }
+      ],
+      "real_candidates_by_path": {
+        "call only": 32
+      },
+      "real_candidates_seeded_by_a_false_alarm": 10,
+      "onset_to_threshold_s": {
+        "call only": [
+          48,
+          51,
+          80,
+          83,
+          94,
+          113,
+          134,
+          135,
+          138,
+          140,
+          142,
+          144,
+          166,
+          172,
+          209,
+          211,
+          217,
+          227,
+          231,
+          255,
+          270,
+          276,
+          299,
+          314,
+          341,
+          381,
+          426,
+          436,
+          486,
+          610,
+          1609
+        ]
+      },
+      "days": 7.0,
+      "real_incidents_reaching_threshold": 30,
+      "false_candidates_per_day": 3531.4285714285716,
+      "false_candidates_reaching_threshold_per_day": 2.5714285714285716,
+      "fusion_seconds": 40.28064879999147
+    }
+  ]
+}
