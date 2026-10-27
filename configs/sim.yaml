@@ -1,0 +1,119 @@
+# Discrete-event simulator (phase 7, D-032). SYNTHETIC: the incidents, detector outcomes and
+# calls all come from this project's own processes (configs/incidents.yaml, the measured detector
+# in results/vision/sim_inputs.yaml, configs/calls.yaml).
+#
+# Ground truth lives in sim/ and must never reach a policy: policies see Events, Calls and the
+# fused Incident, never a GroundTruthIncident (tests/test_architecture.py).
+synthetic: true
+
+run:
+  # A week, because the scenarios of phase 2 are weeks and the forecaster's features need a
+  # settled hour-of-week pattern.
+  horizon_days: 7
+  # The fleet starts idle at every base, which flatters the first incidents. The warm-up is
+  # simulated but excluded from every metric.
+  warmup_hours: 12
+  replications: 30          # master plan: >= 30, common random numbers across policies
+  policies: [B0, B1, B2, B3, FULL]
+  # Dispatch is re-solved when something changes, but at most this often: C1 is a batch model
+  # and re-solving per event would both cost time and let a single alarm reshuffle the city.
+  dispatch_interval_s: 30.0
+
+on_scene:
+  # Time a unit spends at the scene before it can leave. Exponential around these medians.
+  median_s:
+    value: {ambulance: 600.0, police: 1500.0, fire: 1800.0}
+    source: UNVERIFIED
+    note: >-
+      Assumed. The ambulance figure is time to load a patient, not total case time; police stay
+      for the scene and paperwork; fire for suppression and making safe. Phase-10 factors.
+  false_alarm_s:
+    value: {police: 300.0}
+    source: UNVERIFIED
+    note: >-
+      A unit sent to a false alarm still travels, looks and returns. This is the detector's
+      precision cost and it must land in the metrics, not in prose (D-029: ~29 false alarms per
+      camera-hour).
+
+transport:
+  # Whether an ambulance transports, and to where. Capability and capacity come from
+  # data/processed/facilities.json (phase 2); hospital choice is nearest CAPABLE, not nearest.
+  p_transport:
+    value: {accident: 0.55, fire_smoke: 0.25, crowd: 0.10, other: 0.20}
+    source: UNVERIFIED
+    note: Share of incidents where a patient is transported. Assumed; phase-10 factor.
+  handover_median_s:
+    value: 900.0
+    source: UNVERIFIED
+    note: Time at the hospital before the ambulance is available again. Assumed.
+  no_capable_hospital: log_and_release
+  note: >-
+    If no capable hospital is reachable the case is LOGGED and the unit released, never dropped
+    silently. A city that cannot place a patient is a finding.
+
+second_wave:
+  # Master plan section 6 item 7: policies act on an ESTIMATED requirement (from camera cues,
+  # each flipped with the detector's cue_flip_probability, or from call triage), so they can
+  # under-dispatch. The first unit on scene sees the truth and asks for what is missing.
+  enabled: true
+  assessment_s:
+    value: 120.0
+    source: UNVERIFIED
+    note: Time from first arrival to a corrected requirement being requested. Assumed.
+  note: >-
+    Without this, under-dispatch would be free and every CCTV-led policy would be flattered.
+    Over-dispatch is already charged for: the extra unit travels and is busy.
+
+background:
+  # REQUIRED, not optional: D-031 / L30 measured the modelled city at 0.3 % utilisation because
+  # the fleet serves each agency's whole workload while the generator models only the in-scope
+  # multi-agency subset. Without a background process every unit is always free and joint
+  # dispatch would win for the wrong reason.
+  #
+  # Out-of-scope jobs arrive Poisson per agency and occupy one unit for an exponential service
+  # time. The arrival rate is NOT configured directly: it is derived so that total utilisation
+  # (in-scope + background) reaches the target below. Service times are taken from
+  # configs/optimization.yaml -> erlang.service_time_s rather than repeated here, so the
+  # simulator and the Erlang-C cross-check cannot drift apart.
+  enabled: true
+  target_utilisation:
+    value: {police: 0.412, ambulance: 0.412, fire: 0.412}
+    source: UNVERIFIED
+    note: >-
+      UNVERIFIED as a whole because two of the three numbers are assumed; the police figure is
+      derived, but a mixed entry must report as unsourced or find_unverified would hide the
+      assumed part.
+      Police is derived from the one verified volume figure the project has: 23,887 Dial-112
+      calls in Pune in July 2026 = 771/day (press, cited in docs/data-sources.md). With the
+      assumed 1800 s service time and 39 units that is 771 * 1800 / 86400 = 16.06 erlangs over
+      39 servers = 0.412. Ambulance and fire have no comparable verified volume, so they are
+      ASSUMED equal to police; at 0.412 they imply about 394 ambulance and 216 fire jobs a day,
+      which is recorded so the assumption can be judged. Phase 10 sweeps this from 0 (the
+      capacity-blind ablation, i.e. today's model) to saturation.
+  preempt: false
+  note: >-
+    A unit on a background job is unavailable; it is never pre-empted for an in-scope incident.
+    That is pessimistic and is a stated limitation, because a real control room would recall a
+    patrol for a serious crash.
+
+logs:
+  # One row per incident with every timestamp, and one row per unit-busy period.
+  incident_columns: [incident_id, type, severity_class, ward_id, node, onset_ts,
+                     first_detection_ts, first_call_ts, decision_ts, posterior_at_decision,
+                     tier, required_ambulance, required_police, required_fire,
+                     estimated_ambulance, estimated_police, estimated_fire,
+                     arrival_ambulance_ts, arrival_police_ts, arrival_fire_ts,
+                     last_required_arrival_ts, second_wave_ts, hospital_arrival_ts,
+                     handover_ts, shortfall_units, was_camera_covered, policy, replication]
+  write_parquet: true
+
+validation:
+  # Slice 7: strip the simulator to M/M/c and compare with optimization/erlang.py. This is the
+  # only check that the queueing is right rather than merely plausible.
+  erlang_check:
+    agency: police
+    arrival_per_day: 771.0
+    units: 39
+    horizon_days: 60          # long enough for the queue statistics to settle
+    tolerance_utilisation: 0.02
+    tolerance_wait_s: 30.0

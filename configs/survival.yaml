@@ -1,0 +1,97 @@
+# Survival-vs-time curves (phase 7). SECONDARY OUTCOME ONLY -- read the warning below.
+#
+# ---------------------------------------------------------------------------------------------
+# WHY EVERY CURVE HERE IS UNVERIFIED, AND WHAT THAT MEANS FOR THE PAPER
+# ---------------------------------------------------------------------------------------------
+# The research question is about TIME (time to last required arrival). Converting time into
+# lives would be the strong claim, and the evidence does not support it:
+#
+#   * The largest scoping review of prehospital time and trauma outcomes found the relationship
+#     inconsistent: studies "reported mixed (i.e., positive, negative, and neutral)
+#     associations, with conflicting conclusions", and the review deliberately did not quantify
+#     it (Bedard et al. 2020, see sources below).
+#   * The familiar "survival falls N % per minute" figures come from out-of-hospital cardiac
+#     arrest with witnessed ventricular fibrillation -- a different patient, a different clock
+#     and a different intervention from a road-traffic casualty waiting for an ambulance.
+#   * No per-minute odds ratio specific to Indian road-traffic injury could be confirmed at the
+#     source on 2026-10-27.
+#
+# Therefore: the simulator computes expected survival, reports it as a SECONDARY metric beside
+# its own sensitivity, and no conclusion may rest on it (master plan section 6 item 8, D-032).
+# The shape below is a monotone decline with a plausible scale. It is a RANKING AID, not an
+# estimate of survival in Pune. `find_unverified` lists every entry.
+synthetic: true
+primary_outcome: time_to_last_required_arrival   # NOT survival; stated here so it is not
+                                                 # quietly swapped later
+
+# A declared illustrative form: S(t) = s_floor + (s0 - s_floor) * exp(-t / tau).
+# t is seconds from incident onset to the arrival of the last REQUIRED unit.
+# s0 is survival at t = 0 (immediate arrival), s_floor the asymptote (what the injury does
+# regardless of response), tau the time constant in seconds.
+model: exponential_decay
+
+curves:
+  accident:
+    value: {s0: 0.95, s_floor: 0.35, tau_s: 900.0}
+    source: ILLUSTRATIVE
+    note: >-
+      Shape only. tau = 15 min puts the steepest part of the curve inside the window dispatch
+      policy can actually change, which is what makes the metric discriminate between policies;
+      it is NOT an estimate of trauma survival. s_floor says most casualties survive however
+      slow the response, which is true of the injury mix but is not calibrated.
+  fire_smoke:
+    value: {s0: 0.97, s_floor: 0.55, tau_s: 1200.0}
+    source: ILLUSTRATIVE
+    note: >-
+      Shape only. Slower decline than accident: a structure fire's occupant risk grows with
+      time but less sharply than untreated trauma in the first minutes. Assumed.
+  crowd:
+    value: {s0: 0.99, s_floor: 0.90, tau_s: 1800.0}
+    source: ILLUSTRATIVE
+    note: Shape only. Crowd incidents are mostly non-injury; the curve is nearly flat.
+  other:
+    value: {s0: 0.98, s_floor: 0.80, tau_s: 1800.0}
+    source: ILLUSTRATIVE
+    note: Shape only. Catch-all class, deliberately insensitive to response time.
+
+# Phase 10 must show the secondary outcome under all of these, not just the defaults above.
+# If the policy ranking changes across them, expected survival is not reportable at all.
+sensitivity:
+  tau_multipliers:
+    value: [0.5, 1.0, 2.0]
+    source: UNVERIFIED
+    note: Halving tau makes survival much more time-sensitive; doubling it flattens the curve.
+  flat_curve_ablation:
+    value: true
+    source: UNVERIFIED
+    note: >-
+      Run with every curve flat (survival independent of time). The primary time metric must be
+      unchanged, and any policy difference in the survival metric must vanish. This is a
+      self-check on the metric, not a scenario.
+
+sources:
+  - id: bedard_2020
+    citation: >-
+      Bedard AF, Mata LV, Dymond C, Moreira F, Dixon J, Schauer SG, Ginde AA, Bebarta V,
+      Moore EE, Mould-Millman NK. A scoping review of worldwide studies evaluating the effects
+      of prehospital time on trauma outcomes. International Journal of Emergency Medicine
+      2020;13:64.
+    doi: 10.1186/s12245-020-00324-7
+    url: https://pmc.ncbi.nlm.nih.gov/articles/PMC7724615/
+    checked: 2026-10-27
+    supports: >-
+      That the prehospital-time-to-trauma-mortality relationship is inconsistent and was not
+      quantified. This is the reason the curves above are ILLUSTRATIVE, not a source for them.
+  - id: valenzuela_1997
+    citation: >-
+      Valenzuela TD, Roe DJ, Cretin S, Spaite DW, Larsen MP. Estimating effectiveness of
+      cardiac arrest interventions: a logistic regression survival model. Circulation
+      1997;96(10):3308-13.
+    doi: 10.1161/01.CIR.96.10.3308
+    url: https://pubmed.ncbi.nlm.nih.gov/9396421/
+    checked: 2026-10-27
+    supports: >-
+      NOTHING IN THIS FILE. Listed because it is the paper usually cited for a per-minute
+      survival decline, and because it must not be cited here: it models witnessed VF cardiac
+      arrest, not road trauma. Its coefficients could not be read at the source (abstract only),
+      so they are not reproduced anywhere in this project.
