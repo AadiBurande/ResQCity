@@ -30,8 +30,8 @@ export const LanguageValues = ["en", "hi", "mr"] as const;
 export type SourceKind = "camera_event" | "call" | "operator_review";
 export const SourceKindValues = ["camera_event", "call", "operator_review"] as const;
 
-export type UnitState = "idle" | "ready" | "en_route" | "on_scene" | "transporting" | "at_hospital" | "returning" | "relocating" | "out_of_service";
-export const UnitStateValues = ["idle", "ready", "en_route", "on_scene", "transporting", "at_hospital", "returning", "relocating", "out_of_service"] as const;
+export type UnitState = "idle" | "ready" | "en_route" | "on_scene" | "transporting" | "at_hospital" | "returning" | "relocating" | "on_other_task" | "out_of_service";
+export const UnitStateValues = ["idle", "ready", "en_route", "on_scene", "transporting", "at_hospital", "returning", "relocating", "on_other_task", "out_of_service"] as const;
 
 export interface Assignment {
   unit_id: string;

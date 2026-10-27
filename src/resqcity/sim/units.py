@@ -32,6 +32,7 @@ BUSY_STATES = frozenset({
     UnitState.AT_HOSPITAL,
     UnitState.RETURNING,
     UnitState.RELOCATING,
+    UnitState.ON_OTHER_TASK,
 })  # fmt: skip
 
 #: States from which a unit can be given a new incident.
@@ -43,6 +44,7 @@ ALLOWED: dict[UnitState, frozenset[UnitState]] = {
             UnitState.READY,
             UnitState.EN_ROUTE,
             UnitState.RELOCATING,
+            UnitState.ON_OTHER_TASK,
             UnitState.OUT_OF_SERVICE,
         }
     ),
@@ -55,6 +57,9 @@ ALLOWED: dict[UnitState, frozenset[UnitState]] = {
     UnitState.AT_HOSPITAL: frozenset({UnitState.RETURNING}),
     UnitState.RETURNING: frozenset({UnitState.IDLE}),
     UnitState.RELOCATING: frozenset({UnitState.IDLE, UnitState.EN_ROUTE}),
+    # a background job is never pre-empted for an incident (configs/sim.yaml background.preempt),
+    # so the only way out is finishing it
+    UnitState.ON_OTHER_TASK: frozenset({UnitState.IDLE}),
     UnitState.OUT_OF_SERVICE: frozenset({UnitState.IDLE}),
 }
 

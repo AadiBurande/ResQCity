@@ -88,6 +88,12 @@ class UnitState(StrEnum):
     AT_HOSPITAL = "at_hospital"
     RETURNING = "returning"
     RELOCATING = "relocating"
+    ON_OTHER_TASK = "on_other_task"
+    """Busy with out-of-scope work: the background workload of D-031 / L30.
+
+    Kept distinct from RELOCATING, which is a pre-positioning move and is counted separately,
+    and from OUT_OF_SERVICE, which is unavailability rather than work.
+    """
     OUT_OF_SERVICE = "out_of_service"
 
 

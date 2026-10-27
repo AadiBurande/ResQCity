@@ -123,6 +123,10 @@ class Engine:
         self.router = Router(network, opt, scenario)
         self.responses: dict[str, ResponseState] = {}
         self.arrivals: list[ArrivalRecord] = []
+        # Anything that wants to know when a unit goes idle registers here. The background
+        # workload uses it to start a queued out-of-scope job, which is how its waiting time
+        # becomes real rather than zero by construction (sim/background_load.py).
+        self.on_unit_free: list[Callable[[int], None]] = []
         self.background_jobs = 0
         self.false_alarm_trips = 0
 
@@ -267,6 +271,19 @@ class Engine:
         self.fleet.set_state(index, UnitState.RETURNING, self.now_s)
         yield self.env.timeout(0.0 if not np.isfinite(back) else back)
         self.fleet.set_state(index, UnitState.IDLE, self.now_s, node=unit.home_node)
+        self.unit_freed(index)
+
+    def unit_freed(self, index: int) -> None:
+        """Tell every listener that a unit is idle again.
+
+        A listener must not raise: one misbehaving hook would end the replication, and the
+        background workload is a side process, not the experiment.
+        """
+        for hook in self.on_unit_free:
+            try:
+                hook(index)
+            except Exception:  # pragma: no cover - defensive
+                log.exception("unit-freed hook failed for %s", self.fleet.units[index].unit_id)
 
     # -- running ------------------------------------------------------------------------------
 
