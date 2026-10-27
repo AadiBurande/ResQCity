@@ -28,6 +28,7 @@ from resqcity.common.schemas import (
     Agency,
     AssignmentRole,
     DispatchDecision,
+    EventType,
     Unit,
     UnitState,
 )
@@ -36,6 +37,7 @@ from resqcity.geo.scenario import ScenarioState
 from resqcity.optimization.config import OptimizationConfig
 from resqcity.optimization.routing import EtaTable, Router
 from resqcity.sim.config import SimConfig
+from resqcity.sim.hospitals import HandoverRecord, HospitalNetwork
 from resqcity.sim.units import Fleet
 
 log = logging.getLogger(__name__)
@@ -66,6 +68,9 @@ class ResponseState:
     node: int
     created_s: float
     required: dict[Agency, int]
+    #: Needed to choose a CAPABLE hospital. The engine may know the type; a policy sees only
+    #: the fused estimate.
+    event_type: EventType = EventType.OTHER
     arrivals: list[ArrivalRecord] = field(default_factory=list)
     dispatched_units: set[str] = field(default_factory=set)
     #: Units committed to this incident per agency, whether or not they have arrived yet. Used
@@ -74,6 +79,10 @@ class ResponseState:
     committed: dict[Agency, int] = field(default_factory=lambda: dict.fromkeys(Agency, 0))
     second_wave_s: float | None = None
     is_false_alarm: bool = False
+    #: Set once an ambulance has taken a patient, so a second one does not transport again.
+    transported: bool = False
+    hospital_arrival_s: float | None = None
+    handover_s: float | None = None
     #: Units the policy asked for and the engine could not provide (already busy, or no route).
     #: This is what makes a retry meaningful: it distinguishes "wanted a unit and could not get
     #: one" from "chose to hold units back", which is exactly what a confidence tier does. Only
@@ -140,6 +149,11 @@ class ResponseState:
 class Engine:
     """One replication of one policy on one scenario."""
 
+    #: How often an ambulance waiting for a handover bay re-checks. Coarse on purpose: a handover
+    #: is ~15 min, so 30 s granularity on the queue is immaterial and far cheaper than keeping an
+    #: event queue per hospital.
+    HOSPITAL_POLL_S = 30.0
+
     def __init__(
         self,
         network: RoadNetwork,
@@ -149,6 +163,7 @@ class Engine:
         opt: OptimizationConfig,
         start: datetime,
         rng: Callable[[str], np.random.Generator],
+        hospitals: HospitalNetwork | None = None,
     ) -> None:
         self.network, self.scenario, self.fleet, self.cfg = network, scenario, fleet, cfg
         self.opt = opt
@@ -163,6 +178,7 @@ class Engine:
         self.on_unit_free: list[Callable[[int], None]] = []
         self.background_jobs = 0
         self.false_alarm_trips = 0
+        self.hospitals = hospitals
 
     # -- clock --------------------------------------------------------------------------------
 
@@ -202,7 +218,12 @@ class Engine:
     # -- the response lifecycle ---------------------------------------------------------------
 
     def register(
-        self, incident_id: str, node: int, required: dict[Agency, int], is_false_alarm: bool
+        self,
+        incident_id: str,
+        node: int,
+        required: dict[Agency, int],
+        is_false_alarm: bool,
+        event_type: EventType = EventType.OTHER,
     ) -> ResponseState:
         state = self.responses.get(incident_id)
         if state is None:
@@ -211,6 +232,7 @@ class Engine:
                 node=int(node),
                 created_s=self.now_s,
                 required=dict(required),
+                event_type=event_type,
                 is_false_alarm=is_false_alarm,
             )
             self.responses[incident_id] = state
@@ -333,6 +355,8 @@ class Engine:
         state.arrivals.append(record)
         self.arrivals.append(record)
         yield self.env.process(self._on_scene(index, state))
+        if self._should_transport(index, state):
+            yield self.env.process(self._transport(index, state))
         yield self.env.process(self._go_home(index))
 
     def _on_scene(self, index: int, state: ResponseState) -> Generator:
@@ -347,6 +371,59 @@ class Engine:
             median = self.cfg.on_scene.median_s.value[unit.agency]
         draw = self.rng(f"on_scene/{state.incident_id}/{unit.unit_id}")
         yield self.env.timeout(float(draw.exponential(median)))
+
+    def _should_transport(self, index: int, state: ResponseState) -> bool:
+        """Only an ambulance, only for a real incident, and at most one per incident."""
+        if self.hospitals is None or state.is_false_alarm or state.transported:
+            return False
+        if self.fleet.units[index].agency is not Agency.AMBULANCE:
+            return False
+        share = self.cfg.transport.p_transport.value.get(state.event_type, 0.0)
+        draw = self.rng(f"transport/{state.incident_id}")
+        return bool(draw.random() < share)
+
+    def _transport(self, index: int, state: ResponseState) -> Generator:
+        """Drive to the nearest capable hospital, wait for a bay, hand over.
+
+        This is most of an ambulance's busy time in a real system. Leaving it out would make the
+        ambulance fleet look far more available than it is -- the same class of error as the
+        missing background workload of D-031 item 3.
+        """
+        unit = self.fleet.units[index]
+        times = {h.id: self.travel_s(unit.node, int(h.node)) for h in self.hospitals.hospitals}
+        chosen = self.hospitals.choose(state.event_type, times)
+        if chosen is None:
+            # Logged, never silently dropped (configs/sim.yaml transport.no_capable_hospital):
+            # a city that cannot place a patient is a finding, and a vanished ambulance would
+            # corrupt the fleet accounting.
+            self.hospitals.refuse(state.incident_id, "no reachable capable hospital")
+            return
+        state.transported = True
+        hospital = self.hospitals.by_id[chosen]
+        self.fleet.set_state(index, UnitState.TRANSPORTING, self.now_s)
+        yield self.env.timeout(times[chosen])
+        arrived = self.now_s
+        self.fleet.set_state(index, UnitState.AT_HOSPITAL, self.now_s, node=int(hospital.node))
+        state.hospital_arrival_s = arrived
+        # capacity: wait for a free handover bay rather than stacking patients at one address
+        while not self.hospitals.has_room(chosen):
+            yield self.env.timeout(self.HOSPITAL_POLL_S)
+        queued_s = self.now_s - arrived  # time spent waiting for a bay, NOT the handover itself
+        self.hospitals.take(chosen)
+        draw = self.rng(f"handover/{state.incident_id}")
+        yield self.env.timeout(float(draw.exponential(self.cfg.transport.handover_median_s.value)))
+        self.hospitals.release(chosen)
+        state.handover_s = self.now_s
+        self.hospitals.record(
+            HandoverRecord(
+                hospital_id=chosen,
+                incident_id=state.incident_id,
+                unit_id=unit.unit_id,
+                arrived_s=arrived,
+                released_s=self.now_s,
+                waited_s=max(0.0, queued_s),
+            )
+        )
 
     def _go_home(self, index: int) -> Generator:
         unit = self.fleet.units[index]

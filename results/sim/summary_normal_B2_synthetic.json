@@ -1,0 +1,79 @@
+{
+  "status": "SYNTHETIC. Primary outcome is time_to_last_required_arrival; expected survival is secondary and its curves are ILLUSTRATIVE (configs/survival.yaml).",
+  "scenario": "normal",
+  "policy": "B2",
+  "replications": 1,
+  "seed_base": 20261020,
+  "warmup_hours": 12.0,
+  "rows": 24747,
+  "evidence_digests": [
+    "afc14821a5ac00f2423fdec5f7c8b589626f5b4ac563ac470336efa937d6051a"
+  ],
+  "wall_seconds": [
+    86.29911379999976
+  ],
+  "solver_calls": [
+    127
+  ],
+  "utilisation_after_warmup": [
+    {
+      "ambulance": 0.415110565269174,
+      "police": 0.4309911202120914,
+      "fire": 0.4673275473963431
+    }
+  ],
+  "background": [
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2784,
+          "jobs_started": 2784,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5243,
+          "jobs_started": 5243,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1577,
+          "jobs_started": 1577,
+          "queued_at_end": 0,
+          "mean_wait_s": 14.525959035741975,
+          "p_wait": 0.02599873176918199
+        }
+      }
+    }
+  ],
+  "hospitals": [
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 2,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 260.9879266319913,
+      "patients_with_no_capable_hospital": 0
+    }
+  ]
+}

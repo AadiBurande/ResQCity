@@ -62,6 +62,7 @@ from resqcity.sim.config import load_sim_config, load_survival_config
 from resqcity.sim.detection import DetectionProcess
 from resqcity.sim.engine import Engine
 from resqcity.sim.generator import IncidentGenerator, hotspot_weights, load_incidents_config
+from resqcity.sim.hospitals import HospitalNetwork
 from resqcity.sim.optimize_run import ward_demand
 from resqcity.sim.policies import build as build_policy
 from resqcity.sim.units import Fleet
@@ -116,6 +117,7 @@ class Replication:
     replication: int
     rows: list[IncidentRow] = field(default_factory=list)
     background: dict[str, object] = field(default_factory=dict)
+    hospitals: dict[str, object] = field(default_factory=dict)
     utilisation: dict[str, float] = field(default_factory=dict)
     evidence_digest: str = ""
     wall_s: float = 0.0
@@ -216,7 +218,17 @@ def run_replication(
     demand = ward_demand(network, hotspot_weights(network, week.inc_cfg.hotspot))
     units = build_fleet(facilities.stations, facilities.hospitals, demand, load_fleet_config())
 
-    engine = Engine(network, week.state, Fleet.from_units(units), sim_cfg, opt_cfg, week.start, rng)
+    hospitals = HospitalNetwork(list(facilities.hospitals))
+    engine = Engine(
+        network,
+        week.state,
+        Fleet.from_units(units),
+        sim_cfg,
+        opt_cfg,
+        week.start,
+        rng,
+        hospitals=hospitals,
+    )
     load = BackgroundLoad(engine, sim_cfg, opt_cfg)
     load.start()
 
@@ -346,7 +358,11 @@ def run_replication(
             truth_id = truth_of.get(candidate.id)
             required = {a: int(getattr(candidate.requirements, a.value)) for a in Agency}
             engine.register(
-                candidate.id, int(candidate.node), required, is_false_alarm=truth_id is None
+                candidate.id,
+                int(candidate.node),
+                required,
+                is_false_alarm=truth_id is None,
+                event_type=candidate.type,
             )
             row = rows.setdefault(candidate.id, IncidentRow(candidate.id, policy_name, rep))
             row.decision_ts = now
@@ -426,11 +442,16 @@ def run_replication(
             row.shortfall_units = sum(
                 max(0, n - state.arrived_counts()[a]) for a, n in state.required.items()
             )
+            if state.hospital_arrival_s is not None:
+                row.hospital_arrival_ts = week.start + timedelta(seconds=state.hospital_arrival_s)
+            if state.handover_s is not None:
+                row.handover_ts = week.start + timedelta(seconds=state.handover_s)
         anchor = row.onset_ts or row.first_detection_ts or row.first_call_ts
         if anchor is not None:
             row.in_warmup = (anchor - week.start).total_seconds() < sim_cfg.run.warmup_s
     result.rows = list(rows.values())
     result.background = load.report()
+    result.hospitals = hospitals.report()
     result.utilisation = {
         a.value: engine.fleet.utilisation(a, sim_cfg.run.warmup_s, horizon_s) for a in Agency
     }
@@ -479,6 +500,7 @@ def main(argv: list[str] | None = None) -> int:
         "solver_calls": [r.solver_calls for r in reps],
         "utilisation_after_warmup": [r.utilisation for r in reps],
         "background": [r.background for r in reps],
+        "hospitals": [r.hospitals for r in reps],
     }
     (OUT / f"summary_{stem}.json").write_text(
         json.dumps(summary, indent=2, default=str), encoding="utf-8", newline="\n"

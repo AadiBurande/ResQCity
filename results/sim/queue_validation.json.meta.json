@@ -1,11 +1,11 @@
 {
   "file": "results/sim/queue_validation.json",
-  "generated_at_utc": "2026-10-27T15:16:50+00:00",
+  "generated_at_utc": "2026-10-27T15:19:07+00:00",
   "command": "validate_queue.py",
   "synthetic": true,
   "git": {
-    "commit": "612c659587f0c1406a4173f3f785623ce5bb9c89",
-    "dirty": true
+    "commit": "c0531263976ccd78826efda407da1cc010a2caba",
+    "dirty": false
   },
   "configs_sha256": {
     "configs/sim.yaml": "ce980a43044119a399dd983ddff17504a044bae51c9fe656a9ad2bdfbf7f5ba2",
