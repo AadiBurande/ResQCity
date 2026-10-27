@@ -948,15 +948,17 @@ UNVERIFIED and listed by `find_unverified`; the fleet counts are press-derived (
    test module instead of being glossed over, and the property C6 exists to guarantee is asserted
    separately.
 
-## D-032 Phase 7: the simulator, and the finding that reshapes the study  (2026-10-27, IN PROGRESS)
-Plan: `docs/plans/phase-7.md`. Code: `src/resqcity/sim/{config,engine,units,policies,background_load,runner}.py`.
-Slices 0-4 and 2+6 are built and committed; hospitals/transport (slice 5), the Erlang-C queue
-validation (slice 7) and the phase close (slice 8) are **not yet done**, so this entry is marked
-IN PROGRESS and no result file is published from it yet.
+## D-032 Phase 7: the simulator, and the finding that reshapes the study  (2026-10-27)
+Plan: `docs/plans/phase-7.md`. Formulation: `docs/models/simulator.md`. Code:
+`src/resqcity/sim/{config,engine,units,policies,background_load,hospitals,runner,validate_queue,evidence_funnel}.py`.
+Results: `results/sim/`. Figures: `notebooks/07_simulator.ipynb`. All eight slices are built;
+the phase closes with `/verify` and a `research-auditor` pass.
 
 1. **FINDING - at the real camera deployment there is almost nothing for CCTV to trigger on.**
    Measured over 8 simulated weeks of the `normal` scenario (seed base 20261020, replications
-   0-7), with every step reconciling against an earlier phase rather than against an assumption:
+   0-7) by `python -m resqcity.sim.evidence_funnel` ->
+   `results/sim/evidence_funnel.json`, with every step reconciling against an earlier phase
+   rather than against an assumption:
 
    | stage | count | share | reconciles with |
    |---|---|---|---|
@@ -1021,8 +1023,33 @@ IN PROGRESS and no result file is published from it yet.
    - Background utilisation came out 14 % low (0.4297 against a 0.5 target) because a per-job RNG
      lookup returned a fresh generator and replayed one draw for ever: 0.4297/0.5 = 0.859 is that
      seed's first exponential draw.
-7. **Runtime, measured.** 20-31 s per simulated day: 2.3-3.6 min per replication-week, and 5-9
-   hours for 30 replications x 5 policies. CP-SAT contributes **0.22 s of a whole day**, so the
-   solver is not the bottleneck - the camera alarm stream is, exactly as the plan predicted. The
-   documented fallback stands: full 7-day/30-replication runs for the confirmatory comparisons,
-   shorter horizons for the sensitivity grids.
+7. **Runtime, measured per policy-week** (`results/sim/summary_normal_*.json`): B0 81 s, B1
+   83 s, B2 87 s, B3 417 s, FULL 420 s. So 30 replications x 5 policies is about **9 hours**, not
+   the 5 an earlier per-day estimate suggested. B3 and FULL are five times slower for a reason
+   that is itself a result: having no credibility gate, they must emit a REVIEW decision for every
+   one of ~3,550 candidates a week, so **the triage load is part of what confidence tiering
+   costs**. CP-SAT contributes 0.22 s of a whole simulated day, so the solver is never the
+   bottleneck - the camera alarm stream is, exactly as the plan predicted. The documented fallback
+   stands: full 7-day/30-replication runs for the confirmatory comparisons, shorter horizons for
+   the sensitivity grids.
+8. **The engine's queueing is validated against a closed form, and only that.** Stripped to one
+   agency with no incidents the simulator *is* M/M/c, so `optimization.placement.queue_metrics`
+   solves the identical system. Over 60 simulated days at three loads the worst absolute
+   differences are utilisation **0.0006**, P(wait) **0.0044**, E[W_q] **1.05 s**; the case that
+   carries the check is rho = 0.85 (simulated 0.8494 / 0.2359 / 75.0 s against analytic 0.8500 /
+   0.2402 / 73.9 s over 95,631 jobs), because a light load could agree by luck.
+   `results/sim/queue_validation.json`. This validates the clock, the queue discipline and the
+   busy-time accounting; it does **not** validate travel, on-scene time, the second wave or the
+   policies, none of which has a closed form, and the module says so rather than letting the PASS
+   imply more.
+9. **B0 and B1 come out identical on the same seed**, which is item 1 showing up as a sanity
+   check rather than a coincidence: with no camera-detected incident in the week, admitting camera
+   evidence changes nothing, so B1 collapses onto B0. A phase-10 run that showed B1 beating B0 at
+   this camera coverage would therefore be evidence of a bug, not of a benefit.
+10. **Hospital transport is modelled; its capabilities are not real.** An ambulance goes to the
+    nearest **capable** hospital (trauma for accidents, burns for fire/smoke), waits for a
+    handover bay (ICU beds stand in, capped so a mass-casualty scenario cannot absorb unlimited
+    patients at one address), and hands over. Of 590 OSM hospitals, 50 are flagged trauma and 19
+    burns - and those flags are **synthetic**, as `facilities.json` records on every row, so the
+    routing is structurally right and numerically unverified. A patient with no reachable capable
+    hospital is logged and the unit released, never silently dropped.
