@@ -947,3 +947,82 @@ UNVERIFIED and listed by `find_unverified`; the fleet counts are press-derived (
    whose formula is a chosen definition rather than a derivable quantity; that is stated in the
    test module instead of being glossed over, and the property C6 exists to guarantee is asserted
    separately.
+
+## D-032 Phase 7: the simulator, and the finding that reshapes the study  (2026-10-27, IN PROGRESS)
+Plan: `docs/plans/phase-7.md`. Code: `src/resqcity/sim/{config,engine,units,policies,background_load,runner}.py`.
+Slices 0-4 and 2+6 are built and committed; hospitals/transport (slice 5), the Erlang-C queue
+validation (slice 7) and the phase close (slice 8) are **not yet done**, so this entry is marked
+IN PROGRESS and no result file is published from it yet.
+
+1. **FINDING - at the real camera deployment there is almost nothing for CCTV to trigger on.**
+   Measured over 8 simulated weeks of the `normal` scenario (seed base 20261020, replications
+   0-7), with every step reconciling against an earlier phase rather than against an assumption:
+
+   | stage | count | share | reconciles with |
+   |---|---|---|---|
+   | incidents generated | 287 | ~36/week | base rate D-018 |
+   | within camera range | 7 | **2.4 %** | D-031's 3.95 % risk-weighted coverage (expected 11.3; P(<=7) ~ 0.14) |
+   | actually detected by a camera | 1 | **14 % of in-range** | D-029's 0.31 effective detection (expected 2.2; P(<=1) ~ 0.35) |
+   | camera alarms raised | 1,543,628 | - | D-029's ~29 per camera-hour x 40 sites |
+   | of which true | 1 | **0.00006 %** | one true alarm in 1.5 million |
+
+   So **0.35 % of incidents are camera-detected**. B1-FULL can therefore differ from B0 only
+   through the cost of chasing false alarms, not through earlier detection. This is not a new
+   assumption: it is the arithmetic of D-029 and D-031 playing out in a simulator that was built
+   to let it. Consequences, all design decisions rather than observations:
+   - **Phase 10's sweep that matters is camera coverage**, ahead of forecast quality (D-030's band
+     is narrow and its models are indistinguishable) and ahead of the confidence thresholds
+     (D-031 item 5: no threshold promotes an alarm whose likelihood ratio is 1.01-1.04).
+   - The study's honest headline may be **negative**: that CCTV-triggered joint dispatch cannot
+     pay for itself at 40 cameras. That is a publishable answer to RQ1 and it must not be
+     presented as a failure of the method.
+   - The joint-dispatch question (RQ2) is separable and survives: B0 vs B2 is about *who is sent*
+     and *whether agencies are asked together*, neither of which needs a camera.
+2. **The status quo's hand-off delay largely determines RQ2, and it is assumed.** B0 asks agencies
+   one after another; joint dispatch removes exactly that delay. No primary source for Pune's
+   inter-agency hand-off time could be found, so `configs/sim.yaml` -> `policies.b0.
+   sequential_handoff_s` is UNVERIFIED at 120 s under a heading saying so, and **phase 10 must
+   sweep it including 0**, where B0 and B1 differ only in the evidence they admit. If the RQ2
+   conclusion only holds at the larger values, the write-up has to say that.
+3. **An untiered policy needs a declared credibility gate, and the arithmetic says why.** With no
+   gate, B0/B1/B2 would each send a unit to every one of the ~193,000 alarms a week produces,
+   saturating a 39-unit fleet within minutes and measuring nothing but detector precision.
+   `policies.min_dispatch_posterior` = 0.5 (UNVERIFIED, swept) sits between the tiered thresholds
+   (tau_low 0.2, tau_high 0.7) so B2 and B3 stay comparable. B3 and FULL do not use it: their
+   tiers replace it, which is the point of that rung.
+4. **The background workload is part of the model, not a refinement** (D-031 item 3, L30). Jobs
+   arrive Poisson per agency and occupy a unit for an exponential time; the rate is DERIVED from
+   the target utilisation (lambda = rho c / S), and for police that reproduces the verified 771
+   Dial-112 calls a day. Realised utilisation is **0.41 police / 0.35 ambulance / 0.46 fire**,
+   against the 0.26-0.32 % the capacity-blind model showed. Disabling it is a legitimate
+   phase-10 ablation but must be explicit: the config rejects `enabled: false` with a non-zero
+   target.
+5. **Survival is a secondary outcome and its curves are illustrative.** No defensible per-minute
+   survival-vs-time curve for road trauma could be confirmed at the source: the largest scoping
+   review of the question reports "mixed (i.e., positive, negative, and neutral) associations,
+   with conflicting conclusions" and deliberately does not quantify it (Bedard et al., *Int J
+   Emerg Med* 2020;13:64, doi:10.1186/s12245-020-00324-7, read 2026-10-27). The familiar
+   per-minute decline is from witnessed-VF cardiac arrest, a different patient and clock.
+   `configs/survival.yaml` therefore marks every curve ILLUSTRATIVE, lists Valenzuela 1997 with
+   `supports: NOTHING IN THIS FILE` so it cannot be mistaken for the source, and a validator
+   refuses both a curve that claims a citation and any attempt to make survival the primary
+   outcome. **Primary outcome: time to the last required arrival.**
+6. **Four bugs worth recording, because each would have flattered a policy rather than crashed.**
+   - Two decisions in one batch could claim the same unit, because the state change sat inside a
+     SimPy process that had not started. Claims are now synchronous.
+   - Every policy chose among all 91 units as though none were busy: policies get `Unit` records
+     whose `state` is the roster's, not the live fleet's. So capacity could not bite at all, and
+     the phase-10 headline would have run on a permanently free fleet - undoing item 4 silently.
+     Unavailable units are masked where the ETA table is built. Dispatch batches fell from 1,544
+     a day to 13, and every real incident now reaches a full response.
+   - A short response was retried whether the engine *could not* provide a unit or the policy
+     *chose* to withhold one. Retrying the latter fights a confidence tier and never terminates
+     usefully; the engine now records refused asks and re-offers only those.
+   - Background utilisation came out 14 % low (0.4297 against a 0.5 target) because a per-job RNG
+     lookup returned a fresh generator and replayed one draw for ever: 0.4297/0.5 = 0.859 is that
+     seed's first exponential draw.
+7. **Runtime, measured.** 20-31 s per simulated day: 2.3-3.6 min per replication-week, and 5-9
+   hours for 30 replications x 5 policies. CP-SAT contributes **0.22 s of a whole day**, so the
+   solver is not the bottleneck - the camera alarm stream is, exactly as the plan predicted. The
+   documented fallback stands: full 7-day/30-replication runs for the confirmatory comparisons,
+   shorter horizons for the sensitivity grids.
