@@ -811,7 +811,11 @@ now cites a committed artefact.
    The `realistic` model — with no privileged inputs — closes **89.4 %** of the uniform→oracle
    deviance gap and 88.7 % of the top-5 gap (`*_share_of_gap_closed` in the results file). A
    model recovering nine tenths of the generator's own intensity surface is exactly the
-   circularity this phase was built to expose. The first version of this entry mistook the
+   circularity this phase was built to expose. It is not a LightGBM achievement either: plain
+   `climatology` closes **93.1 %** of the top-5 gap, more than either booster, so the ward
+   ranking this generator produces is recoverable by an hour-of-week average. (Its deviance gap
+   is only 37.6 %, which is the honest summary: the baseline ranks wards as well but does not
+   predict counts as well.) The first version of this entry mistook the
    absence of an *informed-vs-realistic* gap for the absence of circularity; that comparison was
    never a test of it, for two reasons both now measured:
    - `hotspot_mass` is **constant within a ward** (one distinct value per ward, by construction),

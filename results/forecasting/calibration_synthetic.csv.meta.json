@@ -1,14 +1,14 @@
 {
   "file": "results/forecasting/calibration_synthetic.csv",
-  "generated_at_utc": "2026-10-26T17:28:37+00:00",
+  "generated_at_utc": "2026-10-27T12:27:26+00:00",
   "command": "forecast_eval.py",
   "synthetic": true,
   "git": {
-    "commit": "d7535aaf168b0cfcccedd4c946636829bd5b7abf",
+    "commit": "70c3ef8b959fe73fcd35cd84079b43efb2ccdf85",
     "dirty": false
   },
   "configs_sha256": {
-    "configs/forecasting.yaml": "a10073d0ef2a84fb0d24e9ed02bc6334f25d37de63f94a3f77199ad3d7d7de78",
+    "configs/forecasting.yaml": "ec46e4f64332ae713040ceb82f6f363369424590fb6aabb836c501a1e0bc767b",
     "configs/incidents.yaml": "54f245fe34f19dcfd8acba582925fa6f86a8d5bf35d0c3369a21c1b4011454d5"
   },
   "seeds": {

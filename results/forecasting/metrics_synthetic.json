@@ -1,6 +1,19 @@
 {
   "status": "SYNTHETIC. Forecast accuracy is NOT a research claim: the training data comes from the project's own incident generator, so the 'informed' model recovers its intensity formula by construction. The claim is only how dispatch performance depends on forecast quality (phase 10).",
-  "panel": "panel_history_3y_synthetic.parquet",
+  "panel": {
+    "file": "panel_history_3y_synthetic.parquet",
+    "sha256": "768bec6d53d300172ee5595922893f23e0b802917d3af6eb10361588e4b66949",
+    "built_at_utc": "2026-10-27T12:23:01+00:00",
+    "built_at_commit": "70c3ef8b959fe73fcd35cd84079b43efb2ccdf85",
+    "configs_sha256": {
+      "configs/forecasting.yaml": "ec46e4f64332ae713040ceb82f6f363369424590fb6aabb836c501a1e0bc767b",
+      "configs/incidents.yaml": "54f245fe34f19dcfd8acba582925fa6f86a8d5bf35d0c3369a21c1b4011454d5",
+      "configs/scenarios/history_3y.yaml": "2cb358f91a16f8d6d0742964ad4314b324ef96bd3444f95a0eb4bad8d034437b"
+    },
+    "seeds": {
+      "forecast_training_seed_base": 7041990
+    }
+  },
   "scenario": "history_3y",
   "split_rows": {
     "train": 2250864,
@@ -36,27 +49,46 @@
       "model": "uniform",
       "cells": 1520064,
       "observed": 2071.0,
-      "predicted": 2038.12987012987,
-      "poisson_deviance": 0.017987733278602622,
-      "mae": 0.0026996145732154555,
-      "poisson_deviance_daily": 0.2258212875384914,
-      "mae_daily": 0.06266439890829364,
+      "predicted": 2035.5728155339807,
+      "poisson_deviance": 0.017987789684677388,
+      "mae": 0.0026979369462384944,
+      "poisson_deviance_daily": 0.22582263757539342,
+      "mae_daily": 0.06262669120379251,
       "top_3_ward_hit_rate": 0.04828585224529213,
       "top_5_ward_hit_rate": 0.08305166586190246,
-      "top_10_ward_hit_rate": 0.18252052148720424
+      "top_10_ward_hit_rate": 0.18252052148720424,
+      "poisson_deviance_share_of_gap_closed": 0.0,
+      "top_5_ward_hit_rate_share_of_gap_closed": -0.0
     },
     {
       "model": "climatology",
       "cells": 1520064,
       "observed": 2071.0,
-      "predicted": 2038.12987012987,
-      "poisson_deviance": 0.017937233011287856,
-      "mae": 0.002694675912861332,
-      "poisson_deviance_daily": 0.20286412895330586,
-      "mae_daily": 0.06062697251319074,
-      "top_3_ward_hit_rate": 0.14485755673587639,
-      "top_5_ward_hit_rate": 0.22694350555287301,
-      "top_10_ward_hit_rate": 0.38194109126026077
+      "predicted": 2035.5728155339807,
+      "poisson_deviance": 0.01739957419841387,
+      "mae": 0.002693011685655347,
+      "poisson_deviance_daily": 0.2019172452591813,
+      "mae_daily": 0.06057544160471177,
+      "top_3_ward_hit_rate": 0.15354901014002897,
+      "top_5_ward_hit_rate": 0.2264606470304201,
+      "top_10_ward_hit_rate": 0.3843553838725253,
+      "poisson_deviance_share_of_gap_closed": 0.3763357694830112,
+      "top_5_ward_hit_rate_share_of_gap_closed": 0.9310344827586208
+    },
+    {
+      "model": "climatology_percell",
+      "cells": 1520064,
+      "observed": 2071.0,
+      "predicted": 2035.5728155339802,
+      "poisson_deviance": 0.058421017998298956,
+      "mae": 0.0026925220419947568,
+      "poisson_deviance_daily": 0.2618004690601094,
+      "mae_daily": 0.06055357080071481,
+      "top_3_ward_hit_rate": 0.09367455335586673,
+      "top_5_ward_hit_rate": 0.14099468855625302,
+      "top_10_ward_hit_rate": 0.24818928054080155,
+      "poisson_deviance_share_of_gap_closed": -25.86887024472545,
+      "top_5_ward_hit_rate_share_of_gap_closed": 0.3761755485893417
     },
     {
       "model": "lightgbm_realistic",
@@ -69,7 +101,9 @@
       "mae_daily": 0.06113728265034791,
       "top_3_ward_hit_rate": 0.14196040560115886,
       "top_5_ward_hit_rate": 0.21970062771607918,
-      "top_10_ward_hit_rate": 0.362143891839691
+      "top_10_ward_hit_rate": 0.362143891839691,
+      "poisson_deviance_share_of_gap_closed": 0.8936476721084831,
+      "top_5_ward_hit_rate_share_of_gap_closed": 0.8871473354231975
     },
     {
       "model": "lightgbm_informed",
@@ -82,7 +116,9 @@
       "mae_daily": 0.06110617637553931,
       "top_3_ward_hit_rate": 0.13761467889908258,
       "top_5_ward_hit_rate": 0.21632061805890873,
-      "top_10_ward_hit_rate": 0.3645581844519556
+      "top_10_ward_hit_rate": 0.3645581844519556,
+      "poisson_deviance_share_of_gap_closed": 0.8788740843427442,
+      "top_5_ward_hit_rate_share_of_gap_closed": 0.8652037617554859
     },
     {
       "model": "oracle",
@@ -95,7 +131,9 @@
       "mae_daily": 0.06068078716191396,
       "top_3_ward_hit_rate": 0.16948334138097537,
       "top_5_ward_hit_rate": 0.23708353452438435,
-      "top_10_ward_hit_rate": 0.3833896668276195
+      "top_10_ward_hit_rate": 0.3833896668276195,
+      "poisson_deviance_share_of_gap_closed": 1.0,
+      "top_5_ward_hit_rate_share_of_gap_closed": 1.0
     },
     {
       "model": "lightgbm_realistic+noise0.5",
@@ -124,6 +162,87 @@
       "top_10_ward_hit_rate": 0.2786093674553356
     }
   ],
+  "uncertainty": {
+    "method": "paired bootstrap over test HOURS (the unit of dependence: wards compete within an hour), 2000 resamples",
+    "seed": 20261027,
+    "by_model": {
+      "uniform": {
+        "poisson_deviance_ci95": [
+          0.017287631327631836,
+          0.018634266283445503
+        ],
+        "top_5_ward_hit_rate_ci95": [
+          0.07146328440407615,
+          0.09530722624910087
+        ]
+      },
+      "climatology": {
+        "poisson_deviance_ci95": [
+          0.016664909785788523,
+          0.018115794339832146
+        ],
+        "top_5_ward_hit_rate_ci95": [
+          0.20843066203481872,
+          0.24555907315165082
+        ]
+      },
+      "climatology_percell": {
+        "poisson_deviance_ci95": [
+          0.05569056759148675,
+          0.06104046567851887
+        ],
+        "top_5_ward_hit_rate_ci95": [
+          0.12577577688860866,
+          0.15590736072060957
+        ]
+      },
+      "lightgbm_realistic": {
+        "poisson_deviance_ci95": [
+          0.015948539554736928,
+          0.017184898210755997
+        ],
+        "top_5_ward_hit_rate_ci95": [
+          0.20172304209448377,
+          0.23812005037660863
+        ]
+      },
+      "lightgbm_informed": {
+        "poisson_deviance_ci95": [
+          0.015974985601364407,
+          0.017214406934889414
+        ],
+        "top_5_ward_hit_rate_ci95": [
+          0.198932492113118,
+          0.23421928892038743
+        ]
+      },
+      "oracle": {
+        "poisson_deviance_ci95": [
+          0.01578505032826954,
+          0.017015333438185443
+        ],
+        "top_5_ward_hit_rate_ci95": [
+          0.21853586453015694,
+          0.2559581306724745
+        ]
+      }
+    }
+  },
+  "gap_note": "*_share_of_gap_closed is the share of the uniform->oracle span a model closes. The realistic model closing most of it IS the circularity of this phase (D-030).",
+  "fitting_note": "The baselines are fitted on train+valid; the boosters are fitted on train and use valid only to choose a stopping round. That residual asymmetry FAVOURS the baselines by 34% more fitting rows, so it cannot explain the boosters' lower deviance. The oracle is ground truth, not a fit.",
+  "tie_break_artefact": {
+    "what": "a model predicting the same value everywhere has no real ranking; breaking ties by ward name made it silently 'choose' the alphabetically first wards",
+    "uniform_top_5_name_tiebreak": 0.17141477547078707,
+    "uniform_top_5_random_tiebreak": 0.08305166586190246,
+    "analytic_k_over_wards": 0.08620689655172414
+  },
+  "per_cell_climatology_is_degenerate": {
+    "what": "why a per-cell historical average is not a usable baseline at this sparsity",
+    "cells_predicted_exactly_zero": 0.8817391899288451,
+    "test_incidents_landing_on_a_zero": 1519,
+    "test_incidents_total": 2071,
+    "mean_incidents_per_cell_in_history": 0.13793103448275862
+  },
   "lightgbm_gain_importance": {
     "lightgbm_realistic": {
       "type": 15927,
