@@ -74,7 +74,18 @@ class B0Config(ConfigModel):
 
 class PoliciesConfig(ConfigModel):
     b0: B0Config
+    min_dispatch_posterior: SourcedValue[float]
     note: str = ""
+
+    @model_validator(mode="after")
+    def _check(self) -> Self:
+        if not 0.0 < self.min_dispatch_posterior.value <= 1.0:
+            raise ValueError(
+                "policies.min_dispatch_posterior must be in (0, 1]: at 0 an untiered policy "
+                "chases every camera false alarm (~195,000 a week at the measured rate), which "
+                "is not a baseline anyone would run"
+            )
+        return self
 
 
 class OnSceneConfig(ConfigModel):

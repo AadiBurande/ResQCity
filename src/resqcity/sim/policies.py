@@ -86,6 +86,17 @@ class Policy(Protocol):
     ) -> DispatchPlan: ...
 
 
+def passes_gate(incident: Incident, cfg: SimConfig) -> bool:
+    """Whether an UNTIERED policy (B0, B1, B2) will act on this candidate at all.
+
+    Not a confidence tier: one fixed threshold, because a policy with no credibility gate would
+    send a unit to each of the ~195,000 camera alarms a simulated week produces at the measured
+    false-alarm rate (D-029). See ``configs/sim.yaml`` -> ``policies.min_dispatch_posterior``.
+    B3 and FULL ignore this and use C2's tiers instead.
+    """
+    return incident.posterior >= cfg.policies.min_dispatch_posterior.value
+
+
 def has_call_evidence(incident: Incident) -> bool:
     """Whether a human ever reported this incident.
 
@@ -153,6 +164,8 @@ class NearestPerAgency:
         for index, incident in enumerate(incidents):
             if self.name == "B0" and not has_call_evidence(incident):
                 continue  # the call-based status quo never sees a camera-only candidate
+            if not passes_gate(incident, self.cfg):
+                continue
             free = EtaTable(etas.unit_nodes, etas.incident_nodes, etas.seconds.copy())
             for u in taken:
                 free.seconds[u, :] = np.inf
@@ -238,6 +251,17 @@ class JointMilp:
         etas: EtaTable,
         now: datetime,
     ) -> DispatchPlan:
+        if self.uses_tiers:
+            batch_incidents = list(incidents)  # C2's tiers decide; no fixed gate
+        else:
+            keep = [i for i, inc in enumerate(incidents) if passes_gate(inc, self.cfg)]
+            batch_incidents = [incidents[i] for i in keep]
+            etas = EtaTable(
+                etas.unit_nodes,
+                [etas.incident_nodes[i] for i in keep],
+                etas.seconds[:, keep],
+            )
+        incidents = batch_incidents
         if not incidents:
             return DispatchPlan([], [], {}, status="EMPTY")
         agencies = [u.agency for u in units]

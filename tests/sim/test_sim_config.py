@@ -26,6 +26,8 @@ def test_every_assumed_simulator_parameter_is_flagged() -> None:
     assert set(find_unverified(SIM)) == {
         # the one that most directly drives RQ2: joint dispatch removes this delay
         "policies.b0.sequential_handoff_s",
+        # how much of the detector's false-alarm load each untiered policy carries
+        "policies.min_dispatch_posterior",
         "on_scene.median_s",
         "on_scene.false_alarm_s",
         "transport.p_transport",

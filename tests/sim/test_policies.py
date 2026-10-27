@@ -247,15 +247,17 @@ def test_the_joint_model_can_beat_nearest_per_agency() -> None:
 # -- B2 vs B3: confidence ----------------------------------------------------------------------
 
 
-def test_b3_holds_back_a_low_confidence_incident_and_b2_does_not() -> None:
-    low = _incident("L1", amb=1, pol=1, posterior=0.3, kinds=(SourceKind.CAMERA_EVENT,))
+def test_b3_holds_back_a_middling_incident_and_b2_does_not() -> None:
+    """0.6 is above B2's fixed gate (0.5) but below tau_high (0.7), which is exactly the band
+    where tiering changes the answer."""
+    low = _incident("L1", amb=1, pol=1, posterior=0.6, kinds=(SourceKind.CAMERA_EVENT,))
     units = [_unit("A1", Agency.AMBULANCE), _unit("P1", Agency.POLICE)]
     etas = _table(np.array([[300.0], [240.0]]))
     b2 = build("B2", CFG, OPT).decide([low], units, etas, NOW)
     b3 = build("B3", CFG, OPT).decide([low], units, etas, NOW)
     assert b2.decisions[0].tier is DispatchTier.FULL
     assert {a.role for a in b2.decisions[0].assignments} == {AssignmentRole.RESPOND}
-    # 0.2 <= 0.3 < 0.7, so B3 verifies with one police unit and pre-alerts the ambulance
+    # 0.2 <= 0.6 < 0.7, so B3 verifies with one police unit and pre-alerts the ambulance
     assert b3.decisions[0].tier is DispatchTier.VERIFY
     roles = {a.role for a in b3.decisions[0].assignments}
     assert AssignmentRole.VERIFY in roles and AssignmentRole.PRE_ALERT in roles
@@ -336,3 +338,64 @@ def test_a_policy_runs_on_fused_incidents_alone(name: str) -> None:
         [_incident("I1", pol=1)], [_unit("P1", Agency.POLICE)], _table(np.array([[120.0]])), NOW
     )
     assert isinstance(plan.decisions, list)
+
+
+# -- the credibility gate on the untiered policies ---------------------------------------------
+
+
+def _cfg_gate(value: float) -> SimConfig:
+    raw = CFG.model_dump(mode="json")
+    raw["policies"]["min_dispatch_posterior"]["value"] = value
+    return SimConfig.model_validate(raw)
+
+
+@pytest.mark.parametrize("name", ["B0", "B1", "B2"])
+def test_an_untiered_policy_ignores_a_candidate_below_the_gate(name: str) -> None:
+    """Without a gate, each of these would send a unit to every one of the ~195,000 camera
+    alarms a simulated week produces at the measured false-alarm rate (D-029)."""
+    faint = _incident("F1", pol=1, posterior=0.01, kinds=(SourceKind.CALL,))
+    plan = build(name, CFG, OPT).decide(
+        [faint], [_unit("P1", Agency.POLICE)], _table(np.array([[120.0]])), NOW
+    )
+    assert plan.decisions == []
+
+
+@pytest.mark.parametrize("name", ["B0", "B1", "B2"])
+def test_lowering_the_gate_lets_the_same_candidate_through(name: str) -> None:
+    faint = _incident("F1", pol=1, posterior=0.01, kinds=(SourceKind.CALL,))
+    plan = build(name, _cfg_gate(0.001), OPT).decide(
+        [faint], [_unit("P1", Agency.POLICE)], _table(np.array([[120.0]])), NOW
+    )
+    assert [a.unit_id for d in plan.decisions for a in d.assignments] == ["P1"]
+
+
+def test_the_tiered_policies_do_not_use_the_fixed_gate() -> None:
+    """B3 must reach its own REVIEW tier rather than being filtered out beforehand, or the
+    confidence rung would be measuring the gate instead of the tiers."""
+    faint = _incident("F1", pol=1, posterior=0.01, kinds=(SourceKind.CAMERA_EVENT,))
+    plan = build("B3", CFG, OPT).decide(
+        [faint], [_unit("P1", Agency.POLICE)], _table(np.array([[120.0]])), NOW
+    )
+    assert len(plan.decisions) == 1
+    assert plan.decisions[0].tier is DispatchTier.REVIEW
+
+
+def test_a_zero_gate_is_refused_by_the_config() -> None:
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError, match="not a baseline anyone would run"):
+        _cfg_gate(0.0)
+
+
+def test_the_gate_keeps_the_eta_columns_aligned_with_the_incidents() -> None:
+    """B2 drops filtered incidents from the ETA table too; a mismatch would silently assign
+    units using another incident's travel times."""
+    incidents = [
+        _incident("Low", pol=1, posterior=0.01),
+        _incident("High", pol=1, posterior=0.99),
+    ]
+    units = [_unit("P1", Agency.POLICE)]
+    etas = _table(np.array([[900.0, 120.0]]))  # Low is far, High is near
+    plan = build("B2", CFG, OPT).decide(incidents, units, etas, NOW)
+    assert [d.incident_id for d in plan.decisions] == ["High"]
+    assert plan.decisions[0].assignments[0].eta_s == pytest.approx(120.0)

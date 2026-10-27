@@ -42,9 +42,26 @@ policies:
         agency starts after one delay, the third after two. Two minutes is a plausible
         control-room relay, not a measurement. Sweep 0, 60, 120, 300 in phase 10 and report RQ2
         against it; if the conclusion only holds at the larger values, say so.
+  # The minimum fused posterior at which an UNTIERED policy (B0, B1, B2) will send anyone.
+  # B3 and FULL do not use it: their confidence tiers (configs/optimization.yaml -> policy)
+  # replace it, and comparing a tiered policy against an ungated one is the point of that rung.
+  #
+  # Why a gate has to exist at all, with the arithmetic: the measured detector produces about
+  # 29 false alarms per camera-hour (D-029), so the 40 phase-2 camera sites generate roughly
+  # 40 * 29 * 168 = 195,000 alarms in a simulated week. A policy with no credibility gate would
+  # send a unit to every one of them, which is not a baseline anyone would run -- it would
+  # saturate a 39-unit fleet within minutes and the comparison would measure nothing but the
+  # detector's precision. Real control rooms do not dispatch on a raw alarm either.
+  min_dispatch_posterior:
+    value: 0.5
+    source: UNVERIFIED
+    note: >-
+      Assumed, and it sits between the tiered thresholds (tau_low 0.2, tau_high 0.7) so B2 and
+      B3 are comparable. Phase 10 must sweep it: it decides how much of the detector's false-
+      alarm load each untiered policy carries, and therefore how bad B1 looks.
   note: >-
-    B1-FULL dispatch every agency at once, so none of them pays this delay. The confidence
-    thresholds of B3 and FULL live in configs/optimization.yaml -> policy.
+    B1-FULL dispatch every agency at once, so none of them pays the hand-off delay. The
+    confidence thresholds of B3 and FULL live in configs/optimization.yaml -> policy.
 
 on_scene:
   # Time a unit spends at the scene before it can leave. Exponential around these medians.

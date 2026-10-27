@@ -68,8 +68,17 @@ class ResponseState:
     required: dict[Agency, int]
     arrivals: list[ArrivalRecord] = field(default_factory=list)
     dispatched_units: set[str] = field(default_factory=set)
+    #: Units committed to this incident per agency, whether or not they have arrived yet. Used
+    #: to work out what is still OUTSTANDING, so a re-dispatch tops the response up instead of
+    #: sending the whole requirement again.
+    committed: dict[Agency, int] = field(default_factory=lambda: dict.fromkeys(Agency, 0))
     second_wave_s: float | None = None
     is_false_alarm: bool = False
+    #: Units the policy asked for and the engine could not provide (already busy, or no route).
+    #: This is what makes a retry meaningful: it distinguishes "wanted a unit and could not get
+    #: one" from "chose to hold units back", which is exactly what a confidence tier does. Only
+    #: the former is worth asking the dispatcher about again.
+    refused: dict[Agency, int] = field(default_factory=lambda: dict.fromkeys(Agency, 0))
 
     def arrived_counts(self) -> dict[Agency, int]:
         counts = dict.fromkeys(Agency, 0)
@@ -77,6 +86,31 @@ class ResponseState:
             if a.role in (AssignmentRole.RESPOND, AssignmentRole.VERIFY):
                 counts[a.agency] += 1
         return counts
+
+    def outstanding(self) -> dict[Agency, int]:
+        """What this incident still needs, given what is already on its way.
+
+        Without this the primary outcome would barely exist: a first batch that could only find
+        a police unit would leave the incident permanently short, because the dispatcher would
+        never be asked about it again.
+        """
+        return {
+            agency: max(0, need - self.committed.get(agency, 0))
+            for agency, need in self.required.items()
+            if need > 0
+        }
+
+    def unfinished(self) -> bool:
+        return any(n > 0 for n in self.outstanding().values())
+
+    def was_refused(self) -> dict[Agency, int]:
+        """Refused asks that are still outstanding, i.e. worth retrying."""
+        short = self.outstanding()
+        return {
+            agency: min(count, short.get(agency, 0))
+            for agency, count in self.refused.items()
+            if count > 0 and short.get(agency, 0) > 0
+        }
 
     def satisfied(self) -> bool:
         got = self.arrived_counts()
@@ -180,12 +214,30 @@ class Engine:
                 is_false_alarm=is_false_alarm,
             )
             self.responses[incident_id] = state
-        else:  # a later decision may raise the requirement (second wave)
-            state.required = dict(required)
+        else:
+            # A later decision may RAISE the requirement (the second wave of slice 5). It must
+            # not lower it: an incident already found to need a fire engine still needs one even
+            # if a later, weaker estimate disagrees.
+            state.required = {
+                agency: max(state.required.get(agency, 0), required.get(agency, 0))
+                for agency in set(state.required) | set(required)
+            }
         return state
 
-    def execute(self, decisions: Iterable[DispatchDecision]) -> None:
-        """Start a unit process for every assignment that actually moves a vehicle."""
+    def execute(
+        self,
+        decisions: Iterable[DispatchDecision],
+        delays: dict[tuple[str, str], float] | None = None,
+    ) -> None:
+        """Start a unit process for every assignment that actually moves a vehicle.
+
+        ``delays`` maps (incident id, unit id) to seconds the unit waits before departing. Only
+        B0 uses it, for the agency-by-agency hand-off of the status quo. The unit is claimed
+        immediately even when it waits: a control room that has decided to send a vehicle has
+        committed it, and letting another incident take it in the meantime would understate the
+        cost of sequential dispatch.
+        """
+        delays = delays or {}
         for decision in decisions:
             state = self.responses.get(decision.incident_id)
             if state is None:
@@ -193,13 +245,22 @@ class Engine:
             for assignment in decision.assignments:
                 if assignment.role == AssignmentRole.PRE_ALERT:
                     index = self._claim(assignment.unit_id, state, pre_alert=True)
-                    if index is not None:
-                        self.fleet.set_state(
-                            index, UnitState.READY, self.now_s, incident_id=state.incident_id
-                        )
+                    if index is None:
+                        continue
+                    # A later batch may pre-alert the same unit again: a VERIFY candidate whose
+                    # posterior keeps moving is re-offered to the policy, and the crew is
+                    # already in the vehicle. Re-alerting is a no-op, not a state change.
+                    if self.fleet.units[index].state is UnitState.READY:
+                        continue
+                    self.fleet.set_state(
+                        index, UnitState.READY, self.now_s, incident_id=state.incident_id
+                    )
                     continue
                 index = self._claim(assignment.unit_id, state)
                 if index is None:
+                    agency = self._agency_of(assignment.unit_id)
+                    if agency is not None:
+                        state.refused[agency] = state.refused.get(agency, 0) + 1
                     continue
                 # Travel is resolved and the unit is moved to EN_ROUTE **synchronously**, before
                 # the next assignment is looked at. A SimPy process does not start until the
@@ -208,11 +269,22 @@ class Engine:
                 travel = self.travel_s(self.fleet.units[index].node, state.node)
                 if not np.isfinite(travel):
                     state.dispatched_units.discard(assignment.unit_id)
+                    state.refused[self.fleet.units[index].agency] += 1
                     continue  # nothing was changed, so the unit stays available
                 self.fleet.set_state(
                     index, UnitState.EN_ROUTE, self.now_s, incident_id=state.incident_id
                 )
-                self.env.process(self._respond(index, state, assignment.role, travel))
+                agency = self.fleet.units[index].agency
+                state.committed[agency] = state.committed.get(agency, 0) + 1
+                state.refused[agency] = max(0, state.refused.get(agency, 0) - 1)
+                wait = max(0.0, delays.get((decision.incident_id, assignment.unit_id), 0.0))
+                self.env.process(self._respond(index, state, assignment.role, travel, wait))
+
+    def _agency_of(self, unit_id: str) -> Agency | None:
+        try:
+            return self.fleet.units[self.fleet.index_of(unit_id)].agency
+        except KeyError:
+            return None
 
     def _claim(self, unit_id: str, state: ResponseState, pre_alert: bool = False) -> int | None:
         """Take a unit for this incident, or refuse. One unit serves one incident at a time."""
@@ -231,11 +303,22 @@ class Engine:
         return index
 
     def _respond(
-        self, index: int, state: ResponseState, role: AssignmentRole, travel: float
+        self,
+        index: int,
+        state: ResponseState,
+        role: AssignmentRole,
+        travel: float,
+        wait: float = 0.0,
     ) -> Generator:
-        """Travel to the scene, work, then return home. The unit is already EN_ROUTE."""
+        """Wait for the hand-off if there is one, travel, work, then return home.
+
+        The unit is already EN_ROUTE, so the hand-off delay is charged as busy time: the vehicle
+        is committed from the moment the control room decides to send it.
+        """
         unit = self.fleet.units[index]
         dispatched_s = self.now_s
+        if wait > 0:
+            yield self.env.timeout(wait)
         yield self.env.timeout(travel)
         self.fleet.set_state(index, UnitState.ON_SCENE, self.now_s, node=state.node)
         record = ArrivalRecord(

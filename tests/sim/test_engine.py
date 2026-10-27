@@ -256,3 +256,126 @@ def test_the_eta_table_is_built_from_current_positions(toy_network: RoadNetwork)
     assert table.seconds.shape == (2, 1)
     assert table.seconds[0, 0] == pytest.approx(_travel(toy_network, NEAR, SCENE))
     assert table.seconds[1, 0] == pytest.approx(_travel(toy_network, FAR, SCENE))
+
+
+def test_a_handoff_delay_postpones_departure_and_is_charged_as_busy_time(
+    toy_network: RoadNetwork,
+) -> None:
+    """B0's sequential hand-off. The vehicle is committed from the decision, so the wait counts
+    as busy time, and the record keeps travel and delay separable: the delay is
+    (arrived - dispatched) - travel."""
+    engine = _engine(toy_network, [_unit("P1", Agency.POLICE, NEAR)])
+    state = engine.register("I1", SCENE, {Agency.POLICE: 1}, is_false_alarm=False)
+    engine.execute(
+        [_decision("I1", [("P1", AssignmentRole.RESPOND)])],
+        delays={("I1", "P1"): 240.0},
+    )
+    engine.run(until_s=86400.0)
+    travel = _travel(toy_network, NEAR, SCENE)
+    arrival = state.arrivals[0]
+    assert arrival.travel_s == pytest.approx(travel)
+    assert arrival.arrived_s == pytest.approx(240.0 + travel)
+    assert arrival.arrived_s - arrival.dispatched_s - arrival.travel_s == pytest.approx(240.0)
+    assert engine.fleet.busy_seconds(Agency.POLICE) > 240.0
+
+
+def test_a_delayed_unit_is_still_claimed_immediately(toy_network: RoadNetwork) -> None:
+    """Otherwise another incident could take it during the hand-off and sequential dispatch
+    would look cheaper than it is."""
+    engine = _engine(toy_network, [_unit("P1", Agency.POLICE, NEAR)])
+    first = engine.register("I1", SCENE, {Agency.POLICE: 1}, is_false_alarm=False)
+    engine.execute(
+        [_decision("I1", [("P1", AssignmentRole.RESPOND)])], delays={("I1", "P1"): 600.0}
+    )
+    assert engine.fleet.units[0].state is UnitState.EN_ROUTE
+    second = engine.register("I2", NEAR, {Agency.POLICE: 1}, is_false_alarm=False)
+    engine.execute([_decision("I2", [("P1", AssignmentRole.RESPOND)])])
+    engine.run(until_s=86400.0)
+    assert len(first.arrivals) == 1
+    assert second.arrivals == []
+
+
+# -- topping up a short response ---------------------------------------------------------------
+
+
+def test_outstanding_counts_units_already_on_their_way(toy_network: RoadNetwork) -> None:
+    """A re-dispatch must top the response up, not send the whole requirement again."""
+    units = [_unit("P1", Agency.POLICE, NEAR), _unit("P2", Agency.POLICE, FAR)]
+    engine = _engine(toy_network, units)
+    state = engine.register("I1", SCENE, {Agency.POLICE: 2}, is_false_alarm=False)
+    assert state.outstanding() == {Agency.POLICE: 2}
+    engine.execute([_decision("I1", [("P1", AssignmentRole.RESPOND)])])
+    assert state.outstanding() == {Agency.POLICE: 1}  # P1 is committed, one still needed
+    assert state.unfinished()
+    engine.execute([_decision("I1", [("P2", AssignmentRole.RESPOND)])])
+    assert state.outstanding() == {Agency.POLICE: 0}
+    assert not state.unfinished()
+    engine.run(until_s=86400.0)
+    assert state.satisfied()
+    assert state.last_required_arrival_s() is not None
+
+
+def test_a_response_that_could_not_be_filled_stays_unfinished(toy_network: RoadNetwork) -> None:
+    engine = _engine(toy_network, [_unit("P1", Agency.POLICE, NEAR)])
+    state = engine.register("I1", SCENE, {Agency.POLICE: 1, Agency.FIRE: 1}, is_false_alarm=False)
+    engine.execute([_decision("I1", [("P1", AssignmentRole.RESPOND)])])
+    engine.run(until_s=86400.0)
+    assert state.outstanding() == {Agency.POLICE: 0, Agency.FIRE: 1}
+    assert state.unfinished()  # so the runner will keep offering it to the dispatcher
+
+
+def test_a_later_estimate_can_raise_the_requirement_but_never_lower_it(
+    toy_network: RoadNetwork,
+) -> None:
+    """The second wave raises what an incident needs. A weaker later estimate must not shrink a
+    requirement the first unit on scene already established."""
+    engine = _engine(toy_network, [_unit("P1", Agency.POLICE, NEAR)])
+    engine.register("I1", SCENE, {Agency.POLICE: 1}, is_false_alarm=False)
+    state = engine.register("I1", SCENE, {Agency.POLICE: 1, Agency.FIRE: 2}, is_false_alarm=False)
+    assert state.required[Agency.FIRE] == 2
+    state = engine.register("I1", SCENE, {Agency.POLICE: 1, Agency.FIRE: 0}, is_false_alarm=False)
+    assert state.required[Agency.FIRE] == 2  # not lowered
+
+
+def test_a_refused_ask_is_recorded_and_a_withheld_one_is_not(toy_network: RoadNetwork) -> None:
+    """The distinction the retry logic rests on: "wanted a unit and could not get one" must be
+    recorded, while "chose to send fewer than the requirement" must not. A confidence tier does
+    the latter deliberately, and retrying it would fight the policy."""
+    engine = _engine(toy_network, [_unit("P1", Agency.POLICE, NEAR)])
+    # asked for two police, only one exists and it is taken by the first ask
+    state = engine.register("I1", SCENE, {Agency.POLICE: 2}, is_false_alarm=False)
+    engine.execute([
+        _decision("I1", [("P1", AssignmentRole.RESPOND)]),
+    ])  # fmt: skip
+    assert state.was_refused() == {}  # nothing was refused; the policy only asked for one
+    other = engine.register("I2", FAR, {Agency.POLICE: 1}, is_false_alarm=False)
+    engine.execute([_decision("I2", [("P1", AssignmentRole.RESPOND)])])
+    assert other.was_refused() == {Agency.POLICE: 1}  # P1 was busy, so this ask was refused
+
+
+def test_a_refusal_clears_once_the_ask_is_met(toy_network: RoadNetwork) -> None:
+    """Otherwise one unlucky batch would keep the incident on the retry list for ever."""
+    units = [_unit("P1", Agency.POLICE, NEAR), _unit("P2", Agency.POLICE, FAR)]
+    engine = _engine(toy_network, units)
+    engine.register("I1", SCENE, {Agency.POLICE: 1}, is_false_alarm=False)
+    engine.execute([_decision("I1", [("P1", AssignmentRole.RESPOND)])])
+    second = engine.register("I2", FAR, {Agency.POLICE: 1}, is_false_alarm=False)
+    engine.execute([_decision("I2", [("P1", AssignmentRole.RESPOND)])])  # refused, P1 is busy
+    assert second.was_refused() == {Agency.POLICE: 1}
+    engine.execute([_decision("I2", [("P2", AssignmentRole.RESPOND)])])  # the retry succeeds
+    assert second.was_refused() == {}
+    assert not second.unfinished()
+
+
+def test_pre_alerting_an_already_ready_unit_is_a_no_op(toy_network: RoadNetwork) -> None:
+    """A VERIFY candidate whose posterior keeps moving is re-offered to the policy, so the same
+    unit gets pre-alerted again. The crew is already in the vehicle; re-alerting must not be
+    treated as a state change (it raised ready -> ready before this was fixed)."""
+    engine = _engine(toy_network, [_unit("A1", Agency.AMBULANCE, NEAR)])
+    engine.register("I1", SCENE, {Agency.AMBULANCE: 1}, is_false_alarm=False)
+    engine.execute([_decision("I1", [("A1", AssignmentRole.PRE_ALERT)])])
+    assert engine.fleet.units[0].state is UnitState.READY
+    first_since = engine.fleet.units[0].since_s
+    engine.execute([_decision("I1", [("A1", AssignmentRole.PRE_ALERT)])])
+    assert engine.fleet.units[0].state is UnitState.READY
+    assert engine.fleet.units[0].since_s == first_since  # the clock was not restarted either
