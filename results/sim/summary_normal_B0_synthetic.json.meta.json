@@ -1,10 +1,10 @@
 {
   "file": "results/sim/summary_normal_B0_synthetic.json",
-  "generated_at_utc": "2026-10-27T15:18:12+00:00",
+  "generated_at_utc": "2026-10-27T15:28:21+00:00",
   "command": "runner.py --scenario normal --policy B0 --reps 1",
   "synthetic": true,
   "git": {
-    "commit": "612c659587f0c1406a4173f3f785623ce5bb9c89",
+    "commit": "93aab6431eb126b2075ab763aa7ca4876726661f",
     "dirty": true
   },
   "configs_sha256": {

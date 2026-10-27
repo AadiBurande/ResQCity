@@ -77,6 +77,31 @@ UNVERIFIED or ILLUSTRATIVE and listed by `find_unverified`) are written by
 Models and metrics: `src/resqcity/forecasting/`. Figures:
 [notebooks/05_forecasting.ipynb](notebooks/05_forecasting.ipynb).
 
+## The simulator (phase 7)
+
+```bash
+make sim                       # validate the queueing against Erlang-C, then run a week of B0
+make sim POLICY=FULL           # the full policy: joint MILP + confidence tiers + green corridor
+make sim SCENARIO=monsoon SIM_REPS=5
+```
+
+A SimPy digital twin on the real Pune network. Incidents, camera alarms and calls are drawn for
+the whole week **before** the clock starts, so every policy sees the identical week and a
+difference between B0 and FULL is the policy rather than the weather (formulation:
+[docs/models/simulator.md](docs/models/simulator.md)).
+
+`make sim` runs the Erlang-C validation first on purpose: the simulator reduced to one agency
+with no incidents is exactly M/M/c, and over 60 simulated days it agrees with the closed form to
+**0.0006** on utilisation and **1.05 s** on mean wait. If the engine's clock or queue discipline
+disagreed with the closed form, nothing downstream would be worth looking at.
+
+**The finding so far is negative, and that is a result.** Over 8 simulated weeks, 7 of 287
+incidents fall within camera range and **1** is detected, out of 1,543,628 alarms. That follows
+from the measured coverage (3.95 %, D-031) and effective detection (0.31, D-029), so at the real
+camera deployment the CCTV-triggered policies can differ from the call-based baseline only
+through the cost of chasing false alarms (D-032, L35). The joint-dispatch question is separable
+and survives: it needs no camera.
+
 ## Layout
 
 ```

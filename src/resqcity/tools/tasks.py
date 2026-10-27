@@ -106,13 +106,15 @@ def optimize(_: argparse.Namespace) -> int:
 
 
 def sim(args: argparse.Namespace) -> int:
-    """Phase 7: validate the engine's queueing against Erlang-C, then run the simulator.
+    """Phase 7: validate the queueing, measure what the cameras see, then run the simulator.
 
     The validation runs first on purpose: if the engine's clock, queue discipline or busy-time
-    accounting disagree with the closed form, nothing downstream is worth looking at. Minutes per
-    replication-week; no GPU."""
+    accounting disagree with the closed form, nothing downstream is worth looking at. The
+    evidence funnel runs second because it bounds what any CCTV policy could possibly achieve
+    (D-032 item 1). Minutes per replication-week; no GPU."""
     return _run(
         _py("resqcity.sim.validate_queue"),
+        _py("resqcity.sim.evidence_funnel", "--scenario", args.scenario),
         _py(
             "resqcity.sim.runner",
             "--scenario",

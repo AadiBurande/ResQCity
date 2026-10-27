@@ -10,7 +10,7 @@
     "afc14821a5ac00f2423fdec5f7c8b589626f5b4ac563ac470336efa937d6051a"
   ],
   "wall_seconds": [
-    79.69881649999661
+    81.30801659999997
   ],
   "solver_calls": [
     127
@@ -61,6 +61,19 @@
           "p_wait": 0.024096385542168676
         }
       }
+    }
+  ],
+  "hospitals": [
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 0,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 0.0,
+      "patients_with_no_capable_hospital": 0
     }
   ]
 }
