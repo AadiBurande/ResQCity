@@ -24,6 +24,8 @@ SURVIVAL = load_survival_config()
 
 def test_every_assumed_simulator_parameter_is_flagged() -> None:
     assert set(find_unverified(SIM)) == {
+        # the one that most directly drives RQ2: joint dispatch removes this delay
+        "policies.b0.sequential_handoff_s",
         "on_scene.median_s",
         "on_scene.false_alarm_s",
         "transport.p_transport",

@@ -19,6 +19,33 @@ run:
   # and re-solving per event would both cost time and let a single alarm reshuffle the city.
   dispatch_interval_s: 30.0
 
+policies:
+  b0:
+    # ------------------------------------------------------------------------------------------
+    # READ THIS BEFORE QUOTING ANY RQ2 NUMBER.
+    # ------------------------------------------------------------------------------------------
+    # B0 is the status quo: one 112 call, then an agency-by-agency hand-off (police control room
+    # calls 108 for an ambulance, 108 calls the fire brigade). Each hand-off adds a delay before
+    # the next agency starts moving, and THAT DELAY IS THE MAIN THING JOINT DISPATCH REMOVES.
+    # The research question is whether joint dispatch cuts time-to-full-response, so a large
+    # assumed hand-off delay would largely ASSUME the answer.
+    #
+    # No primary source for Pune's inter-agency hand-off time could be found, so this is
+    # UNVERIFIED and phase 10 must sweep it, INCLUDING 0. At 0, B0 and B1 differ only in what
+    # evidence they see, which is the cleanest test of the claim: any remaining RQ2 gain is then
+    # coordination (who is sent) rather than the hand-off penalty we handed ourselves.
+    sequential_handoff_s:
+      value: 120.0
+      source: UNVERIFIED
+      note: >-
+        Delay before each ADDITIONAL agency is asked, applied per hand-off step: the second
+        agency starts after one delay, the third after two. Two minutes is a plausible
+        control-room relay, not a measurement. Sweep 0, 60, 120, 300 in phase 10 and report RQ2
+        against it; if the conclusion only holds at the larger values, say so.
+  note: >-
+    B1-FULL dispatch every agency at once, so none of them pays this delay. The confidence
+    thresholds of B3 and FULL live in configs/optimization.yaml -> policy.
+
 on_scene:
   # Time a unit spends at the scene before it can leave. Exponential around these medians.
   median_s:

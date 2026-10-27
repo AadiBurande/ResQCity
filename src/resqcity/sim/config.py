@@ -55,6 +55,28 @@ class RunConfig(ConfigModel):
         return self.warmup_hours * 3600.0
 
 
+class B0Config(ConfigModel):
+    """The status quo's sequential hand-off.
+
+    Flagged loudly because it is the parameter that most directly drives RQ2: joint dispatch
+    removes this delay, so a large assumed value would assume the headline result. See the
+    config's own comment and ``docs/plans/phase-7.md``.
+    """
+
+    sequential_handoff_s: SourcedValue[float]
+
+    @model_validator(mode="after")
+    def _check(self) -> Self:
+        if self.sequential_handoff_s.value < 0:
+            raise ValueError("a hand-off cannot take negative time")
+        return self
+
+
+class PoliciesConfig(ConfigModel):
+    b0: B0Config
+    note: str = ""
+
+
 class OnSceneConfig(ConfigModel):
     median_s: SourcedValue[dict[Agency, float]]
     false_alarm_s: SourcedValue[dict[Agency, float]]
@@ -144,6 +166,7 @@ class ValidationConfig(ConfigModel):
 class SimConfig(ConfigModel):
     synthetic: bool
     run: RunConfig
+    policies: PoliciesConfig
     on_scene: OnSceneConfig
     transport: TransportConfig
     second_wave: SecondWaveConfig
