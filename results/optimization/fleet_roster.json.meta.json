@@ -1,14 +1,14 @@
 {
   "file": "results/optimization/fleet_roster.json",
-  "generated_at_utc": "2026-10-26T21:47:50+00:00",
+  "generated_at_utc": "2026-10-27T13:57:50+00:00",
   "command": "optimize_run.py",
   "synthetic": true,
   "git": {
-    "commit": "6ebefaf8c26e6a8bb94b95c9263f083bc0e092a5",
+    "commit": "7c1ee3fb9223142266630f04f5b26155b133fbf7",
     "dirty": false
   },
   "configs_sha256": {
-    "configs/optimization.yaml": "f2ffdad3ea3d3c9a24e86457ba99dc878b8fad115cfac0d3be8096660a122bf4",
+    "configs/optimization.yaml": "859e22a19acde102a209da0c85ebef9a9329d54831a94b6b68d5bc97ba29cd21",
     "configs/fleet.yaml": "4cf71eb9dcff50c5091d6d5d371fd83b132fa6672efdfdd0e72389dd41ebf8fe",
     "configs/incidents.yaml": "54f245fe34f19dcfd8acba582925fa6f86a8d5bf35d0c3369a21c1b4011454d5"
   },

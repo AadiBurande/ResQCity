@@ -1,63 +1,124 @@
 {
-  "status": "synthetic ETAs; measures solver time against instance size, not route quality",
+  "status": "synthetic ETAs and a synthetic ward-coverage map; measures solver time against instance size, not route quality",
+  "variants": {
+    "full": "green corridor (C7) and ward coverage (C8) active -- what live dispatch solves, and what the acceptance criterion is judged on",
+    "reduced": "neither term; what this benchmark reported before the OR review"
+  },
   "time_limit_s": 1.0,
   "live_batch_within_limit": true,
-  "live_batch_median_s": 0.06315319996792823,
+  "live_batch_median_s": 0.17016760000115028,
+  "live_batch_max_s": 0.2028537000005599,
+  "worst_case": {
+    "incidents": 40,
+    "units": 91,
+    "max_solve_s": 1.1608962999998766,
+    "within_limit": false
+  },
   "sizes": [
     {
       "incidents": 2,
       "units": 20,
       "repeats": 5,
-      "median_solve_s": 0.015561700041871518,
-      "max_solve_s": 0.017665799998212606,
-      "statuses": [
-        "OPTIMAL"
-      ],
-      "within_limit": true
+      "full": {
+        "median_solve_s": 0.046646100003272295,
+        "max_solve_s": 0.04711900000256719,
+        "statuses": [
+          "OPTIMAL"
+        ],
+        "within_limit": true
+      },
+      "reduced": {
+        "median_solve_s": 0.014873299998725997,
+        "max_solve_s": 0.015653399997972883,
+        "statuses": [
+          "OPTIMAL"
+        ],
+        "within_limit": true
+      }
     },
     {
       "incidents": 5,
       "units": 45,
       "repeats": 5,
-      "median_solve_s": 0.03073140000924468,
-      "max_solve_s": 0.03148139995755628,
-      "statuses": [
-        "OPTIMAL"
-      ],
-      "within_limit": true
+      "full": {
+        "median_solve_s": 0.07553310000002966,
+        "max_solve_s": 0.07596140000168816,
+        "statuses": [
+          "OPTIMAL"
+        ],
+        "within_limit": true
+      },
+      "reduced": {
+        "median_solve_s": 0.030350500001077307,
+        "max_solve_s": 0.03184190000320086,
+        "statuses": [
+          "OPTIMAL"
+        ],
+        "within_limit": true
+      }
     },
     {
       "incidents": 10,
       "units": 91,
       "repeats": 5,
-      "median_solve_s": 0.06315319996792823,
-      "max_solve_s": 0.07593719998840243,
-      "statuses": [
-        "OPTIMAL"
-      ],
-      "within_limit": true
+      "full": {
+        "median_solve_s": 0.17016760000115028,
+        "max_solve_s": 0.2028537000005599,
+        "statuses": [
+          "OPTIMAL"
+        ],
+        "within_limit": true
+      },
+      "reduced": {
+        "median_solve_s": 0.07561599999826285,
+        "max_solve_s": 0.07847679999758839,
+        "statuses": [
+          "OPTIMAL"
+        ],
+        "within_limit": true
+      }
     },
     {
       "incidents": 20,
       "units": 91,
       "repeats": 5,
-      "median_solve_s": 0.10920780000742525,
-      "max_solve_s": 0.12509619997581467,
-      "statuses": [
-        "OPTIMAL"
-      ],
-      "within_limit": true
+      "full": {
+        "median_solve_s": 0.3373439999995753,
+        "max_solve_s": 0.4078059999992547,
+        "statuses": [
+          "OPTIMAL"
+        ],
+        "within_limit": true
+      },
+      "reduced": {
+        "median_solve_s": 0.13831159999972442,
+        "max_solve_s": 0.1414781999992556,
+        "statuses": [
+          "OPTIMAL"
+        ],
+        "within_limit": true
+      }
     },
     {
       "incidents": 40,
       "units": 91,
       "repeats": 5,
-      "median_solve_s": 1.0735377999953926,
-      "max_solve_s": 1.0788571999873966,
-      "statuses": [
-        "FEASIBLE"
-      ],
-      "within_limit": false
+      "full": {
+        "median_solve_s": 1.1515008999995189,
+        "max_solve_s": 1.1608962999998766,
+        "statuses": [
+          "FEASIBLE"
+        ],
+        "within_limit": false
+      },
+      "reduced": {
+        "median_solve_s": 1.0834840000024997,
+        "max_solve_s": 1.288952099999733,
+        "statuses": [
+          "FEASIBLE"
+        ],
+        "within_limit": false
+      }
     }
   ]
 }

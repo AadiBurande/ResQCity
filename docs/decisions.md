@@ -862,10 +862,15 @@ UNVERIFIED and listed by `find_unverified`; the fleet counts are press-derived (
    placement, Erlang-C fleet sizing, and the routing layer with the green corridor. Every model
    has a tiny-instance test checked against **brute force** (CLAUDE.md), and the solver's optimum
    is compared with exhaustive enumeration rather than with itself.
-   - **Acceptance criterion met:** a live batch of 10 incidents across the whole 91-unit fleet
-     solves OPTIMAL in **0.062 s** median against the 1 s limit
-     (`results/optimization/solver_bench.json`). At 40 incidents the limit binds and the solver
-     returns FEASIBLE, which is the designed behaviour and is reported, not hidden.
+   - **Acceptance criterion met, on the model that actually runs.** A live batch of 10 incidents
+     across the whole 91-unit fleet solves OPTIMAL in **0.170 s** median, **0.203 s** worst of 5,
+     against the 1 s limit (`results/optimization/solver_bench.json`). The first version of this
+     benchmark timed a model with **neither** the green corridor nor ward coverage and reported
+     0.076 s; an OR review caught the acceptance criterion being read off that reduced model. The
+     benchmark now solves every size twice on the same instances and reports both, so the cost of
+     the two terms is visible: they roughly double the solve time. At 40 incidents the full model
+     takes **1.15 s**, exceeds the limit, and returns FEASIBLE rather than OPTIMAL — the designed
+     degradation, reported rather than hidden.
    - Two guards the brief did not ask for but the model needed: (C6), without which an incident
      left short of units would report a *faster* completion and shortfall would be rewarded; and
      the epsilon term of master plan §6.1, which stops the solver parking an ambulance off the
@@ -904,8 +909,41 @@ UNVERIFIED and listed by `find_unverified`; the fleet counts are press-derived (
    moment a call or a human review corroborates it, which phase 10 measures. VERIFY and REVIEW
    incidents are deliberately kept out of the MILP so an unconfirmed candidate cannot take the
    unit a known incident needs.
-6. **Price of fairness (RQ4) is measured, not asserted.** C3 is solved twice, with and without
-   the per-ward availability constraint, and the relative loss in expected covered demand is
-   reported. An impossible fairness requirement (a ward no base can reach in time) is relaxed to
-   a per-ward shortfall and reported: a city that cannot cover its wards is a finding, not an
-   exception.
+6. **Price of fairness (RQ4) measured — and the fairness requirement is mostly unreachable.**
+   C3 is solved twice, with and without the per-ward availability constraint
+   (`results/optimization/preposition.json`, both solves proved OPTIMAL):
+
+   | agency | units | bases | price of fairness | wards left short |
+   |---|---|---|---|---|
+   | ambulance | 30 | 590 | **10.19 %** | 39 of 58 |
+   | police | 39 | 57 | **5.47 %** | 29 of 58 |
+   | fire | 22 | 14 | **0.00 %** | 40 of 58 |
+
+   The headline number is cheap — about a tenth of expected covered demand for ambulances — but
+   the **"wards left short" column is the real finding and it limits what RQ4 can claim**: the
+   requirement (one unit free with probability ≥ α = 0.8 within T_ward = 10 min) is simply
+   unreachable for 29–40 of the 58 wards with these fleets, so the measured price is the cost of
+   equalising only the wards that *can* be covered. Fire's 0.00 % is the degenerate case: with
+   14 stations the constraint binds nowhere it can be satisfied, so it changes nothing. Phase 10
+   must either sweep α and T_ward down to where the constraint is satisfiable, or report the
+   price of fairness as conditional on the reachable subset. It must not be presented as "fairness
+   costs 10 %".
+   An impossible requirement is **not** detected and re-solved; (P5) is written as a soft
+   constraint always, with a big-M derived from the objective's own coefficients (sum of the
+   positive ones, plus 1 — here 991) so it is provably equivalent to a hard constraint wherever
+   the hard one is satisfiable. The earlier hard-coded M = 10⁴ gave the same optima, but could
+   not carry that guarantee; `docs/models/preposition.md` §5 has the proof and the formulation now
+   matches the code.
+7. **What the OR model review changed.** The review found three blockers, each reproduced before
+   being fixed, each now a regression test: a unit dispatched twice when C1 and a later VERIFY
+   tier both claimed it; MEXCLP cover truncated so expected coverage read 8.25 instead of 9.375;
+   and a green corridor credited to a police unit dispatched to a *different* incident (510 s
+   reported against 900 s actual). Four of my own tests failed afterwards — two encoded the old
+   corridor semantics and two brute-forced an uncapped epsilon — which is the point of keeping the
+   brute-force checks. The review's smaller findings are items 1 and 6 above plus the brute force
+   itself: it previously ran only with the corridor off and no wards, so **C7 and C8 were checked
+   by example rather than against the optimum**. The enumeration now covers both, including a case
+   where they interact. One term it cannot check independently is the C6 shortfall surrogate,
+   whose formula is a chosen definition rather than a derivable quantity; that is stated in the
+   test module instead of being glossed over, and the property C6 exists to guarantee is asserted
+   separately.
