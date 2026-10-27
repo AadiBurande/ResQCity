@@ -5,6 +5,7 @@ TASKS    := uv run python -m resqcity.tools.tasks
 SCENARIO ?= normal
 POLICY   ?= B0
 REPS     ?= 30
+SIM_REPS ?= 1
 
 .PHONY: setup lint format test types data vision fusion forecast optimize streams api ui demo sim experiments figures reproduce
 
@@ -19,4 +20,4 @@ fusion:
 	$(TASKS) fusion --scenario $(SCENARIO) --reps $(REPS)
 
 sim:
-	$(TASKS) sim --scenario $(SCENARIO) --policy $(POLICY)
+	$(TASKS) sim --scenario $(SCENARIO) --policy $(POLICY) --sim-reps $(SIM_REPS)

@@ -105,6 +105,26 @@ def optimize(_: argparse.Namespace) -> int:
     )
 
 
+def sim(args: argparse.Namespace) -> int:
+    """Phase 7: validate the engine's queueing against Erlang-C, then run the simulator.
+
+    The validation runs first on purpose: if the engine's clock, queue discipline or busy-time
+    accounting disagree with the closed form, nothing downstream is worth looking at. Minutes per
+    replication-week; no GPU."""
+    return _run(
+        _py("resqcity.sim.validate_queue"),
+        _py(
+            "resqcity.sim.runner",
+            "--scenario",
+            args.scenario,
+            "--policy",
+            args.policy,
+            "--reps",
+            str(args.sim_reps),
+        ),
+    )
+
+
 def streams(_: argparse.Namespace) -> int:
     """Start MediaMTX (Docker) and publish simulated cameras with scenario cues (Ctrl-C stops)."""
     return _run(_py("resqcity.streams.loop_cameras", "--start-server"))
@@ -204,7 +224,7 @@ TASKS: dict[str, Callable[[argparse.Namespace], int]] = {
     "api": _stub(8, "start backend API"),
     "ui": _stub(9, "start dashboard"),
     "demo": _stub(9, "end-to-end live demo"),
-    "sim": _stub(7, "run simulator"),
+    "sim": sim,
     "experiments": _stub(10, "run experiments"),
     "figures": _stub(10, "generate figures"),
     "reproduce": _stub(11, "regenerate every result and figure"),
@@ -217,6 +237,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--scenario", default="normal")
     parser.add_argument("--policy", default="B0")
     parser.add_argument("--reps", type=int, default=30, help="fusion: week-check replications")
+    parser.add_argument(
+        "--sim-reps", type=int, default=1, help="sim: replications (configs/sim.yaml has 30)"
+    )
     args = parser.parse_args(argv)
     return TASKS[args.target](args)
 
