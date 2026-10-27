@@ -18,6 +18,8 @@ from resqcity.forecasting.config import ForecastingConfig
 TOP_K = (3, 5, 10)
 DECILES = 10
 TIE_SEED = 20260126
+BOOTSTRAP_REPS = 2000
+BOOTSTRAP_SEED = 20261027
 
 
 def split(panel: pd.DataFrame, cfg: ForecastingConfig) -> dict[str, pd.DataFrame]:
@@ -42,31 +44,62 @@ def poisson_deviance(y: np.ndarray, mu: np.ndarray) -> float:
     return float(2.0 * np.mean(term - (y - mu)))
 
 
-def top_k_hit_rate(rows: pd.DataFrame, pred: np.ndarray, k: int) -> float:
-    """Share of real incidents that fall in the k wards with the highest predicted demand.
+def per_hour_hits(
+    rows: pd.DataFrame, pred: np.ndarray, k: int, tie_break: str = "random"
+) -> pd.DataFrame:
+    """Per hour: incidents inside the k highest-predicted wards, and incidents in total.
 
-    Computed per hour over the wards, summing predictions across types -- the question
-    pre-positioning asks when it decides where to stand units.
+    Returned per hour rather than pooled so the bootstrap can resample whole hours, which is the
+    unit of dependence here (every ward competes within its own hour).
+
+    ``tie_break`` decides what happens when predictions are equal. "random" is the honest
+    default; "name" reproduces the ordering artefact described in D-030 item 6, where a model
+    predicting the same value everywhere silently "chose" the alphabetically first wards.
     """
     frame = pd.DataFrame(
         {"ts": rows["ts"].to_numpy(), "ward": rows["ward"].astype(str).to_numpy(),
          "count": rows["count"].to_numpy(), "pred": pred}
     )  # fmt: skip
     by_ward = frame.groupby(["ts", "ward"], observed=True)[["count", "pred"]].sum()
-    # ties are broken at random rather than by ward name: a model that predicts the same value
-    # everywhere (the uniform floor) would otherwise always "choose" the alphabetically first
-    # wards, and score whatever those wards happen to contain
-    rng = np.random.default_rng(TIE_SEED)
-    jitter = rng.random(len(by_ward)) * 1e-12
-    by_ward = by_ward.assign(rank_key=by_ward["pred"].to_numpy() + jitter)
-    hits = total = 0
-    for _, group in by_ward.groupby(level=0, observed=True):
-        if group["count"].sum() == 0:
+    if tie_break == "random":
+        rng = np.random.default_rng(TIE_SEED)
+        key = by_ward["pred"].to_numpy() + rng.random(len(by_ward)) * 1e-12
+    elif tie_break == "name":
+        key = by_ward["pred"].to_numpy()
+    else:
+        raise ValueError(f"unknown tie_break {tie_break!r}")
+    by_ward = by_ward.assign(rank_key=key)
+    rows_out = []
+    for ts, group in by_ward.groupby(level=0, observed=True):
+        total = int(group["count"].sum())
+        if total == 0:
             continue
         chosen = group["rank_key"].nlargest(k).index
-        hits += int(group.loc[chosen, "count"].sum())
-        total += int(group["count"].sum())
-    return hits / total if total else float("nan")
+        rows_out.append({"ts": ts, "hits": int(group.loc[chosen, "count"].sum()), "total": total})
+    return pd.DataFrame(rows_out)
+
+
+def bootstrap_ci(
+    numerator: np.ndarray, denominator: np.ndarray, reps: int = BOOTSTRAP_REPS
+) -> list[float]:
+    """95 % interval of sum(numerator)/sum(denominator), resampling the units (hours)."""
+    if len(numerator) == 0:
+        return [float("nan"), float("nan")]
+    rng = np.random.default_rng(BOOTSTRAP_SEED)
+    idx = rng.integers(0, len(numerator), size=(reps, len(numerator)))
+    ratios = numerator[idx].sum(axis=1) / np.maximum(denominator[idx].sum(axis=1), 1e-12)
+    return [float(np.percentile(ratios, 2.5)), float(np.percentile(ratios, 97.5))]
+
+
+def top_k_hit_rate(rows: pd.DataFrame, pred: np.ndarray, k: int) -> float:
+    """Share of real incidents that fall in the k wards with the highest predicted demand.
+
+    Computed per hour over the wards, summing predictions across types -- the question
+    pre-positioning asks when it decides where to stand units.
+    """
+    per_hour = per_hour_hits(rows, pred, k)
+    total = per_hour["total"].sum()
+    return float(per_hour["hits"].sum() / total) if total else float("nan")
 
 
 def calibration(rows: pd.DataFrame, pred: np.ndarray, model: str, scale: str) -> pd.DataFrame:

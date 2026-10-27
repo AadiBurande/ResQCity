@@ -26,6 +26,11 @@ def _find_project_root(start: Path) -> Path:
 PROJECT_ROOT = _find_project_root(Path(__file__).resolve())
 CONFIG_DIR = PROJECT_ROOT / "configs"
 UNVERIFIED = "UNVERIFIED"
+ILLUSTRATIVE = "ILLUSTRATIVE"
+# Neither word is a citation, so both must be reported by find_unverified. ILLUSTRATIVE marks a
+# value chosen to have the right shape rather than the right magnitude (a fixed festival date, a
+# seasonal profile); treating it as sourced would hide it from the assumption list.
+UNSOURCED = frozenset({UNVERIFIED, ILLUSTRATIVE})
 
 T = TypeVar("T")
 M = TypeVar("M", bound=BaseModel)
@@ -41,12 +46,14 @@ class SourcedValue(ConfigModel, Generic[T]):
     """A parameter value together with the citation it comes from."""
 
     value: T
-    source: str = Field(min_length=1, description=f"Citation, or '{UNVERIFIED}'.")
+    source: str = Field(
+        min_length=1, description=f"Citation, or one of {sorted(UNSOURCED)} when there is none."
+    )
     note: str = ""
 
     @property
     def verified(self) -> bool:
-        return self.source.strip().upper() != UNVERIFIED
+        return self.source.strip().upper() not in UNSOURCED
 
 
 # ---------------------------------------------------------------------------------------------

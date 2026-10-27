@@ -1,5 +1,6 @@
 """Typed config of the ward-hour demand forecaster (configs/forecasting.yaml; phase 5, D-030)."""
 
+from datetime import date
 from pathlib import Path
 from typing import Self
 
@@ -9,6 +10,7 @@ from resqcity.common.config import CONFIG_DIR, ConfigModel, SourcedValue, load_m
 from resqcity.common.schemas import EventType
 
 OTHER = "other"
+HOURS_PER_DAY = 24
 
 
 class Targets(ConfigModel):
@@ -29,6 +31,48 @@ class Targets(ConfigModel):
         if event_type in self.fold_into_other or event_type.value not in self.types:
             return OTHER
         return event_type.value
+
+
+class WetDay(ConfigModel):
+    p_per_mm: float = Field(gt=0)
+    p_min: float = Field(gt=0, lt=1)
+    p_max: float = Field(gt=0, le=1)
+    gamma_shape: float = Field(gt=0)
+
+
+class Festival(ConfigModel):
+    month: int = Field(ge=1, le=12)
+    day: int = Field(ge=1, le=31)
+    evenings: int = Field(ge=1)
+
+
+class History(ConfigModel):
+    """Parameters of the synthetic history written by ``resqcity.sim.make_history``."""
+
+    start: date
+    weeks: int = Field(ge=1)
+    rain_seed: int
+    monthly_mm: SourcedValue[dict[int, float]]
+    wet_day: SourcedValue[WetDay]
+    hourly_shape: SourcedValue[list[float]]
+    festival: SourcedValue[Festival]
+
+    @model_validator(mode="after")
+    def _check(self) -> Self:
+        if sorted(self.monthly_mm.value) != list(range(1, 13)):
+            raise ValueError("history.monthly_mm needs one entry per month 1-12")
+        if len(self.hourly_shape.value) != HOURS_PER_DAY:
+            raise ValueError(f"history.hourly_shape needs {HOURS_PER_DAY} entries")
+        if self.weeks * 7 % 7:  # pragma: no cover - whole weeks by construction
+            raise ValueError("history must span whole weeks")
+        wet = self.wet_day.value
+        if wet.p_min > wet.p_max:
+            raise ValueError("history.wet_day.p_min must not exceed p_max")
+        return self
+
+    @property
+    def days(self) -> int:
+        return self.weeks * 7
 
 
 class Split(ConfigModel):
@@ -83,6 +127,7 @@ class NoiseKnob(ConfigModel):
 class ForecastingConfig(ConfigModel):
     synthetic: bool
     history_scenario: str
+    history: History
     targets: Targets
     split: Split
     features: Features

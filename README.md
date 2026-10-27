@@ -58,6 +58,25 @@ process built from the measured detector feed the Bayesian fusion in `src/resqci
 (formulation: [docs/models/fusion.md](docs/models/fusion.md)). Posterior traces:
 [notebooks/04_fusion.ipynb](notebooks/04_fusion.ipynb).
 
+## Ward-hour demand forecasting (phase 5)
+
+```bash
+make forecast               # build the panel, fit every model, score and calibrate (~4 min)
+```
+
+**Accuracy here is not a research claim.** The training data comes from this project's own
+incident generator, so a model handed those inputs recovers the formula by construction: the
+`realistic` model closes 89 % of the no-information-to-oracle gap, which is the circularity made
+visible rather than avoided. What phase 10 uses is the explicit error knob
+(`forecasting.yaml` -> `noise_knob`), because the fitted models are statistically
+indistinguishable from each other and from the oracle on top-k ward ranking (D-030).
+
+Three years of synthetic history (`configs/forecasting.yaml` -> `history`, every parameter
+UNVERIFIED or ILLUSTRATIVE and listed by `find_unverified`) are written by
+`python -m resqcity.sim.make_history`; the panel is 58 wards x 26,208 hours x 3 incident types.
+Models and metrics: `src/resqcity/forecasting/`. Figures:
+[notebooks/05_forecasting.ipynb](notebooks/05_forecasting.ipynb).
+
 ## Layout
 
 ```

@@ -83,6 +83,47 @@ class UniformRate:
 
 
 @dataclass
+class PerCellClimatology:
+    """The naive historical average: one mean per (ward, hour-of-week, type).
+
+    Kept as a DECLARED baseline, not because anyone should use it, but so the claim that it is
+    degenerate at this sparsity is traceable to a results file rather than to prose (D-030).
+    With ~0.1 incidents per cell it predicts exactly zero for most cells, and a test incident
+    landing on one of those contributes an unbounded Poisson deviance.
+    """
+
+    table: pd.Series
+    fallback: float
+    name: str = "climatology_percell"
+
+    @staticmethod
+    def _key(rows: pd.DataFrame) -> pd.DataFrame:
+        return pd.DataFrame({
+            "ward": rows["ward"].astype(str).reset_index(drop=True),
+            "how": (rows["weekday"].astype(int) * 24 + rows["hour"].astype(int)).reset_index(
+                drop=True
+            ),
+            "type": rows["type"].astype(str).reset_index(drop=True),
+        })  # fmt: skip
+
+    @classmethod
+    def fit(cls, train: pd.DataFrame) -> "PerCellClimatology":
+        key = cls._key(train)
+        counts = train["count"].reset_index(drop=True)
+        table = counts.groupby([key["ward"], key["how"], key["type"]], observed=True).mean()
+        return cls(table=table, fallback=float(counts.mean()))
+
+    def predict(self, rows: pd.DataFrame) -> np.ndarray:
+        key = self._key(rows)
+        index = pd.MultiIndex.from_arrays([key["ward"], key["how"], key["type"]])
+        return self.table.reindex(index).fillna(self.fallback).to_numpy(float)
+
+    def zero_share(self, rows: pd.DataFrame) -> float:
+        pred = self.predict(rows)
+        return float((pred == 0).mean())
+
+
+@dataclass
 class Climatology:
     """Historical average, estimated the way a sparse panel demands.
 

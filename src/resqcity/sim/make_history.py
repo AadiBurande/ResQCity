@@ -6,6 +6,10 @@ The evaluation scenarios are single weeks; the forecaster needs years, with a se
 and a recurring festival to learn from. This script writes that scenario as DATA (like
 ``configs/cameras.yaml``), so the long rain array stays out of the code.
 
+Every parameter (the monthly rainfall profile, the wet-day draw, the hourly shape, the festival
+placement) comes from ``configs/forecasting.yaml`` -> ``history``, so ``find_unverified`` lists
+them with the project's other assumptions rather than them hiding as constants in this file.
+
 Rain: a daily total in mm per day, drawn once here with a fixed seed from a monthly profile
 (wet-day probability plus gamma intensity, rescaled so each month hits its target). A very dry
 month can draw no wet day at all and then stays completely dry, which is what the profile's low
@@ -30,41 +34,27 @@ import numpy as np
 import yaml
 
 from resqcity.common.config import CONFIG_DIR
+from resqcity.forecasting.config import History, load_forecasting_config
 
 IST = ZoneInfo("Asia/Kolkata")
 OUT = CONFIG_DIR / "scenarios" / "history_3y.yaml"
 SOURCE_SCENARIO = CONFIG_DIR / "scenarios" / "ganeshotsav.yaml"
-START = datetime(2023, 1, 2, tzinfo=IST)  # a Monday; history ends before the 2026 eval scenarios
-WEEKS = 156  # 1092 days = whole weeks, so weekday structure is balanced
-RAIN_SEED = 20260126
-
-# Illustrative monthly rainfall for Pune (mm). IMD station normals could not be confirmed at the
-# source on 2026-10-26 (only third-party climate pages, no station stated), so this is UNVERIFIED:
-# it carries the right seasonal shape (dry Nov-May, monsoon Jun-Sep, ~760 mm/year), nothing more.
-MONTHLY_MM = {1: 1, 2: 1, 3: 3, 4: 10, 5: 30, 6: 150, 7: 180, 8: 140, 9: 140, 10: 80, 11: 20, 12: 3}
-WET_P_PER_MM = 1 / 200.0
-WET_P_RANGE = (0.03, 0.75)
-GAMMA_SHAPE = 1.2
-# Rain falls mostly in the afternoon and evening (same shape as configs/scenarios/monsoon.yaml).
-HOUR_SHAPE = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2,
-              0.4, 0.4, 0.8, 1.2, 1.5, 1.2, 0.9, 0.6, 0.4, 0.3, 0.2, 0.2]  # fmt: skip
-FESTIVAL_START = (9, 1)  # (month, day) of the first evening window each year
-FESTIVAL_EVENINGS = 10  # evening crowds, then a two-day immersion procession
 
 log = logging.getLogger(__name__)
 
 
-def daily_rain_mm(start: datetime, days: int, seed: int) -> list[float]:
+def daily_rain_mm(cfg: History, start: datetime, days: int, seed: int) -> list[float]:
     """One rainfall total (mm) per day: wet/dry draw then gamma intensity, rescaled per month."""
     rng = np.random.default_rng(seed)
+    monthly, wet_cfg = cfg.monthly_mm.value, cfg.wet_day.value
     dates = [start.date() + timedelta(days=d) for d in range(days)]
     out = np.zeros(days)
     for key in sorted({(d.year, d.month) for d in dates}):
         idx = np.array([i for i, d in enumerate(dates) if (d.year, d.month) == key])
-        target = MONTHLY_MM[key[1]] * len(idx) / _days_in_month(*key)  # partial months pro-rata
-        p_wet = float(np.clip(MONTHLY_MM[key[1]] * WET_P_PER_MM, *WET_P_RANGE))
+        target = monthly[key[1]] * len(idx) / _days_in_month(*key)  # partial months pro-rata
+        p_wet = float(np.clip(monthly[key[1]] * wet_cfg.p_per_mm, wet_cfg.p_min, wet_cfg.p_max))
         wet = rng.random(len(idx)) < p_wet
-        amount = np.where(wet, rng.gamma(GAMMA_SHAPE, 1.0, len(idx)), 0.0)
+        amount = np.where(wet, rng.gamma(wet_cfg.gamma_shape, 1.0, len(idx)), 0.0)
         if amount.sum() > 0:
             amount *= target / amount.sum()
         out[idx] = amount
@@ -76,16 +66,17 @@ def _days_in_month(year: int, month: int) -> int:
     return (nxt - date(year, month, 1)).days
 
 
-def festival_windows(start: datetime, days: int) -> list[dict]:
+def festival_windows(cfg: History, start: datetime, days: int) -> list[dict]:
     """Evening windows then a two-day immersion, once per year the scenario spans."""
+    fest = cfg.festival.value
     evenings, closed_full, closed_half = [], [], []
     for year in sorted({(start.date() + timedelta(days=d)).year for d in range(days)}):
-        first = (date(year, *FESTIVAL_START) - start.date()).days
-        if first < 0 or first + FESTIVAL_EVENINGS + 1 >= days:
+        first = (date(year, fest.month, fest.day) - start.date()).days
+        if first < 0 or first + fest.evenings + 1 >= days:
             continue
-        evenings += list(range(first, first + FESTIVAL_EVENINGS))
-        closed_full.append(first + FESTIVAL_EVENINGS)
-        closed_half.append(first + FESTIVAL_EVENINGS + 1)
+        evenings += list(range(first, first + fest.evenings))
+        closed_full.append(first + fest.evenings)
+        closed_half.append(first + fest.evenings + 1)
     return [
         {"days": evenings, "start_hour": 18, "end_hour": 24, "effect": "slowed"},
         {"days": closed_full, "start_hour": 9, "end_hour": 24, "effect": "closed"},
@@ -93,10 +84,11 @@ def festival_windows(start: datetime, days: int) -> list[dict]:
     ]
 
 
-def build(start: datetime, days: int, seed: int) -> dict:
+def build(cfg: History, start: datetime, days: int, seed: int) -> dict:
     festival = yaml.safe_load(SOURCE_SCENARIO.read_text(encoding="utf-8"))["festival"]
-    festival["windows"] = festival_windows(start, days)
-    total = sum(HOUR_SHAPE)
+    festival["windows"] = festival_windows(cfg, start, days)
+    shape = cfg.hourly_shape.value
+    total = sum(shape)
     return {
         "name": "history_3y",
         "description": (
@@ -108,8 +100,8 @@ def build(start: datetime, days: int, seed: int) -> dict:
         "days": days,
         "incident_rate_multiplier": 1.0,
         "rain": {
-            "hourly_mm_h": [round(h / total, 5) for h in HOUR_SHAPE],
-            "day_factors": daily_rain_mm(start, days, seed),
+            "hourly_mm_h": [round(h / total, 5) for h in shape],
+            "day_factors": daily_rain_mm(cfg, start, days, seed),
         },
         "flooding": None,
         "festival": festival,
@@ -118,16 +110,19 @@ def build(start: datetime, days: int, seed: int) -> dict:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--weeks", type=int, default=WEEKS)
-    parser.add_argument("--seed", type=int, default=RAIN_SEED)
+    parser.add_argument("--weeks", type=int, default=None, help="default: history.weeks")
+    parser.add_argument("--seed", type=int, default=None, help="default: history.rain_seed")
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    days = args.weeks * 7
-    doc = build(START, days, args.seed)
+    cfg = load_forecasting_config().history
+    days = (args.weeks or cfg.weeks) * 7
+    seed = args.seed if args.seed is not None else cfg.rain_seed
+    start = datetime.combine(cfg.start, datetime.min.time(), tzinfo=IST)
+    doc = build(cfg, start, days, seed)
     header = (
-        f"# GENERATED by `python -m resqcity.sim.make_history` (seed {args.seed}). Do not edit by\n"
-        "# hand; change src/resqcity/sim/make_history.py instead. SYNTHETIC history for the\n"
-        "# phase-5 forecaster only -- never an evaluation scenario.\n"
+        f"# GENERATED by `python -m resqcity.sim.make_history` (seed {seed}). Do not edit by\n"
+        "# hand; change configs/forecasting.yaml -> history (or this script). SYNTHETIC history\n"
+        "# for the phase-5 forecaster only -- never an evaluation scenario.\n"
         "# Rain: illustrative monthly profile for Pune, UNVERIFIED (IMD station normals could not\n"
         "# be confirmed at the source on 2026-10-26). Daily totals are drawn once, per day, so\n"
         "# rain is not a deterministic function of the calendar.\n"

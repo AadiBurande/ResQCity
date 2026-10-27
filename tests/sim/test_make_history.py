@@ -6,10 +6,9 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pytest
 
+from resqcity.forecasting.config import load_forecasting_config
 from resqcity.geo.scenario import load_scenario
 from resqcity.sim.make_history import (
-    MONTHLY_MM,
-    START,
     _days_in_month,
     build,
     daily_rain_mm,
@@ -17,13 +16,16 @@ from resqcity.sim.make_history import (
 )
 
 IST = ZoneInfo("Asia/Kolkata")
-DAYS = 1092
+HISTORY = load_forecasting_config().history
+MONTHLY_MM = HISTORY.monthly_mm.value
+START = datetime.combine(HISTORY.start, datetime.min.time(), tzinfo=IST)
+DAYS = HISTORY.days
 
 
 def test_daily_rain_is_reproducible_and_matches_the_monthly_profile():
-    a = daily_rain_mm(START, DAYS, 7)
-    assert a == daily_rain_mm(START, DAYS, 7)
-    assert a != daily_rain_mm(START, DAYS, 8)
+    a = daily_rain_mm(HISTORY, START, DAYS, 7)
+    assert a == daily_rain_mm(HISTORY, START, DAYS, 7)
+    assert a != daily_rain_mm(HISTORY, START, DAYS, 8)
     dates = [START.date() + timedelta(days=d) for d in range(DAYS)]
     for month in (1, 7, 12):  # a dry, a peak-monsoon and a dry month
         for year in (2023, 2024, 2025):
@@ -40,7 +42,7 @@ def test_daily_rain_is_reproducible_and_matches_the_monthly_profile():
 def test_rain_is_not_a_function_of_the_calendar():
     """Otherwise a model given only the date would know the rain exactly and the phase-5
     informed-vs-realistic comparison would collapse."""
-    a = np.asarray(daily_rain_mm(START, DAYS, 11))
+    a = np.asarray(daily_rain_mm(HISTORY, START, DAYS, 11))
     dates = [START.date() + timedelta(days=d) for d in range(DAYS)]
     july = {
         y: a[[i for i, d in enumerate(dates) if (d.year, d.month) == (y, 7)]] for y in (2023, 2024)
@@ -49,7 +51,7 @@ def test_rain_is_not_a_function_of_the_calendar():
 
 
 def test_dry_season_is_drier_than_the_monsoon():
-    a = np.asarray(daily_rain_mm(START, DAYS, 3))
+    a = np.asarray(daily_rain_mm(HISTORY, START, DAYS, 3))
     dates = [START.date() + timedelta(days=d) for d in range(DAYS)]
     monsoon = a[[i for i, d in enumerate(dates) if d.month in (6, 7, 8, 9)]]
     dry = a[[i for i, d in enumerate(dates) if d.month in (12, 1, 2, 3)]]
@@ -57,7 +59,7 @@ def test_dry_season_is_drier_than_the_monsoon():
 
 
 def test_festival_windows_once_per_year_and_inside_the_horizon():
-    windows = festival_windows(START, DAYS)
+    windows = festival_windows(HISTORY, START, DAYS)
     effects = {w["effect"] for w in windows}
     assert effects == {"slowed", "closed"}
     all_days = [d for w in windows for d in w["days"]]
@@ -69,6 +71,16 @@ def test_festival_windows_once_per_year_and_inside_the_horizon():
     assert years == {2023, 2024, 2025}
 
 
+def test_the_profile_comes_from_config_not_from_code():
+    """The climate and festival assumptions must be in configs/forecasting.yaml, so that
+    `find_unverified` lists them (research integrity rule 3). Guards the phase-5 audit fix."""
+    import resqcity.sim.make_history as mh
+
+    paths = {"IST", "OUT", "SOURCE_SCENARIO", "CONFIG_DIR"}  # locations, not parameters
+    assert not [n for n in dir(mh) if n.isupper() and n not in paths]
+    assert HISTORY.days == DAYS and START.weekday() == 0
+
+
 def test_days_in_month():
     assert _days_in_month(2024, 2) == 29  # leap year
     assert _days_in_month(2023, 2) == 28
@@ -76,7 +88,7 @@ def test_days_in_month():
 
 
 def test_build_is_loadable_and_hour_shape_is_normalised():
-    doc = build(datetime(2023, 1, 2, tzinfo=IST), 364, 5)
+    doc = build(HISTORY, datetime(2023, 1, 2, tzinfo=IST), 364, 5)
     assert sum(doc["rain"]["hourly_mm_h"]) == pytest.approx(1.0, abs=1e-4)
     assert len(doc["rain"]["day_factors"]) == 364
     assert doc["synthetic"] is True

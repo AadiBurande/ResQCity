@@ -5,10 +5,42 @@
 synthetic: true
 history_scenario: history_3y
 
-# Crowd is ~0.4 % of incidents, too rare to forecast on its own, so it is folded into "other".
+# Crowd is 1.0 % of incidents (configs/incidents.yaml type_mix), too rare to forecast on its
+# own, so it is folded into "other".
 targets:
   types: [accident, fire_smoke, other]
   fold_into_other: [crowd]
+
+# Parameters of the SYNTHETIC history that `python -m resqcity.sim.make_history` writes to
+# configs/scenarios/history_3y.yaml. They live here rather than in the script so that
+# `find_unverified` lists them with every other assumption (research integrity rule 3).
+history:
+  start: 2023-01-02        # a Monday, so weekday structure is balanced; ends before the 2026 scenarios
+  weeks: 156
+  rain_seed: 20260126
+  monthly_mm:
+    value: {1: 1, 2: 1, 3: 3, 4: 10, 5: 30, 6: 150, 7: 180, 8: 140, 9: 140, 10: 80, 11: 20, 12: 3}
+    source: UNVERIFIED
+    note: >-
+      Illustrative monthly rainfall for Pune in mm. IMD station normals could not be confirmed at
+      the source on 2026-10-26 (only third-party climate pages, no station stated). Carries the
+      right seasonal shape (dry Nov-May, monsoon Jun-Sep, ~760 mm/year) and nothing more.
+  wet_day:
+    value: {p_per_mm: 0.005, p_min: 0.03, p_max: 0.75, gamma_shape: 1.2}
+    source: UNVERIFIED
+    note: "Wet-day probability per monthly mm and the gamma intensity shape; both assumed."
+  hourly_shape:
+    value: [0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2,
+            0.4, 0.4, 0.8, 1.2, 1.5, 1.2, 0.9, 0.6, 0.4, 0.3, 0.2, 0.2]
+    source: UNVERIFIED
+    note: "Rain falls mostly in the afternoon and evening; same shape as scenarios/monsoon.yaml."
+  festival:
+    value: {month: 9, day: 1, evenings: 10}
+    source: ILLUSTRATIVE
+    note: >-
+      Ganeshotsav: 10 evening windows from a fixed 1 September, then a full and a half day of
+      immersion processions. The real festival moves with the lunar calendar, which this
+      fixed-date placement does not model.
 
 split:
   # Time-based, never shuffled: the last test_weeks of the horizon are held out, and the model
