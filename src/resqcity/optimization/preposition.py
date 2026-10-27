@@ -14,7 +14,6 @@ import numpy as np
 from resqcity.optimization.config import OptimizationConfig
 
 WEIGHT_SCALE = 1000  # demand weights are floats; CP-SAT needs integer coefficients
-SHORTFALL_PENALTY = 10_000  # per ward left below the fairness requirement (soft constraint)
 
 
 @dataclass
@@ -28,9 +27,28 @@ class PrepositionResult:
     uncovered_wards: list[str] = field(default_factory=list)
     status: str = ""
     solve_s: float = 0.0
+    shortfall_penalty: int = 0  # the derived (P5) big-M actually used, for the record
 
     def moved_units(self, current: list[int]) -> list[int]:
         return [u for u, k in enumerate(self.placement) if k != current[u]]
+
+
+def shortfall_penalty(coefficients: list[int]) -> int:
+    """Penalty per unit of fairness shortfall, derived from the instance rather than assumed.
+
+    (P5) is written as a soft constraint so that an impossible requirement is REPORTED (which
+    wards cannot be served) instead of the solve returning "infeasible". That only measures the
+    price of fairness honestly if the penalty can never be traded for coverage.
+
+    The bound is taken from the integer coefficients the objective actually uses, not from
+    ``WEIGHT_SCALE * sum(demand)``: each coefficient is rounded, which can add up to half a unit
+    per term, and with 58 wards times several cover levels that slack is not negligible. One unit
+    of shortfall costing more than the entire coverage objective makes the soft constraint
+    equivalent to a hard one wherever the hard one is satisfiable
+    (``test_the_soft_fairness_constraint_behaves_like_a_hard_one``). A fixed magic number cannot
+    carry that guarantee.
+    """
+    return sum(c for c in coefficients if c > 0) + 1
 
 
 def required_units(alpha: float, q: float) -> int:
@@ -132,7 +150,9 @@ def solve(
             <= round(p.relocation.max_total_s.value)
         )
 
-    # (P5) fairness, soft so an impossible requirement is reported rather than raised
+    # (P5) fairness, soft so an impossible requirement is reported rather than raised. The
+    # penalty is derived from the coverage coefficients below, so it can never be traded for
+    # coverage: the relaxation reports infeasibility, it does not weaken the constraint.
     shortfall = {}
     if use_fairness:
         need = required_units(p.fairness.alpha.value, q)
@@ -142,16 +162,19 @@ def solve(
             model.add(sum(within) + gap >= need)
             shortfall[j] = gap
 
-    objective = [
-        round(WEIGHT_SCALE * demand[j] * (1 - q) * q ** (level - 1)) * z[(j, level)]
+    gains = [
+        round(WEIGHT_SCALE * demand[j] * (1 - q) * q ** (level - 1))
         for j in range(n_wards)
         for level in range(1, max_cover + 1)
     ]
-    objective += [-SHORTFALL_PENALTY * WEIGHT_SCALE * gap for gap in shortfall.values()]
+    cells = [z[(j, level)] for j in range(n_wards) for level in range(1, max_cover + 1)]
+    objective = [g * var for g, var in zip(gains, cells, strict=True)]
+    penalty = shortfall_penalty(gains)
+    objective += [-penalty * gap for gap in shortfall.values()]
     model.maximize(sum(objective))
 
     solver = cp_model.CpSolver()
-    solver.parameters.max_time_in_seconds = cfg.dispatch.solver.time_limit_s
+    solver.parameters.max_time_in_seconds = p.solver_time_limit_s
     solver.parameters.num_workers = cfg.dispatch.solver.workers
     status = solver.solve(model)
     names = {cp_model.OPTIMAL: "OPTIMAL", cp_model.FEASIBLE: "FEASIBLE"}
@@ -179,6 +202,7 @@ def solve(
         uncovered_wards=sorted(uncovered),
         status=names[status],
         solve_s=time.perf_counter() - started,
+        shortfall_penalty=penalty,
     )
 
 
@@ -195,9 +219,12 @@ def price_of_fairness(
     """RQ4: solve with and without (P5) and report the relative loss in expected coverage."""
     free = solve(unit_bases, move_seconds, demand, covers, reach, cfg, capacity, ward_ids, False)
     fair = solve(unit_bases, move_seconds, demand, covers, reach, cfg, capacity, ward_ids, True)
+    # subtracting two truncated solves would make the headline RQ4 number solver noise, and it
+    # can even come out negative; only a pair of proved optima is reportable
+    both_optimal = free.status == "OPTIMAL" and fair.status == "OPTIMAL"
     loss = (
         (free.expected_covered_demand - fair.expected_covered_demand) / free.expected_covered_demand
-        if free.expected_covered_demand > 0
+        if both_optimal and free.expected_covered_demand > 0
         else float("nan")
     )
     return {
@@ -208,4 +235,9 @@ def price_of_fairness(
         "unconstrained_moves": free.moves,
         "fair_moves": fair.moves,
         "status": {"unconstrained": free.status, "fair": fair.status},
+        "both_optimal": both_optimal,
+        "shortfall_penalty": fair.shortfall_penalty,
+        "penalty_note": "(P5) is a soft constraint whose penalty exceeds the whole coverage "
+        "objective, so it is equivalent to a hard constraint wherever the hard one is "
+        "satisfiable; wards_left_short are the wards that cannot be covered at all.",
     }

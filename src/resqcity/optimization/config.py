@@ -141,6 +141,7 @@ class Relocation(ConfigModel):
 
 class PrepositionConfig(ConfigModel):
     every_minutes: int = Field(ge=1)
+    solver_time_limit_s: float = Field(gt=0)
     busy_fraction: SourcedValue[float]
     coverage_radius_s: SourcedValue[float]
     fairness: Fairness
@@ -156,10 +157,12 @@ class PrepositionConfig(ConfigModel):
 class PlacementConfig(ConfigModel):
     coverage_radius_m: SourcedValue[float]
     k_max: int = Field(ge=1)
+    solver_time_limit_s: float = Field(gt=0)
     note: str = ""
 
 
 class ErlangConfig(ConfigModel):
+    agency_share: SourcedValue[dict[Agency, float]]
     service_time_s: SourcedValue[dict[Agency, float]]
     target_wait_s: SourcedValue[float]
 
@@ -167,6 +170,8 @@ class ErlangConfig(ConfigModel):
     def _check(self) -> Self:
         if set(self.service_time_s.value) != set(Agency):
             raise ValueError("service_time_s must cover every agency")
+        if set(self.agency_share.value) != set(Agency):
+            raise ValueError("agency_share must cover every agency")
         return self
 
 

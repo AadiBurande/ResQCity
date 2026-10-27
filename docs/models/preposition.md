@@ -92,10 +92,37 @@ $$
 ## 5. Feasibility
 
 (P5) can be impossible — a ward with no base within $T_{\text{ward}}$, or too few units to meet
-every ward's requirement at once. The implementation detects this and **relaxes to a soft
-constraint**: a per-ward shortfall variable with a large penalty, so the solver reports which
-wards cannot be served rather than returning "infeasible". A city that cannot cover its wards is
-a finding, not an error.
+every ward's requirement at once. Rather than detect that case, the implementation writes (P5) as
+a soft constraint **always**: a per-ward shortfall variable $g_j \ge 0$ with
+
+$$
+\sum_{k : \tau_{jk} \le T_{\text{ward}}} n_k + g_j \ge n_\alpha ,
+\qquad\text{objective } \dots - M \sum_j g_j .
+$$
+
+One solve then reports *which* wards cannot be served instead of returning "infeasible". A city
+that cannot cover its wards is a finding, not an error.
+
+This is only honest if $M$ cannot buy coverage. $M$ is therefore **derived from the instance**,
+not assumed. The coverage objective is largest when every $z_{j\ell} = 1$, so its upper bound is
+the sum of its own integer coefficients $c_{j\ell}$:
+
+$$
+M = \sum_{j,\ell} \max(c_{j\ell},\, 0) + 1,
+\qquad c_{j\ell} = \big\lfloor S\, d_j (1-q) q^{\ell-1} \big\rceil
+$$
+
+with $S$ the integer scale. One unit of shortfall then costs more than all the coverage there is
+to win, which makes the soft constraint **equivalent to the hard one wherever the hard one is
+satisfiable**. Two details are why the bound comes from the coefficients rather than from
+$S \sum_j d_j$: each $c_{j\ell}$ is rounded, which over 58 wards and several cover levels is not
+negligible slack; and summing $\ell$ only to $\ell_{\max}$ gives $1 - q^{\ell_{\max}}$ rather
+than 1, so the coefficient sum is also strictly **tighter**.
+`tests/optimization/test_preposition.py::test_the_soft_fairness_constraint_behaves_like_a_hard_one`
+checks that equivalence against a genuinely hard-constrained solve, and
+`results/optimization/preposition.json` records the penalty actually used. An earlier version
+used a fixed $M = 10^4$, which an OR review flagged: a constant cannot carry that guarantee, and
+the formulation claimed a detect-then-relax step the code never performed.
 
 ## 6. Assumptions and what is left out
 

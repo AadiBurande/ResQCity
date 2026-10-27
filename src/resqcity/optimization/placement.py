@@ -86,7 +86,7 @@ def solve_mclp(
     scale = 1000
     model.maximize(sum(round(float(weights[i]) * scale) * y[i] for i in range(n_points)))
     solver = cp_model.CpSolver()
-    solver.parameters.max_time_in_seconds = cfg.dispatch.solver.time_limit_s
+    solver.parameters.max_time_in_seconds = cfg.placement.solver_time_limit_s
     solver.parameters.num_workers = cfg.dispatch.solver.workers
     status = solver.solve(model)
     names = {cp_model.OPTIMAL: "OPTIMAL", cp_model.FEASIBLE: "FEASIBLE"}

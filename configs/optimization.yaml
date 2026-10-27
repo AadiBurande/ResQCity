@@ -48,6 +48,9 @@ policy:
 
 preposition:
   every_minutes: 30
+  # Pre-positioning runs every 30 min offline, so it does not inherit the 1 s LIVE dispatch
+  # limit. A truncated solve here would make the price of fairness (RQ4) solver noise.
+  solver_time_limit_s: 30.0
   busy_fraction: {value: 0.3, source: UNVERIFIED}   # MEXCLP q: chance a unit is unavailable
   coverage_radius_s: {value: 480.0, source: UNVERIFIED}   # 8 minutes
   fairness:
@@ -64,6 +67,7 @@ placement:
   # MCLP for new camera sites: maximise risk-weighted coverage of incident locations.
   coverage_radius_m: {value: 50.0, source: UNVERIFIED}   # matches fusion.yaml camera coverage
   k_max: 50
+  solver_time_limit_s: 60.0        # offline planning, not live dispatch
   note: >
     Coverage is an UPPER BOUND on value: a covered incident is still only detected with the
     measured effective probability of 0.31 (D-029), and every added camera also adds false
@@ -71,6 +75,13 @@ placement:
 
 erlang:
   # M/M/c sanity check against the simulator (phase 7).
+  agency_share:
+    value: {ambulance: 0.45, police: 1.0, fire: 0.30}
+    source: UNVERIFIED
+    note: >
+      Share of incidents that need at least one unit of each agency. Assumed; the requirements
+      table (configs/requirements.yaml) implies something similar but depends on cue
+      probabilities, so this is stated rather than derived. Feeds results/optimization/erlang.json.
   service_time_s:
     value: {ambulance: 2700.0, police: 1800.0, fire: 3600.0}
     source: UNVERIFIED

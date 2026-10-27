@@ -16,6 +16,7 @@ It lives in ``sim`` because it reads the incident generator for demand weights, 
 import argparse
 import json
 import logging
+from datetime import datetime
 
 import numpy as np
 
@@ -39,6 +40,8 @@ from resqcity.optimization.placement import (
     queue_metrics,
     servers_for_target,
 )
+from resqcity.optimization.preposition import price_of_fairness
+from resqcity.optimization.routing import Router
 from resqcity.sim.generator import hotspot_weights, load_incidents_config
 
 OUT = PROJECT_ROOT / "results" / "optimization"
@@ -99,11 +102,72 @@ def camera_placement(
     }
 
 
+def preposition_report(
+    network: RoadNetwork,
+    units: list,
+    stations: list,
+    demand_by_ward: dict[str, float],
+    cfg: OptimizationConfig,
+    agency: Agency,
+    when: datetime,
+    capacity_per_base: int,
+) -> dict[str, object]:
+    """Price of fairness (RQ4) for one agency, on the real network.
+
+    ``covers`` and ``reach`` are built from the configured SECONDS
+    (``preposition.coverage_radius_s`` and ``fairness.t_ward_s``) by routing from every candidate
+    base to a representative node of every ward, so the units in the config reach the model.
+    """
+    bases = [s for s in stations if s.agency == agency]
+    pool = [u for u in units if u.agency == agency]
+    if not bases or not pool:
+        return {"agency": agency.value, "skipped": "no bases or no units"}
+    wards = sorted(demand_by_ward)
+    ward_node = _ward_nodes(network, wards)
+    keep = [w for w in wards if w in ward_node]
+    router = Router(network, cfg)
+    table = router.eta_table([b.node for b in bases], [ward_node[w] for w in keep], when)
+    base_to_ward = table.seconds  # (bases, wards)
+    covers = (base_to_ward <= cfg.preposition.coverage_radius_s.value).T
+    reach = (base_to_ward <= cfg.preposition.fairness.t_ward_s.value).T
+    index = {b.id: k for k, b in enumerate(bases)}
+    unit_bases = [index[u.home_station] for u in pool]
+    move = router.eta_table([u.node for u in pool], [b.node for b in bases], when).seconds
+    demand = np.array([demand_by_ward[w] for w in keep], dtype=float)
+    caps = [capacity_per_base for _ in bases]
+    report = price_of_fairness(
+        unit_bases, move, demand, covers, reach, cfg, capacity=caps, ward_ids=keep
+    )
+    return {
+        "agency": agency.value,
+        "bases": len(bases),
+        "units": len(pool),
+        "wards": len(keep),
+        "coverage_radius_s": cfg.preposition.coverage_radius_s.value,
+        "t_ward_s": cfg.preposition.fairness.t_ward_s.value,
+        "alpha": cfg.preposition.fairness.alpha.value,
+        **report,
+    }
+
+
+def _ward_nodes(network: RoadNetwork, wards: list[str]) -> dict[str, int]:
+    """One representative in-city node per ward: the highest-degree node it contains."""
+    ward_of = network.nodes["ward_id"].astype(str).to_numpy()
+    in_city = network.nodes["in_city"].to_numpy(bool)
+    degree = network.distinct_degree()
+    out: dict[str, int] = {}
+    for ward in wards:
+        rows = np.flatnonzero((ward_of == ward) & in_city)
+        if rows.size:
+            out[ward] = int(network.node_ids[rows[np.argmax(degree[rows])]])
+    return out
+
+
 def erlang_table(
     incidents_per_day: float, cfg: OptimizationConfig, fleet: FleetConfig
 ) -> list[dict]:
     rows = []
-    mix = {Agency.AMBULANCE: 0.45, Agency.POLICE: 1.0, Agency.FIRE: 0.30}
+    mix = cfg.erlang.agency_share.value
     for agency, share in sorted(mix.items(), key=lambda kv: kv[0].value):
         rate = incidents_per_day * share / 86400.0
         service = cfg.erlang.service_time_s.value[agency]
@@ -156,6 +220,29 @@ def main(argv: list[str] | None = None) -> int:
         100 * placement["curve"][-1]["covered_share"],
     )
 
+    when = datetime.fromisoformat("2026-03-03T09:00:00+05:30")
+    cap = fleet_cfg.placement.max_units_per_station.value
+    preposition = {
+        "status": "SYNTHETIC demand and UNVERIFIED coverage/fairness parameters; the price of "
+        "fairness is reported only when BOTH solves prove optimality",
+        "agencies": [
+            preposition_report(network, units, facilities.stations, demand, opt, agency, when, cap)
+            for agency in sorted(Agency, key=lambda a: a.value)
+        ],
+    }
+    for row in preposition["agencies"]:
+        if "skipped" in row:
+            continue
+        log.info(
+            "preposition %-9s price of fairness %s (optimal: %s), wards short %d",
+            row["agency"],
+            "n/a"
+            if row["price_of_fairness"] != row["price_of_fairness"]
+            else f"{100 * row['price_of_fairness']:.2f}%",
+            row["both_optimal"],
+            len(row["wards_left_short"]),
+        )
+
     erlang = {
         "status": "M/M/c with assumed service times (UNVERIFIED); the analytical cross-check for "
         "phase 7, not a result",
@@ -174,6 +261,7 @@ def main(argv: list[str] | None = None) -> int:
     for name, payload in (
         ("fleet_roster.json", roster),
         ("camera_placement.json", placement),
+        ("preposition.json", preposition),
         ("erlang.json", erlang),
     ):
         path = OUT / name

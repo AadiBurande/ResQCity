@@ -80,24 +80,39 @@ class Router:
         enough, is decided in the dispatch model (docs/models/dispatch.md (C7)). Using the
         fastest police ETA alone would credit a corridor to a unit dispatched elsewhere.
         """
-        rho = self.cfg.routing.green_corridor.rho.value
-        out = etas.seconds.copy()
-        if rho >= 1.0:
-            return out
-        is_police = np.array([a == Agency.POLICE for a in agencies])
-        is_assisted = np.array([a == assisted for a in agencies])
-        if not is_police.any() or not is_assisted.any():
-            return out
-        for j in range(out.shape[1]):
-            police = out[is_police, j]
-            if not np.isfinite(police).any():
-                continue
-            first_police = float(np.nanmin(np.where(np.isfinite(police), police, np.nan)))
-            rows = np.flatnonzero(is_assisted & np.isfinite(out[:, j]))
-            sped_up = out[rows, j] * rho
-            eligible = rows[sped_up >= first_police]
-            out[eligible, j] = out[eligible, j] * rho
+        return green_corridor_etas(self.cfg, etas, agencies, assisted)
+
+
+def green_corridor_etas(
+    cfg: OptimizationConfig,
+    etas: EtaTable,
+    agencies: list[Agency],
+    assisted: Agency = Agency.AMBULANCE,
+) -> np.ndarray:
+    """The corridor as a pure function of the config and an ETA table.
+
+    Kept separate from :class:`Router` because it needs no road graph: the benchmark and the
+    tests build ETA tables directly, and constructing a Router just to reach this would mean
+    loading the network.
+    """
+    rho = cfg.routing.green_corridor.rho.value
+    out = etas.seconds.copy()
+    if rho >= 1.0:
         return out
+    is_police = np.array([a == Agency.POLICE for a in agencies])
+    is_assisted = np.array([a == assisted for a in agencies])
+    if not is_police.any() or not is_assisted.any():
+        return out
+    for j in range(out.shape[1]):
+        police = out[is_police, j]
+        if not np.isfinite(police).any():
+            continue
+        first_police = float(np.nanmin(np.where(np.isfinite(police), police, np.nan)))
+        rows = np.flatnonzero(is_assisted & np.isfinite(out[:, j]))
+        sped_up = out[rows, j] * rho
+        eligible = rows[sped_up >= first_police]
+        out[eligible, j] = out[eligible, j] * rho
+    return out
 
 
 def nearest_unit(

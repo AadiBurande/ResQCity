@@ -1,7 +1,16 @@
 """C1 joint dispatch against brute force on tiny instances (docs/models/dispatch.md).
 
 Every optimum below is checked by enumerating assignments exhaustively, so the test depends on
-the formulation rather than on the solver agreeing with itself.
+the formulation rather than on the solver agreeing with itself. The enumeration covers the whole
+objective of docs/models/dispatch.md section 4, including the green corridor (C7) and the
+coverage loss (C8): an OR review of this phase found that it previously ran only with the
+corridor disabled and no wards, so those two terms were checked by example rather than against
+the optimum.
+
+One caveat is stated rather than hidden. The shortfall surrogate (C6) is a *definition* chosen in
+the formulation, not a quantity with an independent ground truth, so `brute_force` necessarily
+uses the same formula as the model. What the surrogate is FOR is tested separately in
+`test_an_unserved_incident_cannot_report_a_short_completion`.
 """
 
 import itertools
@@ -15,6 +24,7 @@ from resqcity.common.schemas import Agency, ServiceCounts, Unit, UnitState
 from resqcity.optimization.config import OptimizationConfig, load_optimization_config
 from resqcity.optimization.dispatch import (
     DispatchIncident,
+    _horizon,
     effective_epsilon,
     greedy,
     solve,
@@ -60,14 +70,22 @@ def _table(matrix: np.ndarray) -> EtaTable:
 
 
 def brute_force(
-    incidents: list[DispatchIncident], units: list[Unit], etas: np.ndarray, cfg: OptimizationConfig
+    incidents: list[DispatchIncident],
+    units: list[Unit],
+    etas: np.ndarray,
+    cfg: OptimizationConfig,
+    assisted: np.ndarray | None = None,
+    ward_units: dict[str, list[int]] | None = None,
+    ward_value: dict[str, float] | None = None,
 ) -> float:
     """Exhaustive objective over every assignment of units to incidents (or to nothing).
 
-    Mirrors docs/models/dispatch.md section 4 with no coverage term (the callers below pass no
-    wards), so it is an independent implementation of the same objective.
+    An independent implementation of docs/models/dispatch.md section 4: C4 agency arrival, C5
+    synchronisation, C6 shortfall, C7 green corridor and C8 coverage loss.
     """
     n_u, n_i = etas.shape
+    helped = etas if assisted is None else assisted
+    horizon = _horizon(etas)
     best = float("inf")
     options = [[None, *range(n_i)] for _ in range(n_u)]
     for combo in itertools.product(*options):
@@ -78,28 +96,43 @@ def brute_force(
             if any(not np.isfinite(etas[u, i]) for u in assigned):
                 feasible = False
                 break
+            # (C7) only police SENT HERE and fast enough to arrive by the sped-up time open the
+            # corridor; a faster unit dispatched elsewhere must not count
+            police_here = [u for u in assigned if units[u].agency == Agency.POLICE]
             per_agency, short = {}, 0
             for agency in Agency:
                 need = getattr(inc.requirements, agency.value)
-                got = [etas[u, i] for u in assigned if units[u].agency == agency]
-                if need > 0:
-                    short += max(0, need - len(got))
-                    if got:
-                        per_agency[agency] = max(got[:need]) if len(got) >= need else max(got)
+                if need <= 0:
+                    continue
+                got = []
+                for u in assigned:
+                    if units[u].agency != agency:
+                        continue
+                    eta = etas[u, i]
+                    opened = any(etas[p, i] <= helped[u, i] for p in police_here)
+                    if agency is Agency.AMBULANCE and helped[u, i] < etas[u, i] and opened:
+                        eta = helped[u, i]
+                    got.append(eta)
+                short += max(0, need - len(got))
+                if got:
+                    per_agency[agency] = max(got)  # (C4) wait for the slowest unit sent
             needed = {a for a in Agency if getattr(inc.requirements, a.value) > 0}
             arrivals = [per_agency[a] for a in needed if a in per_agency]
             total_need = sum(getattr(inc.requirements, a.value) for a in Agency)
-            last = max(arrivals) if arrivals else 0.0
+            last = max(arrivals) if arrivals else 0.0  # (C5)
             if short:  # (C6) an unserved incident cannot report a short completion
-                horizon = float(np.ceil(etas[np.isfinite(etas)].max()))
                 last = max(last, horizon * short / max(1, total_need))
             total += cfg.dispatch.weight(inc.severity_class) * last
             total += cfg.dispatch.mu_shortfall.value * short
             if Agency.AMBULANCE in per_agency:
-                horizon = int(np.ceil(etas[np.isfinite(etas)].max()))
                 total += effective_epsilon(cfg, horizon) * per_agency[Agency.AMBULANCE]
-        if feasible:
-            best = min(best, total)
+        if not feasible:
+            continue
+        for ward, coverers in (ward_units or {}).items():  # (C8) coverage loss
+            if any(combo[u] is None for u in coverers):
+                continue  # at least one unit that could reach this ward stays free
+            total += cfg.dispatch.lambda_coverage.value * (ward_value or {}).get(ward, 0.0)
+        best = min(best, total)
     return best
 
 
@@ -112,6 +145,84 @@ def test_matches_brute_force_on_a_two_incident_instance():
     result = solve(incidents, units, _table(etas), cfg, NOW)
     assert result.status in {"OPTIMAL", "FEASIBLE"}
     assert result.objective_s == pytest.approx(brute_force(incidents, units, etas, cfg), rel=1e-6)
+
+
+def test_matches_brute_force_with_the_corridor_active():
+    """The corridor changes which assignment is optimal, so it must be inside the enumeration.
+
+    A1 is slow but can be sped up; A2 is faster unassisted. Whether sending police here to open
+    A1's corridor beats sending A2 is exactly the trade-off C7 encodes.
+    """
+    units = [_unit("A1", Agency.AMBULANCE), _unit("A2", Agency.AMBULANCE),
+             _unit("P1", Agency.POLICE), _unit("P2", Agency.POLICE)]  # fmt: skip
+    incidents = [_incident("I1", amb=1, pol=1), _incident("I2", amb=1, pol=1, severity="critical")]
+    etas = np.array([[600.0, 660.0], [480.0, 900.0], [400.0, 300.0], [520.0, 480.0]])
+    cfg = _cfg(rho=0.85)
+    router = Router.__new__(Router)
+    router.cfg = cfg
+    assisted = router.green_corridor_etas(_table(etas), [u.agency for u in units])
+    assert (assisted < etas).any(), "the instance must actually exercise the corridor"
+    result = solve(incidents, units, _table(etas), cfg, NOW, assisted_etas=assisted)
+    assert result.status in {"OPTIMAL", "FEASIBLE"}
+    expected = brute_force(incidents, units, etas, cfg, assisted=assisted)
+    assert result.objective_s == pytest.approx(expected, rel=1e-6)
+
+
+def test_matches_brute_force_with_the_coverage_term_active():
+    """C8 makes holding a unit back worthwhile, so the optimum is not just the fastest arrival.
+
+    W02 is covered only by P2, and its risk weight is high enough that leaving P2 free can beat
+    sending it. Enumerating this is the only way to know the solver resolves it correctly.
+    """
+    units = [_unit("P1", Agency.POLICE), _unit("P2", Agency.POLICE)]
+    incidents = [_incident("I1", pol=2)]
+    etas = np.array([[300.0], [320.0]])
+    wards = {"W01": [0], "W02": [1]}
+    values = {"W01": 0.1, "W02": 400.0}
+    cfg = _cfg(rho=1.0)
+    result = solve(incidents, units, _table(etas), cfg, NOW,
+                   ward_units=wards, ward_value=values)  # fmt: skip
+    assert result.status in {"OPTIMAL", "FEASIBLE"}
+    expected = brute_force(incidents, units, etas, cfg, ward_units=wards, ward_value=values)
+    assert result.objective_s == pytest.approx(expected, rel=1e-6)
+    # and the trade-off is live: with a worthless ward the solver sends both units
+    cheap = solve(incidents, units, _table(etas), cfg, NOW,
+                  ward_units=wards, ward_value={"W01": 0.1, "W02": 0.1})  # fmt: skip
+    assert len(cheap.decision[0].assignments) == 2
+    assert len(result.decision[0].assignments) == 1  # P2 held back to keep W02 covered
+
+
+def test_matches_brute_force_with_the_corridor_and_coverage_together():
+    """Both terms at once, because C7 and C8 interact: police sent to open a corridor are also
+    police no longer covering a ward."""
+    units = [_unit("A1", Agency.AMBULANCE), _unit("P1", Agency.POLICE)]
+    incidents = [_incident("I1", amb=1, pol=1)]
+    etas = np.array([[600.0], [450.0]])
+    wards = {"W02": [1]}
+    values = {"W02": 50.0}
+    cfg = _cfg(rho=0.85)
+    router = Router.__new__(Router)
+    router.cfg = cfg
+    assisted = router.green_corridor_etas(_table(etas), [u.agency for u in units])
+    result = solve(incidents, units, _table(etas), cfg, NOW, assisted_etas=assisted,
+                   ward_units=wards, ward_value=values)  # fmt: skip
+    expected = brute_force(
+        incidents, units, etas, cfg, assisted=assisted, ward_units=wards, ward_value=values
+    )
+    assert result.objective_s == pytest.approx(expected, rel=1e-6)
+
+
+def test_an_unserved_incident_cannot_report_a_short_completion():
+    """What the C6 surrogate is for. Its formula is a definition, so brute force cannot check it
+    independently; this checks the property it exists to guarantee."""
+    units = [_unit("P1", Agency.POLICE)]
+    incidents = [_incident("I1", pol=1, fire=1)]  # no fire unit exists, so fire is short
+    etas = np.array([[120.0]])
+    result = solve(incidents, units, _table(etas), _cfg(rho=1.0), NOW)
+    assert result.shortfall["I1"] == 1
+    # the police unit arrives at 120 s, but the incident is only half served, so the reported
+    # completion must not be 120 s
+    assert result.last_arrival_s["I1"] > 120.0
 
 
 def test_matches_brute_force_when_an_agency_is_missing():

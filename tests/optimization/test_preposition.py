@@ -7,9 +7,11 @@ import pytest
 
 from resqcity.optimization.config import OptimizationConfig, load_optimization_config
 from resqcity.optimization.preposition import (
+    WEIGHT_SCALE,
     expected_covered,
     price_of_fairness,
     required_units,
+    shortfall_penalty,
     solve,
 )
 
@@ -131,6 +133,40 @@ def test_price_of_fairness_is_reported_and_non_negative():
     assert report["price_of_fairness"] > 0
     assert report["fair_expected_covered"] <= report["unconstrained_expected_covered"]
     assert report["wards_left_short"] == []
+
+
+def test_the_soft_fairness_constraint_behaves_like_a_hard_one():
+    """(P5) is relaxed with a derived big-M, so wherever a fair placement exists the solver must
+    find it rather than paying M to skip a ward.
+
+    The temptation is deliberately extreme: ward 0 carries 1000x the demand of ward 1, so any
+    penalty below the coverage objective would be bought off. An OR review flagged the fixed
+    M = 10_000 this replaced, which could not guarantee that.
+    """
+    unit_bases = [0, 0]
+    move_seconds = np.array([[0.0, 60.0], [0.0, 60.0]])
+    demand = np.array([1000.0, 1.0])
+    covers = np.array([[1, 0], [0, 1]], dtype=bool)
+    cfg = _cfg(alpha=0.5, max_moves=2, max_total_s=500.0, busy_fraction=0.5)
+    fair = solve(unit_bases, move_seconds, demand, covers, covers, cfg,
+                 capacity=[2, 2], ward_ids=["W01", "W02"])  # fmt: skip
+    assert fair.uncovered_wards == []  # the constraint was met, not paid off
+    assert 1 in fair.placement
+    # and one unit of shortfall costs more than the best coverage attainable without fairness,
+    # which is the most it could ever buy
+    free = solve(unit_bases, move_seconds, demand, covers, covers,
+                 _cfg(enabled=False, max_moves=2, max_total_s=500.0, busy_fraction=0.5),
+                 capacity=[2, 2], ward_ids=["W01", "W02"])  # fmt: skip
+    assert fair.shortfall_penalty > WEIGHT_SCALE * free.expected_covered_demand
+
+
+def test_the_big_m_is_derived_from_the_coefficients_not_assumed():
+    """It must exceed the sum of the POSITIVE coverage coefficients, which is what a shortfall
+    could otherwise buy. Taking WEIGHT_SCALE * sum(demand) instead would ignore the rounding
+    slack of every coefficient."""
+    assert shortfall_penalty([3, 4, 0]) == 8
+    assert shortfall_penalty([5, -100]) == 6  # a negative term cannot fund a shortfall
+    assert shortfall_penalty([]) == 1
 
 
 def test_an_impossible_fairness_requirement_is_reported_not_raised():
