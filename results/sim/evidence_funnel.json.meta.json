@@ -1,0 +1,31 @@
+{
+  "file": "results/sim/evidence_funnel.json",
+  "generated_at_utc": "2026-10-27T15:49:15+00:00",
+  "command": "evidence_funnel.py --reps 8",
+  "synthetic": true,
+  "git": {
+    "commit": "b89022f9871ac6fce6b15761984498aa575cdb0e",
+    "dirty": false
+  },
+  "configs_sha256": {
+    "configs/cameras.yaml": "fdfbfdd81597195281364bcae4b0b086a8562f12c05345c5515b26d4ba360cb6",
+    "configs/fusion.yaml": "e255088b989b1b3075d507fd7d1a0be2b3442816a8e42a18a82ee8760c944030",
+    "configs/incidents.yaml": "54f245fe34f19dcfd8acba582925fa6f86a8d5bf35d0c3369a21c1b4011454d5"
+  },
+  "seeds": {
+    "seed_base": 20261020
+  },
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "status": "SYNTHETIC incidents and the MEASURED detector model. Each stage is bounded by a quantity an earlier phase measured, so this is also a consistency check on D-018, D-029 and D-031.",
+  "scenario": "normal",
+  "replications": 8,
+  "weeks": 8,
+  "totals": {
+    "incidents": 287,
+    "within_camera_range": 7,
+    "detected_by_a_camera": 1,
+    "alarms": 1543628,
+    "true_alarms": 1,
+    "incidents_with_a_call": 248
+  },
+  "shares": {
+    "within_camera_range": 0.024390243902439025,
+    "detected_of_in_range": 0.14285714285714285,
+    "detected_of_all_incidents": 0.003484320557491289,
+    "alarm_precision": 6.478244758452166e-07,
+    "incidents_with_a_call": 0.8641114982578397
+  },
+  "expected_from_earlier_phases": {
+    "within_camera_range": 0.0395,
+    "within_camera_range_source": "D-031: the 40 phase-2 sites cover 3.95 % of risk-weighted demand, and incidents are drawn proportionally to that demand",
+    "detected_of_in_range": 0.306,
+    "detected_of_in_range_source": "D-029: effective detection p_detect x armed_fraction = 0.306, i.e. the detector's own false alarms silence it for much of the time"
+  },
+  "note": "A camera-detected incident is rare enough that a single week is mostly noise; read the pooled shares, not a replication.",
+  "by_replication": [
+    {
+      "replication": 0,
+      "incidents": 34,
+      "within_camera_range": 1,
+      "detected_by_a_camera": 0,
+      "alarms": 192959,
+      "true_alarms": 0,
+      "calls": 82,
+      "incidents_with_a_call": 32
+    },
+    {
+      "replication": 1,
+      "incidents": 38,
+      "within_camera_range": 1,
+      "detected_by_a_camera": 0,
+      "alarms": 192855,
+      "true_alarms": 0,
+      "calls": 77,
+      "incidents_with_a_call": 32
+    },
+    {
+      "replication": 2,
+      "incidents": 41,
+      "within_camera_range": 0,
+      "detected_by_a_camera": 0,
+      "alarms": 193029,
+      "true_alarms": 0,
+      "calls": 85,
+      "incidents_with_a_call": 34
+    },
+    {
+      "replication": 3,
+      "incidents": 38,
+      "within_camera_range": 2,
+      "detected_by_a_camera": 0,
+      "alarms": 193008,
+      "true_alarms": 0,
+      "calls": 78,
+      "incidents_with_a_call": 31
+    },
+    {
+      "replication": 4,
+      "incidents": 31,
+      "within_camera_range": 2,
+      "detected_by_a_camera": 1,
+      "alarms": 192945,
+      "true_alarms": 1,
+      "calls": 72,
+      "incidents_with_a_call": 29
+    },
+    {
+      "replication": 5,
+      "incidents": 27,
+      "within_camera_range": 0,
+      "detected_by_a_camera": 0,
+      "alarms": 193170,
+      "true_alarms": 0,
+      "calls": 55,
+      "incidents_with_a_call": 24
+    },
+    {
+      "replication": 6,
+      "incidents": 37,
+      "within_camera_range": 1,
+      "detected_by_a_camera": 0,
+      "alarms": 192919,
+      "true_alarms": 0,
+      "calls": 81,
+      "incidents_with_a_call": 31
+    },
+    {
+      "replication": 7,
+      "incidents": 41,
+      "within_camera_range": 0,
+      "detected_by_a_camera": 0,
+      "alarms": 192743,
+      "true_alarms": 0,
+      "calls": 88,
+      "incidents_with_a_call": 35
+    }
+  ]
+}
