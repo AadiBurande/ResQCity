@@ -19,7 +19,7 @@ this module and in the engine, never in a policy: policies are handed fused ``In
 only, and ``tests/test_architecture.py`` enforces the import boundary.
 
 **The warm-up is simulated and then discarded.** The fleet starts idle at every base, which
-flatters the first incidents, so incidents whose onset falls inside ``run.warmup_hours`` are
+flatter the first incidents, so incidents whose onset falls inside ``run.warmup_hours`` are
 excluded from the metrics but still consume units.
 """
 
@@ -270,8 +270,8 @@ def run_replication(
             s.kind in (SourceKind.CALL, SourceKind.OPERATOR_REVIEW) for s in candidate.sources
         )
 
-    truth_of: dict[str, str | None] = {}  # fused candidate -> ground-truth id, or None if false
-    latest: dict[str, Incident] = {}  # most recent fused view, for re-offering a short response
+    truth_of: dict[str, str | None] = {}
+    latest: dict[str, Incident] = {}
     rows: dict[str, IncidentRow] = {}
     decided: set[str] = set()
     result = Replication(policy=policy_name, replication=rep, evidence_digest=week.digest())
@@ -305,7 +305,6 @@ def run_replication(
             known = latest.get(candidate_id)
             if known is None:
                 continue
-            # re-offer only what the policy asked for and could not get
             offered[candidate_id] = known.model_copy(update={"requirements": _counts(refused)})
         open_candidates = [
             inc
@@ -315,17 +314,10 @@ def run_replication(
         if policy_name == "B0":
             open_candidates = [c for c in open_candidates if _human_evidence(c)]
         if policy_name in {"B0", "B1", "B2"}:
-            # the untiered policies will not act below the credibility gate, so do not pay for
-            # an ETA table to be told that (B3 and FULL tier instead and must see everything)
             gate = sim_cfg.policies.min_dispatch_posterior.value
             open_candidates = [c for c in open_candidates if c.posterior >= gate]
         if not open_candidates:
             return
-        # Only candidates that could actually receive a unit are worth a shortest-path search.
-        # A tiered policy still has to SEE the rest -- a camera-only alarm gets a REVIEW
-        # decision, and that review workload is itself a result -- so they stay in the batch
-        # with unreachable ETAs, which no assignment can come from. At ~193,000 camera alarms a
-        # week this is the difference between one Dijkstra per batch and thousands.
         floor = (
             opt_cfg.policy.tau_low.value
             if policy_name in {"B3", "FULL"}
@@ -337,12 +329,6 @@ def run_replication(
         if nodes:
             partial = engine.eta_table(nodes)
             seconds[:, actionable] = partial.seconds
-            # Mask the units that are not available. Policies are handed Unit RECORDS, whose
-            # state field is the roster's, not the live one, so without this every policy would
-            # choose among all 91 units as though none were busy -- naming a committed unit,
-            # having the engine refuse it, and being asked again. It would also have quietly
-            # undone the background workload: capacity cannot bite if the dispatcher cannot
-            # see it.
             busy = [i for i, u in enumerate(engine.fleet.units) if not u.claimable]
             if busy:
                 seconds[busy, :] = np.inf
@@ -377,12 +363,9 @@ def run_replication(
             row.estimated_police = required[Agency.POLICE]
             row.estimated_fire = required[Agency.FIRE]
             if decision.assignments:
-                decided.add(candidate.id)  # kept for the log: this candidate was acted on
+                decided.add(candidate.id)
         engine.execute(plan.decisions, plan.delays)
 
-    # ---- the clock -------------------------------------------------------------------------
-    # Evidence is replayed in time order; the clock advances to each item, and a dispatch batch
-    # is formed from the accumulated evidence at most every dispatch_interval_s.
     horizon_s = min(sim_cfg.run.horizon_s, week.sc.days * 86400.0)
     next_expiry = week.start + EXPIRY_TICK
     pending: dict[str, Incident] = {}
@@ -391,7 +374,12 @@ def run_replication(
         at_s = (ts - week.start).total_seconds()
         if at_s > horizon_s:
             break
-        engine.env.run(until=max(at_s, engine.now_s))
+
+        # SimPy requires `until` to be strictly greater than the current time.
+        # Evidence can have duplicate timestamps, so do not advance the clock in that case.
+        if at_s > engine.now_s:
+            engine.env.run(until=at_s)
+
         while ts >= next_expiry:
             fusion.tick(next_expiry, refresh=False)
             next_expiry += EXPIRY_TICK
@@ -412,7 +400,6 @@ def run_replication(
         dispatch(engine.now, pending)
     engine.run(until_s=horizon_s)
 
-    # ---- outcomes --------------------------------------------------------------------------
     onset_of = {i.id: i.onset_ts for i in week.incidents}
     truth_required = {
         i.id: {a: int(getattr(i.requirements, a.value)) for a in Agency} for i in week.incidents
@@ -502,16 +489,16 @@ def main(argv: list[str] | None = None) -> int:
         "background": [r.background for r in reps],
         "hospitals": [r.hospitals for r in reps],
     }
-    (OUT / f"summary_{stem}.json").write_text(
+    summary_path = OUT / f"summary_{stem}.json"
+    summary_path.write_text(
         json.dumps(summary, indent=2, default=str), encoding="utf-8", newline="\n"
     )
-    for path in (OUT / f"summary_{stem}.json",):
-        write_meta(
-            path,
-            configs=[CONFIG_DIR / "sim.yaml", CONFIG_DIR / "survival.yaml"],
-            synthetic=True,
-            seeds={"seed_base": seed_base},
-        )
+    write_meta(
+        summary_path,
+        configs=[CONFIG_DIR / "sim.yaml", CONFIG_DIR / "survival.yaml"],
+        synthetic=True,
+        seeds={"seed_base": seed_base},
+    )
     log.info(
         "%s %s: %d rows, %.1f s/rep, utilisation %s",
         args.scenario,

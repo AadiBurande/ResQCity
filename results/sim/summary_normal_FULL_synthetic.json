@@ -2,24 +2,256 @@
   "status": "SYNTHETIC. Primary outcome is time_to_last_required_arrival; expected survival is secondary and its curves are ILLUSTRATIVE (configs/survival.yaml).",
   "scenario": "normal",
   "policy": "FULL",
-  "replications": 1,
+  "replications": 30,
   "seed_base": 20261020,
   "warmup_hours": 12.0,
-  "rows": 24747,
+  "rows": 742278,
   "evidence_digests": [
-    "afc14821a5ac00f2423fdec5f7c8b589626f5b4ac563ac470336efa937d6051a"
+    "afc14821a5ac00f2423fdec5f7c8b589626f5b4ac563ac470336efa937d6051a",
+    "7368202de00a5d0d2b7863a78050dd77cabd11d85d49c3844002d9f15dcca9d4",
+    "6e814614eff8c8cd1875df90ec1d83735137c5617c2b33720c6f64b687356cfd",
+    "3f118077d72d0a77dff44cdab85f82d1fe6ba6742200333540e85d52f04b9980",
+    "74950d5a06b95ff311e1f2e73d98ea7f669d8905308f16d7e54fb657d106a06b",
+    "ef080c9c9eb9076373567e48c5b8b9ffcc7ea8ab715d8531466657655d5f9f0d",
+    "6d93240603b56836856058cfc1f14e06baa7b4eb279e9fb62d2bffd292a586ab",
+    "59301b5d42a9ddd31a9dc03e941a7c6b31223dad75521dffad56e2dcee8ed740",
+    "28c3b9e16725f7e88524eecf7faeb1b8c68ddf79262ba75375e86a874c7f7d4d",
+    "3eead8b172daaa1c4ca9ee915e4ec2922d5e2128e267d1bf98eb77a2dfa62b59",
+    "2723067c162929e4a2a4526d46cef9d6214d9b34d85bec445d5dff3c591d7db2",
+    "057977eecab7d1fffb90143e7b05dc93111b171e348e9bc2b454e9dc4eec52a8",
+    "dbc225457405a8f776761d029cfc7fad78a1a873a2493d1a82ae26ad3cd4b5be",
+    "8d1b1bc335d62b7f32d46fca974f45e6b17b2c7ee156f23471c05e6a7c17e802",
+    "51e3aa18746d198b7ed95d3594eba8417e4e5e102bcea23e081e299bd715645e",
+    "97d29f8c522dd777ab99a9b674b089b33d4de9f2c4d384a353ac4327e07c9dca",
+    "c4912a255a8eb8b588e98a68c6c5bc2b34a25ee313376ca8c1a5d41103e73b79",
+    "03d2575e8423bdf34e2ab9ee85adca23234be6ccdf3a713eda8623d50ef1c21e",
+    "d5f34513aa12c2a4a52a117f38f0a01440b0b10e972d0de0f3e951574966614c",
+    "76596d1f6fb232fe9c8d501eee788cb658fa799e838668ef722cf43d863433cd",
+    "9bdb4ed15f0c286289cbc15d052928f64e17174b07ad07b0e4b08f880a7c1ba0",
+    "8462043192005af7149fd05cf6688ddeb46bd66af955c14c47e290aa4db301e7",
+    "494a7549a173430c2819a0c384c7d3291089fc29f8028d93df959aa05b6e0ad5",
+    "d0af572c004ac2e4396c5d1a90ee88557e7c31723a932f5b0191e36e29a44953",
+    "1230d585aa3a5c33aec8ea054b44a44dd32d60e6017af94b2a6caa23b3c8fbdd",
+    "8f16e882ca0044c9ab7934546dc963c4fc1b56ea4812726f789d27ea9c160274",
+    "464af14b5df51f2b191aa2060b10bb5782fbbae85eac2c432ed65fa3e5eb6d02",
+    "03352e462dc7dc65c5e9ed6e217ccdba75dc2ab985180c32af4dc63da5486143",
+    "5abcd720690fea06cda3fc1bec59bd390e5fa21f0ab83e7aaa6a3d68f0a9ea4f",
+    "370aba7c47b75bd33204b6600cba659b09d590b0f6e90e46c276a49528db693f"
   ],
   "wall_seconds": [
-    418.86417650000294
+    320.1470932000084,
+    329.8620831000153,
+    341.1306912000291,
+    340.4319990000222,
+    341.8771814000211,
+    559.1374550000182,
+    546.358287799987,
+    542.2310160000343,
+    555.0677741999971,
+    572.3615303999977,
+    546.9873028000002,
+    552.0405755999964,
+    556.938516299997,
+    559.0883445999934,
+    562.2615931000328,
+    543.8269800999551,
+    540.1971803000197,
+    565.3889366999501,
+    561.9331292000134,
+    537.4831469999626,
+    547.7061937999679,
+    477.13120000000345,
+    403.9008909999975,
+    671.9679881000193,
+    673.028781800007,
+    801.9128180000116,
+    673.7269396000193,
+    699.8219241999905,
+    693.4428700999706,
+    695.100060900033
   ],
   "solver_calls": [
-    18278
+    18278,
+    18293,
+    18293,
+    18293,
+    18290,
+    18317,
+    18295,
+    18302,
+    18296,
+    18305,
+    18273,
+    18321,
+    18324,
+    18320,
+    18295,
+    18304,
+    18285,
+    18312,
+    18299,
+    18303,
+    18290,
+    18318,
+    18316,
+    18315,
+    18290,
+    18301,
+    18318,
+    18311,
+    18312,
+    18330
   ],
   "utilisation_after_warmup": [
     {
       "ambulance": 0.41674198098190324,
       "police": 0.4282753036925524,
       "fire": 0.46596519534974734
+    },
+    {
+      "ambulance": 0.42278520849907936,
+      "police": 0.42971848476190244,
+      "fire": 0.43658800697067446
+    },
+    {
+      "ambulance": 0.41228134091927227,
+      "police": 0.44515014962101557,
+      "fire": 0.41245624639731626
+    },
+    {
+      "ambulance": 0.4221725272362393,
+      "police": 0.42830294391089263,
+      "fire": 0.4539743640739457
+    },
+    {
+      "ambulance": 0.4192542918435003,
+      "police": 0.43988373661171193,
+      "fire": 0.4386940273880604
+    },
+    {
+      "ambulance": 0.3940002651755614,
+      "police": 0.43404570180842167,
+      "fire": 0.43220653114619784
+    },
+    {
+      "ambulance": 0.4191779970600491,
+      "police": 0.44444794346854927,
+      "fire": 0.44795160696956926
+    },
+    {
+      "ambulance": 0.4267273434904397,
+      "police": 0.42822086024973444,
+      "fire": 0.42396446485516537
+    },
+    {
+      "ambulance": 0.42699418519570836,
+      "police": 0.42565388990472314,
+      "fire": 0.43066113983269944
+    },
+    {
+      "ambulance": 0.3983651783037075,
+      "police": 0.43693221044533803,
+      "fire": 0.43818828452826475
+    },
+    {
+      "ambulance": 0.3891545966655275,
+      "police": 0.4238879840463594,
+      "fire": 0.4265487016104897
+    },
+    {
+      "ambulance": 0.41020914725072066,
+      "police": 0.42713466188593197,
+      "fire": 0.4613374487285583
+    },
+    {
+      "ambulance": 0.4323176430611803,
+      "police": 0.4261880693516305,
+      "fire": 0.4417827974918782
+    },
+    {
+      "ambulance": 0.4115866933790709,
+      "police": 0.44073161234018404,
+      "fire": 0.4349842734222799
+    },
+    {
+      "ambulance": 0.43650315660502137,
+      "police": 0.44247057158740544,
+      "fire": 0.4401088848658844
+    },
+    {
+      "ambulance": 0.42783480458242773,
+      "police": 0.44350403754121626,
+      "fire": 0.44367247933089704
+    },
+    {
+      "ambulance": 0.4061147595341829,
+      "police": 0.4144025040008461,
+      "fire": 0.4570874099791017
+    },
+    {
+      "ambulance": 0.41247588843376504,
+      "police": 0.4145766211288574,
+      "fire": 0.457230613200713
+    },
+    {
+      "ambulance": 0.43182478944920044,
+      "police": 0.4310699795107947,
+      "fire": 0.45010238379911466
+    },
+    {
+      "ambulance": 0.4254820566290701,
+      "police": 0.43503235375715277,
+      "fire": 0.42973811049436045
+    },
+    {
+      "ambulance": 0.41609014253275106,
+      "police": 0.4355596877571439,
+      "fire": 0.4471896795943979
+    },
+    {
+      "ambulance": 0.41753596388341485,
+      "police": 0.4234606873073254,
+      "fire": 0.41685520969548034
+    },
+    {
+      "ambulance": 0.4329484678376463,
+      "police": 0.42101391619854633,
+      "fire": 0.47618538618866896
+    },
+    {
+      "ambulance": 0.42749539839707545,
+      "police": 0.43872914763711973,
+      "fire": 0.4502532432903713
+    },
+    {
+      "ambulance": 0.4049023403061257,
+      "police": 0.4313443690415014,
+      "fire": 0.45315185723656604
+    },
+    {
+      "ambulance": 0.4154751980146938,
+      "police": 0.4284585332683211,
+      "fire": 0.47073471008655077
+    },
+    {
+      "ambulance": 0.4091935137835347,
+      "police": 0.4183347636665113,
+      "fire": 0.4295973651820724
+    },
+    {
+      "ambulance": 0.4152333309869061,
+      "police": 0.4235412248174857,
+      "fire": 0.4200049978320368
+    },
+    {
+      "ambulance": 0.42079329348752303,
+      "police": 0.43848126596765397,
+      "fire": 0.4374684977947025
+    },
+    {
+      "ambulance": 0.4276892455717945,
+      "police": 0.4445507651831663,
+      "fire": 0.43785239761472267
     }
   ],
   "background": [
@@ -61,6 +293,1137 @@
           "p_wait": 0.025364616360177554
         }
       }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2875,
+          "jobs_started": 2875,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5376,
+          "jobs_started": 5376,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1568,
+          "jobs_started": 1568,
+          "queued_at_end": 0,
+          "mean_wait_s": 1.7068179049365984,
+          "p_wait": 0.005739795918367347
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2832,
+          "jobs_started": 2832,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5496,
+          "jobs_started": 5496,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1464,
+          "jobs_started": 1464,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.8847194710864333,
+          "p_wait": 0.0034153005464480873
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2774,
+          "jobs_started": 2774,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5383,
+          "jobs_started": 5383,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1514,
+          "jobs_started": 1514,
+          "queued_at_end": 0,
+          "mean_wait_s": 9.48501895485095,
+          "p_wait": 0.013870541611624834
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2775,
+          "jobs_started": 2775,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.6414016843292032,
+          "p_wait": 0.0036036036036036037
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5357,
+          "jobs_started": 5357,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1498,
+          "jobs_started": 1498,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2691,
+          "jobs_started": 2691,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5489,
+          "jobs_started": 5489,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.4323336464413627,
+          "p_wait": 0.0018218254691200583
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1544,
+          "jobs_started": 1544,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.5772072788516203,
+          "p_wait": 0.003238341968911917
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2743,
+          "jobs_started": 2743,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5484,
+          "jobs_started": 5484,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.19782567316453928,
+          "p_wait": 0.0018234865061998542
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1587,
+          "jobs_started": 1587,
+          "queued_at_end": 0,
+          "mean_wait_s": 2.8241224907974867,
+          "p_wait": 0.011342155009451797
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2805,
+          "jobs_started": 2805,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5345,
+          "jobs_started": 5345,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1517,
+          "jobs_started": 1517,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.9207368381317209,
+          "p_wait": 0.003955174686882004
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2749,
+          "jobs_started": 2749,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5383,
+          "jobs_started": 5383,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1520,
+          "jobs_started": 1520,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2692,
+          "jobs_started": 2692,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5430,
+          "jobs_started": 5430,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1546,
+          "jobs_started": 1546,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2593,
+          "jobs_started": 2593,
+          "queued_at_end": 0,
+          "mean_wait_s": 9.18461078966578,
+          "p_wait": 0.010026995757809487
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5460,
+          "jobs_started": 5460,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1536,
+          "jobs_started": 1536,
+          "queued_at_end": 0,
+          "mean_wait_s": 1.6442996393221943,
+          "p_wait": 0.004557291666666667
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2760,
+          "jobs_started": 2760,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5427,
+          "jobs_started": 5427,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1549,
+          "jobs_started": 1549,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2785,
+          "jobs_started": 2785,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.3701722999182998,
+          "p_wait": 0.0021543985637342907
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5316,
+          "jobs_started": 5316,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1536,
+          "jobs_started": 1536,
+          "queued_at_end": 0,
+          "mean_wait_s": 25.549499797287467,
+          "p_wait": 0.016927083333333332
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2751,
+          "jobs_started": 2751,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5539,
+          "jobs_started": 5539,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1524,
+          "jobs_started": 1524,
+          "queued_at_end": 0,
+          "mean_wait_s": 1.7804206374771914,
+          "p_wait": 0.0032808398950131233
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2767,
+          "jobs_started": 2767,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.2819222387533317,
+          "p_wait": 0.0018070112034694614
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5501,
+          "jobs_started": 5501,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1501,
+          "jobs_started": 1501,
+          "queued_at_end": 0,
+          "mean_wait_s": 7.7112110675000975,
+          "p_wait": 0.016655562958027982
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2860,
+          "jobs_started": 2860,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.11014816357957287,
+          "p_wait": 0.001048951048951049
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5484,
+          "jobs_started": 5484,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1527,
+          "jobs_started": 1527,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.07070559071627247,
+          "p_wait": 0.0006548788474132286
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2738,
+          "jobs_started": 2738,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.14379170997150093,
+          "p_wait": 0.0014609203798392988
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5328,
+          "jobs_started": 5328,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1519,
+          "jobs_started": 1519,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.12117790140547283,
+          "p_wait": 0.0013166556945358788
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2719,
+          "jobs_started": 2719,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.1744249679930479,
+          "p_wait": 0.0011033468186833395
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5431,
+          "jobs_started": 5431,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1594,
+          "jobs_started": 1594,
+          "queued_at_end": 0,
+          "mean_wait_s": 1.4434146940459172,
+          "p_wait": 0.0056461731493099125
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2861,
+          "jobs_started": 2861,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.16987919953199412,
+          "p_wait": 0.0020971688220901784
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5372,
+          "jobs_started": 5372,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1536,
+          "jobs_started": 1536,
+          "queued_at_end": 0,
+          "mean_wait_s": 1.8625532756830883,
+          "p_wait": 0.009114583333333334
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2768,
+          "jobs_started": 2768,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5342,
+          "jobs_started": 5342,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1482,
+          "jobs_started": 1482,
+          "queued_at_end": 0,
+          "mean_wait_s": 3.8984808702856735,
+          "p_wait": 0.01282051282051282
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2785,
+          "jobs_started": 2785,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5453,
+          "jobs_started": 5453,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1543,
+          "jobs_started": 1543,
+          "queued_at_end": 0,
+          "mean_wait_s": 1.565001847344144,
+          "p_wait": 0.004536616979909268
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2802,
+          "jobs_started": 2802,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.4812163589566698,
+          "p_wait": 0.0017844396859386152
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5392,
+          "jobs_started": 5392,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1472,
+          "jobs_started": 1472,
+          "queued_at_end": 0,
+          "mean_wait_s": 1.5436352912592521,
+          "p_wait": 0.005434782608695652
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2791,
+          "jobs_started": 2791,
+          "queued_at_end": 0,
+          "mean_wait_s": 1.9179530712774508,
+          "p_wait": 0.0032246506628448583
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5315,
+          "jobs_started": 5315,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1582,
+          "jobs_started": 1582,
+          "queued_at_end": 0,
+          "mean_wait_s": 1.7802654851430768,
+          "p_wait": 0.005689001264222503
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2758,
+          "jobs_started": 2758,
+          "queued_at_end": 0,
+          "mean_wait_s": 1.3006858746985486,
+          "p_wait": 0.00435097897026831
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5373,
+          "jobs_started": 5373,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.4060802971025327,
+          "p_wait": 0.003163967988088591
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1528,
+          "jobs_started": 1528,
+          "queued_at_end": 0,
+          "mean_wait_s": 12.478918805351586,
+          "p_wait": 0.02356020942408377
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2814,
+          "jobs_started": 2814,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5406,
+          "jobs_started": 5406,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.03177582892676529,
+          "p_wait": 0.0003699593044765076
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1557,
+          "jobs_started": 1557,
+          "queued_at_end": 0,
+          "mean_wait_s": 1.939432097094986,
+          "p_wait": 0.006422607578676943
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2762,
+          "jobs_started": 2762,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.52298019999737,
+          "p_wait": 0.0032585083272990588
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5420,
+          "jobs_started": 5420,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1556,
+          "jobs_started": 1556,
+          "queued_at_end": 0,
+          "mean_wait_s": 13.634638687412497,
+          "p_wait": 0.021208226221079693
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2764,
+          "jobs_started": 2764,
+          "queued_at_end": 0,
+          "mean_wait_s": 2.253982034792815,
+          "p_wait": 0.005065123010130246
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5355,
+          "jobs_started": 5355,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1512,
+          "jobs_started": 1512,
+          "queued_at_end": 0,
+          "mean_wait_s": 3.3805893343823246,
+          "p_wait": 0.007275132275132275
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2738,
+          "jobs_started": 2738,
+          "queued_at_end": 0,
+          "mean_wait_s": 1.2335389634974265,
+          "p_wait": 0.004017531044558071
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5425,
+          "jobs_started": 5425,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1514,
+          "jobs_started": 1514,
+          "queued_at_end": 0,
+          "mean_wait_s": 2.65453814833327,
+          "p_wait": 0.004623513870541612
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2760,
+          "jobs_started": 2760,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5503,
+          "jobs_started": 5503,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0,
+          "p_wait": 0.0
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1564,
+          "jobs_started": 1564,
+          "queued_at_end": 0,
+          "mean_wait_s": 11.407313985766166,
+          "p_wait": 0.017263427109974423
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "service_time_source": "configs/optimization.yaml -> erlang.service_time_s",
+      "by_agency": {
+        "ambulance": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 395.52,
+          "service_mean_s": 2700.0,
+          "offered_load_erlangs": 12.36,
+          "jobs_arrived": 2742,
+          "jobs_started": 2742,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.0785995761793813,
+          "p_wait": 0.0014587892049598833
+        },
+        "police": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 771.2639999999999,
+          "service_mean_s": 1800.0,
+          "offered_load_erlangs": 16.067999999999998,
+          "jobs_arrived": 5693,
+          "jobs_started": 5693,
+          "queued_at_end": 0,
+          "mean_wait_s": 0.051126167678363615,
+          "p_wait": 0.0008782715615668365
+        },
+        "fire": {
+          "target_utilisation": 0.412,
+          "arrival_per_day": 217.536,
+          "service_mean_s": 3600.0,
+          "offered_load_erlangs": 9.064,
+          "jobs_arrived": 1542,
+          "jobs_started": 1542,
+          "queued_at_end": 0,
+          "mean_wait_s": 16.54568821694525,
+          "p_wait": 0.01621271076523995
+        }
+      }
     }
   ],
   "hospitals": [
@@ -73,6 +1436,325 @@
       "mean_bay_wait_s": 0.0,
       "max_bay_wait_s": 0.0,
       "mean_time_at_hospital_s": 243.63845638549537,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 4,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 673.9004529822851,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 4,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 280.77980119005224,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 1,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 573.4552019608091,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 1,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 702.8621790691977,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 1,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 2845.9957878063906,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 4,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 954.294019068775,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 4,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 695.4176849530595,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 5,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 690.0013337054436,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 4,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 1205.2255791362404,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 2,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 253.24995071688318,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 4,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 1230.2102152130446,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 5,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 1104.4956991080485,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 2,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 2830.8754860369954,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 3,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 705.834691260934,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 2,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 557.0027688140399,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 1,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 112.72252469928935,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 4,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 712.3737397856967,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 5,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 395.5236454831553,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 2,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 1379.809318565589,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 5,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 550.346074892208,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 1,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 261.6837843977846,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 2,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 464.75033723956585,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 4,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 1777.0691396268812,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 1,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 1243.1638815667247,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 2,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 620.8429470999108,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 2,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 1943.9901750960416,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 4,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 569.216272908976,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 2,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 1097.277460288924,
+      "patients_with_no_capable_hospital": 0
+    },
+    {
+      "status": "hospital CAPABILITIES AND BEDS ARE SYNTHETIC (facilities.json records capabilities_synthetic=true); only the locations are real OSM data",
+      "hospitals": 590,
+      "with_trauma": 50,
+      "with_burns": 19,
+      "handovers": 4,
+      "mean_bay_wait_s": 0.0,
+      "max_bay_wait_s": 0.0,
+      "mean_time_at_hospital_s": 865.7453666807851,
       "patients_with_no_capable_hospital": 0
     }
   ]
