@@ -1,0 +1,25 @@
+{
+  "file": "results/figures/primary_comparison.pdf",
+  "generated_at_utc": "2026-11-19T21:26:58+00:00",
+  "command": "generate.py",
+  "synthetic": true,
+  "git": {
+    "commit": "ceebaf76caa02444e28d0a3018c84cab3538ca22",
+    "dirty": true
+  },
+  "configs_sha256": {},
+  "seeds": {},
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  }
+}

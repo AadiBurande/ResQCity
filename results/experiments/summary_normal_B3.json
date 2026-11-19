@@ -1,0 +1,33 @@
+{
+  "scenario": "normal",
+  "policy": "B3",
+  "replications": 3,
+  "seed_base": 20261020,
+  "n_incidents": 105,
+  "primary_mean_s": 1778.0694478842106,
+  "primary_median_s": 1761.013396,
+  "primary_p90_s": 3147.9585190000003,
+  "pct_within_8min": 3.8095238095238098,
+  "pct_within_15min": 21.904761904761905,
+  "detection_delay_mean_s": -78.76995741176471,
+  "detection_to_dispatch_mean_s": 851.1770723823529,
+  "first_to_last_gap_mean_s": 871.2072504347825,
+  "expected_survival_mean": 0.6888068086708201,
+  "ward_gini": 0.30787540411635245,
+  "false_alarm_incidents": 74146,
+  "utilisation": {
+    "ambulance": 0.41560840080948375,
+    "police": 0.4339328872417691,
+    "fire": 0.43833648290591265
+  },
+  "wall_seconds": [
+    368.3745835000009,
+    382.81676549999975,
+    388.7756948999995
+  ],
+  "evidence_digests": [
+    "afc14821a5ac00f2423fdec5f7c8b589626f5b4ac563ac470336efa937d6051a",
+    "7368202de00a5d0d2b7863a78050dd77cabd11d85d49c3844002d9f15dcca9d4",
+    "6e814614eff8c8cd1875df90ec1d83735137c5617c2b33720c6f64b687356cfd"
+  ]
+}

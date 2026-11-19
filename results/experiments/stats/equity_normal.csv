@@ -1,0 +1,2 @@
+metric,policy_full,policy_baseline,delta,n,mean_full,mean_baseline,mean_diff,t_statistic,p_value,non_inferior,reading
+ward_gini,FULL,B0,0.02,3,0.292698641521427,0.26719682233307335,0.025501819188353658,1.2048038579499798,0.8242493561245516,False,"Equity (FULL vs B0): mean Gini diff = +0.0255, delta = 0.02, t = 1.205, p = 0.8242 → NOT ESTABLISHED"

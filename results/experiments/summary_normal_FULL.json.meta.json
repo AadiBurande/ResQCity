@@ -1,0 +1,30 @@
+{
+  "file": "results/experiments/summary_normal_FULL.json",
+  "generated_at_utc": "2026-11-19T21:25:15+00:00",
+  "command": "run.py --quick",
+  "synthetic": true,
+  "git": {
+    "commit": "ceebaf76caa02444e28d0a3018c84cab3538ca22",
+    "dirty": false
+  },
+  "configs_sha256": {
+    "configs/sim.yaml": "ce980a43044119a399dd983ddff17504a044bae51c9fe656a9ad2bdfbf7f5ba2",
+    "configs/survival.yaml": "e7b0026ad7b6bf4cee44341f18d97c9dc9e26b9f1c560d7231e40ee4399a3e69"
+  },
+  "seeds": {
+    "seed_base": 20261020
+  },
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  }
+}

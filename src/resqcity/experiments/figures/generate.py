@@ -180,7 +180,7 @@ def fig_ward_equity() -> None:
     if ward_data:
         labels = list(ward_data.keys())
         data = [ward_data[k] for k in labels]
-        bp = ax.boxplot(data, labels=labels, patch_artist=True, widths=0.5)
+        bp = ax.boxplot(data, tick_labels=labels, patch_artist=True, widths=0.5)
         for patch, policy in zip(bp["boxes"], labels, strict=False):
             patch.set_facecolor(COLORS.get(policy, "#999999"))
             patch.set_alpha(0.7)
