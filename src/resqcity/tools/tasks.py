@@ -211,6 +211,17 @@ def _stub(phase: int, what: str) -> Callable[[argparse.Namespace], int]:
     return run
 
 
+def experiments(args: argparse.Namespace) -> int:
+    """Phase 10: run the experiment grid (scenarios x policies x replications)."""
+    quick_args = ["--quick"] if args.sim_reps <= 3 else []
+    return _run(_py("resqcity.experiments.run", *quick_args))
+
+
+def figures(_: argparse.Namespace) -> int:
+    """Phase 10: generate publication figures from experiment results."""
+    return _run(_py("resqcity.experiments.figures.generate"))
+
+
 TASKS: dict[str, Callable[[argparse.Namespace], int]] = {
     "setup": setup,
     "lint": lint,
@@ -227,8 +238,8 @@ TASKS: dict[str, Callable[[argparse.Namespace], int]] = {
     "ui": _stub(9, "start dashboard"),
     "demo": _stub(9, "end-to-end live demo"),
     "sim": sim,
-    "experiments": _stub(10, "run experiments"),
-    "figures": _stub(10, "generate figures"),
+    "experiments": experiments,
+    "figures": figures,
     "reproduce": _stub(11, "regenerate every result and figure"),
 }
 
