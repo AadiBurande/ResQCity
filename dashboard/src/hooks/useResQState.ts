@@ -127,8 +127,12 @@ export function useResQState() {
           setDecisions((prev) => ({ ...prev, [dec.id]: dec }));
           break;
         }
+        case "scenario_status":
         case "scenario_state": {
           setScenarioStatus((prev) => ({ ...prev, ...event.data }));
+          setLastNotification(
+            `Scenario updated: ${event.data.scenario?.toUpperCase()} (${event.data.mode?.toUpperCase()})`
+          );
           break;
         }
         case "hospital_prealert": {

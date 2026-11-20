@@ -7,6 +7,7 @@ export type WebSocketEventType =
   | "decision_update"
   | "units_tick"
   | "scenario_state"
+  | "scenario_status"
   | "hospital_prealert"
   | "green_corridor_active"
   | "pong";

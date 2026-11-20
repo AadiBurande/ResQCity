@@ -43,7 +43,16 @@ export const PuneMap: React.FC<PuneMapProps> = ({
     routes: L.layerGroup(),
   });
 
-  // Initialize Map
+  const onMapClickRef = useRef(onMapClick);
+  onMapClickRef.current = onMapClick;
+
+  const onSelectIncidentRef = useRef(onSelectIncident);
+  onSelectIncidentRef.current = onSelectIncident;
+
+  const onSelectCameraRef = useRef(onSelectCamera);
+  onSelectCameraRef.current = onSelectCamera;
+
+  // Initialize Map exactly once
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
@@ -70,11 +79,9 @@ export const PuneMap: React.FC<PuneMapProps> = ({
     lg.units.addTo(map);
     lg.incidents.addTo(map);
 
-    if (onMapClick) {
-      map.on("click", (e: L.LeafletMouseEvent) => {
-        onMapClick(e.latlng.lat, e.latlng.lng);
-      });
-    }
+    map.on("click", (e: L.LeafletMouseEvent) => {
+      onMapClickRef.current?.(e.latlng.lat, e.latlng.lng);
+    });
 
     mapRef.current = map;
 
@@ -82,7 +89,7 @@ export const PuneMap: React.FC<PuneMapProps> = ({
       map.remove();
       mapRef.current = null;
     };
-  }, [onMapClick]);
+  }, []);
 
   // Update Stations & Hospitals
   useEffect(() => {
@@ -135,10 +142,10 @@ export const PuneMap: React.FC<PuneMapProps> = ({
         iconSize: [8, 8],
       });
       const marker = L.marker([cam.lat, cam.lon], { icon }).addTo(lg.cameras);
-      marker.on("click", () => onSelectCamera(cam.id));
+      marker.on("click", () => onSelectCameraRef.current(cam.id));
       marker.bindTooltip(`CCTV: <b>${cam.id}</b> (${cam.ward_id})`, { direction: "top" });
     });
-  }, [cameras, onSelectCamera]);
+  }, [cameras]);
 
   // Update Incidents
   useEffect(() => {
@@ -162,13 +169,13 @@ export const PuneMap: React.FC<PuneMapProps> = ({
       });
 
       const marker = L.marker([inc.location.lat, inc.location.lon], { icon }).addTo(lg.incidents);
-      marker.on("click", () => onSelectIncident(inc.id));
+      marker.on("click", () => onSelectIncidentRef.current(inc.id));
       marker.bindTooltip(
         `<b>${inc.type.toUpperCase()}</b><br>Ward: ${inc.ward_id}<br>Posterior: ${(inc.posterior * 100).toFixed(0)}% · Severity: ${(inc.severity * 100).toFixed(0)}%`,
         { direction: "top", permanent: isSelected }
       );
     });
-  }, [incidents, selectedIncidentId, onSelectIncident]);
+  }, [incidents, selectedIncidentId]);
 
   // Update Units
   useEffect(() => {

@@ -32,6 +32,7 @@ export const ScenarioManager: React.FC<ScenarioManagerProps> = ({
     setIsStarting(true);
     try {
       await api.startScenario(selectedScenario, selectedMode);
+      onTriggerSuccess();
     } catch (e) {
       console.error("Failed to start scenario:", e);
     } finally {

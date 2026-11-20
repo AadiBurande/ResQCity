@@ -191,6 +191,8 @@ class AppState:
             )
             total_units = max(1, len(self.units))
             util = busy_units / total_units
+            total_dec = self.approved_decisions + self.overridden_decisions + self.auto_decisions
+            override_rate = (self.overridden_decisions / total_dec) if total_dec > 0 else 0.0
             return {
                 "timestamp": datetime.now(UTC).isoformat(),
                 "mode": self.mode,
@@ -204,6 +206,13 @@ class AppState:
                 "approved_decisions": self.approved_decisions,
                 "overridden_decisions": self.overridden_decisions,
                 "auto_decisions": self.auto_decisions,
+                "decisions": {
+                    "approved": self.approved_decisions,
+                    "overridden": self.overridden_decisions,
+                    "auto": self.auto_decisions,
+                    "total": total_dec,
+                    "override_rate": round(override_rate, 3),
+                },
             }
 
 

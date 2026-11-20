@@ -7,8 +7,24 @@ interface KpiDashboardProps {
 }
 
 export const KpiDashboard: React.FC<KpiDashboardProps> = ({ kpis }) => {
-  const utilisation = kpis ? (kpis.fleet_utilisation * 100).toFixed(1) : "0.0";
-  const overrideRate = kpis ? (kpis.decisions.override_rate * 100).toFixed(1) : "0.0";
+  const utilisation =
+    kpis && typeof kpis.fleet_utilisation === "number"
+      ? (kpis.fleet_utilisation * 100).toFixed(1)
+      : "0.0";
+
+  const approved =
+    kpis?.decisions?.approved ?? kpis?.approved_decisions ?? 0;
+  const overridden =
+    kpis?.decisions?.overridden ?? kpis?.overridden_decisions ?? 0;
+  const auto =
+    kpis?.decisions?.auto ?? kpis?.auto_decisions ?? 0;
+  const totalDec = approved + overridden + auto;
+  const overrideRate =
+    kpis?.decisions?.override_rate !== undefined
+      ? (kpis.decisions.override_rate * 100).toFixed(1)
+      : totalDec > 0
+      ? ((overridden / totalDec) * 100).toFixed(1)
+      : "0.0";
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6 overflow-y-auto h-full">
@@ -69,7 +85,7 @@ export const KpiDashboard: React.FC<KpiDashboardProps> = ({ kpis }) => {
           </div>
           <div className="text-2xl font-black text-purple-400">{overrideRate}%</div>
           <p className="text-[10px] text-slate-500 mt-1">
-            {kpis?.decisions.approved || 0} approvals · {kpis?.decisions.overridden || 0} overrides
+            {approved} approvals · {overridden} overrides
           </p>
         </div>
       </div>

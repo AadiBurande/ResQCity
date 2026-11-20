@@ -15,8 +15,11 @@ export interface KpiSummary {
   total_units: number;
   busy_units: number;
   fleet_utilisation: number;
-  decisions: {
-    proposed: number;
+  approved_decisions?: number;
+  overridden_decisions?: number;
+  auto_decisions?: number;
+  decisions?: {
+    proposed?: number;
     approved: number;
     overridden: number;
     auto: number;
