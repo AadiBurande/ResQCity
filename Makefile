@@ -7,13 +7,13 @@ POLICY   ?= B0
 REPS     ?= 30
 SIM_REPS ?= 1
 
-.PHONY: setup lint format test types data vision fusion forecast optimize streams api ui demo sim experiments figures reproduce
+.PHONY: setup lint format test types data vision fusion forecast optimize streams api ui demo sim experiments figures paper reproduce
 
 setup:
 	uv sync
 	$(TASKS) setup
 
-lint format test types data vision forecast optimize streams api ui demo experiments figures reproduce:
+lint format test types data vision forecast optimize streams api ui demo experiments figures paper reproduce:
 	$(TASKS) $@
 
 fusion:

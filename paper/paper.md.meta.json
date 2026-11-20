@@ -1,0 +1,27 @@
+{
+  "file": "paper/paper.md",
+  "generated_at_utc": "2026-11-19T22:35:53+00:00",
+  "command": "build.py",
+  "synthetic": true,
+  "git": {
+    "commit": "99e74ed379d37f7746a7f6515f4e09cb7ca03ac7",
+    "dirty": true
+  },
+  "configs_sha256": {
+    "results/experiments/summary_normal_B0.json": "6f73dacdb39205be3f9332fb59ce7331fc01762122e7984796b1b43a65c9b253"
+  },
+  "seeds": {},
+  "versions": {
+    "python": "3.11.9",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "osmnx": "2.1.1",
+    "pydantic": "2.14.1"
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD"
+  }
+}

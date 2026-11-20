@@ -1,10 +1,10 @@
 {
   "file": "results/figures/detection_breakdown_normal.pdf",
-  "generated_at_utc": "2026-11-19T21:27:01+00:00",
+  "generated_at_utc": "2026-11-19T22:35:51+00:00",
   "command": "generate.py",
   "synthetic": true,
   "git": {
-    "commit": "ceebaf76caa02444e28d0a3018c84cab3538ca22",
+    "commit": "99e74ed379d37f7746a7f6515f4e09cb7ca03ac7",
     "dirty": true
   },
   "configs_sha256": {},

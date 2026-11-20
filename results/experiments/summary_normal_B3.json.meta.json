@@ -1,11 +1,11 @@
 {
   "file": "results/experiments/summary_normal_B3.json",
-  "generated_at_utc": "2026-11-19T21:05:59+00:00",
+  "generated_at_utc": "2026-11-19T23:06:30+00:00",
   "command": "run.py --quick",
   "synthetic": true,
   "git": {
-    "commit": "ceebaf76caa02444e28d0a3018c84cab3538ca22",
-    "dirty": false
+    "commit": "99e74ed379d37f7746a7f6515f4e09cb7ca03ac7",
+    "dirty": true
   },
   "configs_sha256": {
     "configs/sim.yaml": "ce980a43044119a399dd983ddff17504a044bae51c9fe656a9ad2bdfbf7f5ba2",

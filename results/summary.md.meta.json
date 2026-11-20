@@ -1,11 +1,11 @@
 {
   "file": "results/summary.md",
-  "generated_at_utc": "2026-11-19T21:26:34+00:00",
+  "generated_at_utc": "2026-11-19T22:35:44+00:00",
   "command": "summarize.py",
   "synthetic": true,
   "git": {
-    "commit": "ceebaf76caa02444e28d0a3018c84cab3538ca22",
-    "dirty": false
+    "commit": "99e74ed379d37f7746a7f6515f4e09cb7ca03ac7",
+    "dirty": true
   },
   "configs_sha256": {},
   "seeds": {},

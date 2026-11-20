@@ -10,11 +10,15 @@ succeed. A silent no-op ``reproduce`` would be a research-integrity hazard.
 """
 
 import argparse
+import json
 import os
+import platform
 import shutil
 import subprocess
 import sys
+import time
 from collections.abc import Callable, Sequence
+from datetime import UTC, datetime
 
 from resqcity.common.config import PROJECT_ROOT
 
@@ -222,6 +226,39 @@ def figures(_: argparse.Namespace) -> int:
     return _run(_py("resqcity.experiments.figures.generate"))
 
 
+def paper(_: argparse.Namespace) -> int:
+    """Phase 11: compile the IMRaD paper from results."""
+    return _run(_py("resqcity.paper.build"))
+
+
+def reproduce(args: argparse.Namespace) -> int:
+    """Phase 11: regenerate results, figures, summary and paper from clean state."""
+    t0 = time.perf_counter()
+    quick_args = ["--quick"] if args.sim_reps <= 3 else []
+    code = _run(
+        _py("resqcity.experiments.run", *quick_args),
+        _py("resqcity.experiments.summarize"),
+        _py("resqcity.experiments.figures.generate"),
+        _py("resqcity.paper.build"),
+    )
+    if code != 0:
+        return code
+
+    elapsed = time.perf_counter() - t0
+    meta = {
+        "timestamp": datetime.now(UTC).isoformat(),
+        "wall_seconds": elapsed,
+        "platform": platform.platform(),
+        "processor": platform.processor(),
+        "python_version": platform.python_version(),
+        "cpu_count": os.cpu_count(),
+    }
+    meta_path = PROJECT_ROOT / "results" / "reproduce_meta.json"
+    meta_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
+    print(f"Reproduction complete in {elapsed:.1f} s. Metadata recorded in {meta_path.name}")
+    return 0
+
+
 TASKS: dict[str, Callable[[argparse.Namespace], int]] = {
     "setup": setup,
     "lint": lint,
@@ -240,7 +277,8 @@ TASKS: dict[str, Callable[[argparse.Namespace], int]] = {
     "sim": sim,
     "experiments": experiments,
     "figures": figures,
-    "reproduce": _stub(11, "regenerate every result and figure"),
+    "paper": paper,
+    "reproduce": reproduce,
 }
 
 

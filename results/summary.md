@@ -1,6 +1,6 @@
 # ResQCity — Experiment Summary
 
-> Generated 2026-11-19 21:26 UTC by `python -m resqcity.experiments.summarize`.
+> Generated 2026-11-19 22:35 UTC by `python -m resqcity.experiments.summarize`.
 > Every number is read from `results/experiments/`; none is typed.
 
 ---

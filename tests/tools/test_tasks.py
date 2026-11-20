@@ -20,8 +20,9 @@ def test_every_make_target_has_a_task():
     assert set(TASKS) == MAKEFILE_TARGETS
 
 
-# "sim" moved off this list when phase 7 implemented it; the list is the remaining stubs
-@pytest.mark.parametrize("target", ["reproduce", "experiments"])
+# "sim", "experiments", "reproduce", "figures", "paper" moved off this list
+# as phases implemented them
+@pytest.mark.parametrize("target", ["api", "ui", "demo"])
 def test_unimplemented_targets_fail_loudly(target: str, capsys: pytest.CaptureFixture[str]):
     assert main([target]) == NOT_IMPLEMENTED_EXIT
     assert "not implemented yet" in capsys.readouterr().err
@@ -32,11 +33,9 @@ def test_unknown_target_rejected():
         main(["deploy"])
 
 
-def test_the_sim_target_is_implemented():
-    """Phase 7 implemented it, so it must no longer be a stub. Guards against the target being
-    silently reverted to one while the Makefile still advertises it."""
-    from resqcity.tools.tasks import TASKS
-
-    assert "sim" in TASKS
-    assert TASKS["sim"].__doc__ is not None
-    assert "not implemented" not in (TASKS["sim"].__doc__ or "")
+def test_implemented_targets():
+    """Phases 7, 10, 11 implemented these targets; they must no longer be stubs."""
+    for target in ("sim", "experiments", "figures", "paper", "reproduce"):
+        assert target in TASKS
+        assert TASKS[target].__doc__ is not None
+        assert "not implemented" not in (TASKS[target].__doc__ or "")
