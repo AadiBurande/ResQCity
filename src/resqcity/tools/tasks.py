@@ -259,6 +259,11 @@ def reproduce(args: argparse.Namespace) -> int:
     return 0
 
 
+def api(_: argparse.Namespace) -> int:
+    """Phase 8: start FastAPI backend."""
+    return _run(_py("uvicorn", "resqcity.backend.app:app", "--host", "0.0.0.0", "--port", "8000"))
+
+
 TASKS: dict[str, Callable[[argparse.Namespace], int]] = {
     "setup": setup,
     "lint": lint,
@@ -271,7 +276,7 @@ TASKS: dict[str, Callable[[argparse.Namespace], int]] = {
     "fusion": fusion,
     "forecast": forecast,
     "optimize": optimize,
-    "api": _stub(8, "start backend API"),
+    "api": api,
     "ui": _stub(9, "start dashboard"),
     "demo": _stub(9, "end-to-end live demo"),
     "sim": sim,
