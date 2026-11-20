@@ -19,17 +19,19 @@ import sys
 import time
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
+from pathlib import Path
 
 from resqcity.common.config import PROJECT_ROOT
 
 NOT_IMPLEMENTED_EXIT = 3
 
 
-def _run(*commands: Sequence[str]) -> int:
+def _run(*commands: Sequence[str], cwd: Path | str | None = None) -> int:
+    work_dir = PROJECT_ROOT if cwd is None else cwd
     env = {**os.environ, "PYTHONUTF8": "1"}  # Marathi/Hindi names on Windows consoles
     for cmd in commands:
         print("$", " ".join(cmd), flush=True)
-        code = subprocess.call(list(cmd), cwd=PROJECT_ROOT, env=env)
+        code = subprocess.call(list(cmd), cwd=work_dir, env=env)
         if code != 0:
             return code
     return 0
@@ -264,6 +266,25 @@ def api(_: argparse.Namespace) -> int:
     return _run(_py("uvicorn", "resqcity.backend.app:app", "--host", "0.0.0.0", "--port", "8000"))
 
 
+def ui(_: argparse.Namespace) -> int:
+    """Phase 9: start Vite dashboard dev server."""
+    pkg_mgr = shutil.which("pnpm") or shutil.which("npm") or "pnpm"
+    return _run([pkg_mgr, "run", "dev"], cwd=PROJECT_ROOT / "dashboard")
+
+
+def demo(_: argparse.Namespace) -> int:
+    """Phase 9: run end-to-end live demo in browser."""
+    import webbrowser
+
+    url = "http://localhost:5173"
+    print(f"Launching ResQCity Control Room in browser: {url}")
+    try:
+        webbrowser.open(url)
+    except Exception as exc:
+        print(f"Browser launch note: {exc}")
+    return 0
+
+
 TASKS: dict[str, Callable[[argparse.Namespace], int]] = {
     "setup": setup,
     "lint": lint,
@@ -277,8 +298,8 @@ TASKS: dict[str, Callable[[argparse.Namespace], int]] = {
     "forecast": forecast,
     "optimize": optimize,
     "api": api,
-    "ui": _stub(9, "start dashboard"),
-    "demo": _stub(9, "end-to-end live demo"),
+    "ui": ui,
+    "demo": demo,
     "sim": sim,
     "experiments": experiments,
     "figures": figures,

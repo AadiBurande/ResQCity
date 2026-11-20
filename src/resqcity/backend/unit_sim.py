@@ -138,6 +138,21 @@ class RealTimeUnitSimulator:
         await state.update_unit(updated_unit)
         return True
 
+    async def step(
+        self, state: AppState, broadcaster: WebSocketBroadcaster | None = None, dt: float = 1.0
+    ) -> None:
+        """Advance vehicle movements by dt seconds."""
+        from resqcity.backend.bus import broadcaster as default_bus
+
+        bus = broadcaster or default_bus
+        await self._step(state, bus, dt)
+
+    async def tick(
+        self, state: AppState, broadcaster: WebSocketBroadcaster | None = None, delta_s: float = 1.0
+    ) -> None:
+        """Alias for step."""
+        await self.step(state, broadcaster, dt=delta_s)
+
     async def _step(self, state: AppState, broadcaster: WebSocketBroadcaster, dt: float) -> None:
         async with self._lock:
             active_items = list(self.missions.items())

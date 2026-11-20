@@ -20,11 +20,13 @@ def test_every_make_target_has_a_task():
     assert set(TASKS) == MAKEFILE_TARGETS
 
 
-# "sim", "experiments", "reproduce", "figures", "paper", "api" moved off this list
-# as phases implemented them
-@pytest.mark.parametrize("target", ["ui", "demo"])
-def test_unimplemented_targets_fail_loudly(target: str, capsys: pytest.CaptureFixture[str]):
-    assert main([target]) == NOT_IMPLEMENTED_EXIT
+def test_stub_helper_fails_loudly(capsys: pytest.CaptureFixture[str]):
+    from resqcity.tools.tasks import _stub
+
+    stub = _stub(99, "future target")
+    import argparse
+
+    assert stub(argparse.Namespace()) == NOT_IMPLEMENTED_EXIT
     assert "not implemented yet" in capsys.readouterr().err
 
 
@@ -34,8 +36,8 @@ def test_unknown_target_rejected():
 
 
 def test_implemented_targets():
-    """Phases 7, 8, 10, 11 implemented these targets; they must no longer be stubs."""
-    for target in ("sim", "experiments", "figures", "paper", "reproduce", "api"):
+    """Phases 7, 8, 9, 10, 11 implemented these targets; they must no longer be stubs."""
+    for target in ("sim", "experiments", "figures", "paper", "reproduce", "api", "ui", "demo"):
         assert target in TASKS
         assert TASKS[target].__doc__ is not None
         assert "not implemented" not in (TASKS[target].__doc__ or "")
