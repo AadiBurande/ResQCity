@@ -1,6 +1,6 @@
 # Phase 8 — Backend API (Live Mode)
 
-Status: implementing · Date: 2026-11-20 · Decisions: docs/decisions.md
+Status: implemented · Date: 2026-11-20 · Decisions: docs/decisions.md
 
 ## Goal
 
